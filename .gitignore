@@ -1,0 +1,27 @@
+# Node.js / JavaScript / TypeScript
+node_modules/
+dist/
+build/
+*.log
+.env*
+coverage/
+.npmrc
+
+# Next.js
+.next/
+
+# React Native / Expo
+.expo/
+android/
+ios/
+web-build/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.iml
+.DS_Store
+
+# Pnpm
+.pnpm-store
