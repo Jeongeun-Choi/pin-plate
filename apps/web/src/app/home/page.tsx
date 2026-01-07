@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-const MapContainer = dynamic(() => import("../features/map/components/MapContainer"), {
+const MapContainer = dynamic(() => import("../../features/map/components/MapContainer"), {
   ssr: false,
   loading: () => (
     <div style={{ width: "100vw", height: "100dvh", backgroundColor: "#eee" }}>Loading Map...</div>

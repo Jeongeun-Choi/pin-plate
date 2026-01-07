@@ -22,8 +22,8 @@ npm test && npm run lint
 TypeScript (Strict Mode): Follow standard conventions
 
 ## Recent Changes
+- 003-native-script-map: Added TypeScript (Strict Mode)
 - 002-implement-naver-map: Added TypeScript (Strict Mode)
-- 001-setup-nextjs-project: Added TypeScript (Strict Mode)
 - 001-setup-nextjs-project: Added TypeScript (Strict Mode)
 
 
