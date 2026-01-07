@@ -2,7 +2,8 @@
   "name": "@pin-plate/ui",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,6 +12,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.21.0",
   "dependencies": {
-    "@vanilla-extract/css": "^1.18.0"
+    "@vanilla-extract/css": "^1.18.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5"
   }
 }

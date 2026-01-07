@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import '../shared/styles/reset.css';
-import '../shared/styles/theme.css';
-import { MapProvider } from '../shared/providers/MapProvider';
+import "@pin-plate/ui/src/styles/reset.css.ts"; // UI 패키지의 Reset CSS 적용
 
 export const metadata: Metadata = {
   title: "Pin Plate",
@@ -15,11 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <MapProvider>
-          {children}
-        </MapProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

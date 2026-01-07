@@ -8,6 +8,14 @@
     "dev:web": "pnpm --filter web dev",
     "dev:mobile": "pnpm --filter mobile start"
   },
+  "pnpm": {
+    "overrides": {
+      "react": "^18.3.1",
+      "react-dom": "^18.3.1",
+      "@types/react": "^18.3.1",
+      "@types/react-dom": "^18.3.1"
+    }
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
