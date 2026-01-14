@@ -3,6 +3,6 @@ import { inputStyle } from "./styles.css";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {}
 
-export default function Input(props: InputProps) {
+export const Input = (props: InputProps) => {
   return <input className={inputStyle} {...props} />;
-}
+};
