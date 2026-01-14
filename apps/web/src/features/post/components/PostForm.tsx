@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useState, useRef, ChangeEvent, MouseEvent } from "react";
-import { Button, Input, Textarea } from "@pin-plate/ui";
+import React, { useState, useRef, ChangeEvent, MouseEvent } from 'react';
+import { Button, Input, Textarea } from '@pin-plate/ui';
 import {
   container,
   header,
@@ -14,8 +14,8 @@ import {
   starWrapper,
   starBase,
   starOverlay,
-} from "./PostForm.styles.css";
-import LocationSearchModal from "./LocationSearchModal";
+} from './PostForm.styles.css';
+import LocationSearchModal from './LocationSearchModal';
 
 const PostForm = () => {
   const [photos, setPhotos] = useState<string[]>([]);
@@ -25,7 +25,7 @@ const PostForm = () => {
 
   const handlePhotoAddClick = () => {
     if (photos.length >= 5) {
-      alert("사진은 최대 5개까지 등록 가능합니다.");
+      alert('사진은 최대 5개까지 등록 가능합니다.');
       return;
     }
     fileInputRef.current?.click();
@@ -49,15 +49,15 @@ const PostForm = () => {
       setPhotos((prev) => [...prev, ...tempUrls]);
 
       // 1. Presigned URL 요청
-      const presignedRes = await fetch("/api/image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const presignedRes = await fetch('/api/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           files: fileList.map((f) => ({ filename: f.name, type: f.type })),
         }),
       });
 
-      if (!presignedRes.ok) throw new Error("Failed to get presigned URLs");
+      if (!presignedRes.ok) throw new Error('Failed to get presigned URLs');
 
       const { urls } = await presignedRes.json();
 
@@ -65,22 +65,22 @@ const PostForm = () => {
       const uploadPromises = urls.map(async (item: any, index: number) => {
         const file = fileList[index];
         await fetch(item.url, {
-          method: "PUT",
+          method: 'PUT',
           body: file,
-          headers: { "Content-Type": file.type },
+          headers: { 'Content-Type': file.type },
         });
         // S3 업로드 완료 후 접근 가능한 퍼블릭 URL 반환 (물음표 앞부분만)
-        return item.url.split("?")[0];
+        return item.url.split('?')[0];
       });
 
       await Promise.all(uploadPromises);
     } catch (error) {
-      console.error("Image upload failed:", error);
-      alert("이미지 업로드에 실패했습니다.");
+      console.error('Image upload failed:', error);
+      alert('이미지 업로드에 실패했습니다.');
     } finally {
       // input 초기화
       if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+        fileInputRef.current.value = '';
       }
     }
   };
@@ -98,11 +98,14 @@ const PostForm = () => {
     <div className={container}>
       {/* 헤더 */}
       <header className={header}>
-        <button onClick={() => window.history.back()} style={{ fontSize: "18px" }}>
+        <button
+          onClick={() => window.history.back()}
+          style={{ fontSize: '18px' }}
+        >
           ✕
         </button>
-        <span style={{ fontWeight: "bold" }}>맛집 기록</span>
-        <Button onClick={() => alert("등록!")}>등록</Button>
+        <span style={{ fontWeight: 'bold' }}>맛집 기록</span>
+        <Button onClick={() => alert('등록!')}>등록</Button>
       </header>
 
       {/* 컨텐츠 영역 */}
@@ -114,7 +117,7 @@ const PostForm = () => {
               type="file"
               accept="image/*"
               multiple
-              style={{ display: "none" }}
+              style={{ display: 'none' }}
               ref={fileInputRef}
               onChange={handleFileChange}
             />
@@ -128,10 +131,10 @@ const PostForm = () => {
                   src={photo}
                   alt="preview"
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "inherit",
-                    objectFit: "cover",
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 'inherit',
+                    objectFit: 'cover',
                   }}
                 />
               </div>
@@ -147,7 +150,7 @@ const PostForm = () => {
             readOnly
             value="성수동 맛집 (지도에서 선택)"
             onClick={() => setIsModalOpen(true)}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: 'pointer' }}
           />
         </section>
 
@@ -157,11 +160,11 @@ const PostForm = () => {
           <div className={starRating}>
             {[0, 1, 2, 3, 4].map((index) => {
               // 현재 별이 얼마나 채워져야 하는지 계산
-              let fillWidth = "0%";
+              let fillWidth = '0%';
               if (rating >= index + 1) {
-                fillWidth = "100%";
+                fillWidth = '100%';
               } else if (rating === index + 0.5) {
-                fillWidth = "50%";
+                fillWidth = '50%';
               }
 
               return (
@@ -183,11 +186,17 @@ const PostForm = () => {
         {/* 후기 작성 */}
         <section>
           <h3 className={sectionTitle}>후기</h3>
-          <Textarea placeholder="맛, 서비스, 분위기는 어땠나요?" style={{ minHeight: "150px" }} />
+          <Textarea
+            placeholder="맛, 서비스, 분위기는 어땠나요?"
+            style={{ minHeight: '150px' }}
+          />
         </section>
       </div>
 
-      <LocationSearchModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <LocationSearchModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };
