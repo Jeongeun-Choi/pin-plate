@@ -63,6 +63,12 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo "Checking API Key..."
+          if [ -z "${{ secrets.GEMINI_API_KEY }}" ]; then
+            echo "❌ Error: Secret is EMPTY in GitHub Actions context."
+          else
+            echo "✅ Secret is detected. Length: ${#GEMINI_API_KEY}" 
+          fi
           git fetch origin main
 
           # 1. Commits & Internal Stats (Fallback/Base)
