@@ -1,0 +1,33 @@
+{
+  "name": "@pin-plate/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "main": "base.mjs",
+  "files": [
+    "base.mjs",
+    "next.mjs",
+    "react.mjs"
+  ],
+  "exports": {
+    ".": "./base.mjs",
+    "./next": "./next.mjs",
+    "./react": "./react.mjs"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^15.1.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.53.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  }
+}
