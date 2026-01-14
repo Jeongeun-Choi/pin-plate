@@ -36,16 +36,17 @@ async function generateSummary(diffData) {
 You are a skilled senior software engineer.
 The following is a git diff of a Pull Request.
 Please summarize the changes in a clear, concise manner using Markdown.
+**IMPORTANT: Please write the response in Korean (한국어).**
 
 Format:
-## ✨ Summary
-(A one-line high-level summary)
+## ✨ 요약
+(A one-line high-level summary in Korean)
 
-## 🔑 Key Changes
-- (Bullet points of specific important changes)
+## 🔑 주요 변경 사항
+- (Bullet points of specific important changes in Korean)
 
-## 🛠️ Implementation Details
-(Optional: meaningful technical details if any)
+## 🛠️ 구현 세부 사항
+(Optional: meaningful technical details if any in Korean)
 
 Diff:
 ${diffData}
