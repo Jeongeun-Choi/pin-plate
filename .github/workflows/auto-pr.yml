@@ -76,7 +76,7 @@ jobs:
           FINAL_BODY="$FALLBACK_BODY"
 
           if [[ -n "$GEMINI_API_KEY" ]]; then
-            echo "GEMINI_API_KEY found, attempting AI summary... "
+            echo "GEMINI_API_KEY is present, attempting AI summary... "
             AI_SUMMARY=$(node scripts/generate-pr-summary.mjs || echo "")
             
             if [[ -n "$AI_SUMMARY" ]]; then

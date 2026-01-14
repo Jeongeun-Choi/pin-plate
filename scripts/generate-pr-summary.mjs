@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : "";
 
 if (!GEMINI_API_KEY) {
   console.error("Error: GEMINI_API_KEY is not set.");
