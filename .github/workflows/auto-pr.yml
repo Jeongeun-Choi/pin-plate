@@ -1,0 +1,67 @@
+name: Auto Pull Request
+
+on:
+  push:
+    branches:
+      - "feature/*"
+      - "bugfix/*"
+      - "refactor/*"
+
+jobs:
+  auto-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint (Web)
+        run: pnpm --filter web lint
+
+      - name: Type Check (Mobile)
+        # Mobile app doesn't have a specific script for tsc, so running it via pnpm exec or adding a script would be ideal.
+        # Here we run tsc directly in the package context.
+        run: cd apps/mobile && npx tsc --noEmit
+
+      - name: Build (Web)
+        run: pnpm --filter web build
+
+      - name: Create Pull Request
+        if: success() # Only run if all previous steps succeeded
+        run: |
+          gh pr create \
+            --base main \
+            --head ${{ github.ref_name }} \
+            --fill \
+            || echo "PR already exists or encountered an error"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
