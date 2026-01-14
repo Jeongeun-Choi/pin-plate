@@ -11,4 +11,12 @@ const compat = new FlatCompat({
 });
 
 /** @type {import('eslint').Linter.Config[]} */
-export default [...baseConfig, ...compat.extends("next/core-web-vitals", "next/typescript")];
+export default [
+  ...baseConfig,
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+];

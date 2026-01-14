@@ -1,11 +1,11 @@
-import { createVanillaExtractPlugin } from "@vanilla-extract/next-plugin";
+import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
 
 const withVanillaExtract = createVanillaExtractPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@pin-plate/ui"],
-  outputFileTracingRoot: new URL("../../", import.meta.url).pathname,
+  transpilePackages: ['@pin-plate/ui'],
+  outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
   turbopack: {
     // We are currently using a custom webpack config for Vanilla Extract
   },
@@ -13,8 +13,8 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      react: "react",
-      "react-dom": "react-dom",
+      react: 'react',
+      'react-dom': 'react-dom',
     };
 
     // .css.ts 파일에 대해 Fast Refresh가 간섭하지 않도록 설정 보완
@@ -24,7 +24,7 @@ const nextConfig = {
           rule.oneOf.forEach((oneOfRule) => {
             if (
               oneOfRule.test &&
-              oneOfRule.test.toString().includes("tsx|ts") &&
+              oneOfRule.test.toString().includes('tsx|ts') &&
               oneOfRule.use &&
               Array.isArray(oneOfRule.use)
             ) {
