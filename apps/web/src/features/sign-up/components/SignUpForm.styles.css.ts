@@ -75,7 +75,7 @@ export const field = style({
 
 export const label = style({
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.body,
+  fontSize: vars.fontSize.caption,
   fontWeight: vars.fontWeight.medium,
   color: '#364153',
 });
