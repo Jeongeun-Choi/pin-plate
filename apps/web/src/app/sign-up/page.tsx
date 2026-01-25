@@ -3,8 +3,6 @@ import SignUpForm from '@/features/sign-up/components/SignUpForm';
 
 const topIcon =
   'http://localhost:3845/assets/c0e8c76e07a0d08a2c51a6c409088264f692b1b8.svg';
-const googleIcon =
-  'http://localhost:3845/assets/16c499f9bbe2bd92dfdbd914e04f8e2ca5ba64d8.svg';
 
 export default function SignUpPage() {
   return (

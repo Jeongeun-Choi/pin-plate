@@ -10,7 +10,7 @@ const nextConfig = {
   // pnpm workspace의 루트를 추적하도록 설정 (이미 잘 설정하셨습니다)
   outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
 
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     // 1. React Refresh(Fast Refresh) 로더가 .css.ts를 건드리지 못하게 차단
     config.module.rules.forEach((rule) => {
       if (!rule.oneOf) return;
