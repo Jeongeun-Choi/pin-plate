@@ -7,7 +7,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "prettier": "prettier ."
+    "prettier": "prettier .",
+    "test": "vitest"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.965.0",
@@ -27,13 +28,20 @@
     "@eslint/eslintrc": "^3.3.3",
     "@pin-plate/eslint-config": "workspace:*",
     "@pin-plate/prettier-config": "workspace:*",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vanilla-extract/next-plugin": "^2.4.17",
+    "@vanilla-extract/vite-plugin": "^5.1.4",
+    "@vitejs/plugin-react": "^5.1.2",
     "eslint": "^9",
     "eslint-config-next": "^16.1.1",
+    "jsdom": "^27.4.0",
     "prettier": "^3.7.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   }
 }

@@ -46,7 +46,7 @@ export function LoginForm() {
     validationError || getAuthErrorMessage(mutationError as Error);
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="email">
           이메일
