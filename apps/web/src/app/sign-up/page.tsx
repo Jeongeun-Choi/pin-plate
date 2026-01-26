@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import * as styles from '../../features/sign-up/components/SignUpForm.styles.css';
 import SignUpForm from '@/features/sign-up/components/SignUpForm';
 
@@ -18,7 +19,11 @@ export default function SignUpPage() {
         </section>
         <SignUpForm />
         <div style={{ width: '100%' }}>
-          <div className={styles.loginLink}>이미 계정이 있으신가요? 로그인</div>
+          <Link href="/sign-in" style={{ textDecoration: 'none' }}>
+            <div className={styles.loginLink}>
+              이미 계정이 있으신가요? 로그인
+            </div>
+          </Link>
 
           {/* TODO: SSO 도입시 부활시키기 */}
           {/* <div className={styles.dividerWrap}>

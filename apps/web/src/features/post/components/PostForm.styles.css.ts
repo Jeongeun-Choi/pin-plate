@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { vars } from '@pin-plate/ui';
+import { vars } from '@pin-plate/ui/vars';
 
 export const container = style({
   display: 'flex',
