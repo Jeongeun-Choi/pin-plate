@@ -1,19 +1,52 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useState } from 'react';
 import { Input } from '@pin-plate/ui';
-import { login } from '../actions';
 import * as styles from './LoginForm.styles.css';
-
-const initialState = {
-  error: '',
-};
+import { useLogin } from '../hooks/useLogin';
+import { getAuthErrorMessage, isValidEmail } from '../utils/validation';
 
 export function LoginForm() {
-  const [state, formAction, isPending] = useActionState(login, initialState);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const { mutate: login, isPending, error: mutationError } = useLogin();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setValidationError(null);
+
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail) {
+      setValidationError('이메일을 입력해주세요.');
+      return;
+    }
+
+    if (!isValidEmail(trimmedEmail)) {
+      setValidationError('올바른 이메일 형식이 아닙니다.');
+      return;
+    }
+
+    if (!trimmedPassword) {
+      setValidationError('비밀번호를 입력해주세요.');
+      return;
+    }
+
+    if (trimmedPassword.length < 8) {
+      setValidationError('비밀번호는 최소 8자 이상이어야 합니다.');
+      return;
+    }
+
+    login({ email: trimmedEmail, password: trimmedPassword });
+  };
+
+  const displayError =
+    validationError || getAuthErrorMessage(mutationError as Error);
 
   return (
-    <form className={styles.form} action={formAction}>
+    <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="email">
           이메일
@@ -24,6 +57,8 @@ export function LoginForm() {
           type="email"
           className={styles.input as unknown as string}
           placeholder="example@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           disabled={isPending}
           required
         />
@@ -39,14 +74,21 @@ export function LoginForm() {
           type="password"
           className={styles.input as unknown as string}
           placeholder="••••••••"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (validationError) setValidationError(null);
+          }}
           disabled={isPending}
           required
         />
       </div>
 
-      {state?.error && (
-        <div style={{ color: 'red', fontSize: '14px', textAlign: 'center' }}>
-          {state.error}
+      {displayError && (
+        <div
+          style={{ color: '#FB2C36', fontSize: '14px', textAlign: 'center' }}
+        >
+          {displayError}
         </div>
       )}
 
