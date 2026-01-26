@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import LoginForm from '../components/LoginForm';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -49,9 +49,9 @@ describe('LoginForm', () => {
   it('shows validation error for empty fields', () => {
     renderComponent();
     const submitButton = screen.getByRole('button', { name: '로그인' });
-    
+
     fireEvent.click(submitButton);
-    
+
     expect(screen.getByText('이메일을 입력해주세요.')).toBeInTheDocument();
   });
 
@@ -63,7 +63,9 @@ describe('LoginForm', () => {
     fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
     fireEvent.click(submitButton);
 
-    expect(screen.getByText('올바른 이메일 형식이 아닙니다.')).toBeInTheDocument();
+    expect(
+      screen.getByText('올바른 이메일 형식이 아닙니다.'),
+    ).toBeInTheDocument();
   });
 
   it('shows validation error for short password', () => {
@@ -76,7 +78,9 @@ describe('LoginForm', () => {
     fireEvent.change(passwordInput, { target: { value: 'short' } });
     fireEvent.click(submitButton);
 
-    expect(screen.getByText('비밀번호는 최소 8자 이상이어야 합니다.')).toBeInTheDocument();
+    expect(
+      screen.getByText('비밀번호는 최소 8자 이상이어야 합니다.'),
+    ).toBeInTheDocument();
   });
 
   it('calls login mutation when form is valid', () => {
@@ -103,8 +107,10 @@ describe('LoginForm', () => {
     });
 
     renderComponent();
-    
+
     // The component uses getAuthErrorMessage to translate
-    expect(screen.getByText('이메일 또는 비밀번호가 일치하지 않습니다.')).toBeInTheDocument();
+    expect(
+      screen.getByText('이메일 또는 비밀번호가 일치하지 않습니다.'),
+    ).toBeInTheDocument();
   });
 });

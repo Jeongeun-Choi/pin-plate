@@ -18,7 +18,7 @@ describe('auth.service', () => {
       data: { session: { access_token: 'fake-token' } },
       error: null,
     });
-    
+
     // createClient가 호출되면 우리가 만든 mockSignIn을 포함한 객체를 반환하도록 설정
     (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       auth: {
@@ -26,8 +26,11 @@ describe('auth.service', () => {
       },
     });
 
-    const result = await login({ email: 'test@test.com', password: 'password123' });
-    
+    const result = await login({
+      email: 'test@test.com',
+      password: 'password123',
+    });
+
     expect(createClient).toHaveBeenCalled();
     expect(mockSignIn).toHaveBeenCalledWith({
       email: 'test@test.com',
@@ -48,8 +51,8 @@ describe('auth.service', () => {
       },
     });
 
-    await expect(login({ email: 'test@test.com', password: 'wrong' })).rejects.toThrow(
-      'Invalid credentials',
-    );
+    await expect(
+      login({ email: 'test@test.com', password: 'wrong' }),
+    ).rejects.toThrow('Invalid credentials');
   });
 });

@@ -42,7 +42,9 @@ describe('useLogin', () => {
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: ({ children }) => (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
       ),
     });
 
@@ -61,7 +63,9 @@ describe('useLogin', () => {
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: ({ children }) => (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
       ),
     });
 
