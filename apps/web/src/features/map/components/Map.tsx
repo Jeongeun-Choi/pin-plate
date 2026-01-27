@@ -19,10 +19,19 @@ export const Map = () => {
         zoomControl: false,
         mapTypeControl: false,
       };
-      mapInstance.current = new window.naver.maps.Map(
-        mapRef.current,
-        mapOptions,
-      );
+      const map = new window.naver.maps.Map(mapRef.current, mapOptions);
+      mapInstance.current = map;
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          const currentPosition = new window.naver.maps.LatLng(
+            latitude,
+            longitude,
+          );
+          map.setCenter(currentPosition);
+        });
+      }
     }
   };
 
@@ -36,7 +45,7 @@ export const Map = () => {
   return (
     <>
       <Script
-        id="map"
+        id="naver-map-script"
         strategy="afterInteractive"
         src={`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID}`}
         onReady={initializeMap}
