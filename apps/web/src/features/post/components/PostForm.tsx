@@ -1,10 +1,15 @@
 'use client';
 
-import React, { useState, useRef, ChangeEvent, MouseEvent } from 'react';
-import { Button, Input, Textarea } from '@pin-plate/ui';
+import React, {
+  useState,
+  useRef,
+  ChangeEvent,
+  MouseEvent,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
+import { Input, Textarea } from '@pin-plate/ui';
 import {
-  container,
-  header,
   content,
   photoSection,
   photoAddButton,
@@ -17,11 +22,23 @@ import {
 } from './PostForm.styles.css';
 import LocationSearchModal from './LocationSearchModal';
 
-const PostForm = () => {
+export interface PostFormHandle {
+  submit: () => void;
+}
+
+const PostForm = ({ ref }: React.RefAttributes<PostFormHandle>) => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [rating, setRating] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 부모 컴포넌트에서 호출할 수 있도록 submit 함수 노출
+  useImperativeHandle(ref, () => ({
+    submit: () => {
+      alert(`등록 시도! 별점: ${rating}, 사진: ${photos.length}장`);
+      // 실제 API 호출 로직이 여기 들어갑니다.
+    },
+  }));
 
   const handlePhotoAddClick = () => {
     if (photos.length >= 5) {
@@ -35,7 +52,6 @@ const PostForm = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    // 남은 슬롯 개수 체크
     const remainingSlots = 5 - photos.length;
     if (files.length > remainingSlots) {
       alert(`최대 ${remainingSlots}장까지만 더 추가할 수 있습니다.`);
@@ -88,117 +104,101 @@ const PostForm = () => {
   const handleStarClick = (e: MouseEvent<HTMLSpanElement>, index: number) => {
     const { offsetX } = e.nativeEvent;
     const { offsetWidth } = e.currentTarget;
-
-    // 별의 왼쪽 절반을 클릭했는지 확인
     const isHalf = offsetX < offsetWidth / 2;
     setRating(index + (isHalf ? 0.5 : 1));
   };
 
   return (
-    <div className={container}>
-      {/* 헤더 */}
-      <header className={header}>
-        <button
-          onClick={() => window.history.back()}
-          style={{ fontSize: '18px' }}
-        >
-          ✕
-        </button>
-        <span style={{ fontWeight: 'bold' }}>맛집 기록</span>
-        <Button onClick={() => alert('등록!')}>등록</Button>
-      </header>
-
-      {/* 컨텐츠 영역 */}
-      <div className={content}>
-        {/* 사진 업로드 */}
-        <section>
-          <div className={photoSection}>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              style={{ display: 'none' }}
-              ref={fileInputRef}
-              onChange={handleFileChange}
-            />
-            <button className={photoAddButton} onClick={handlePhotoAddClick}>
-              <span>📷</span>
-              <span>{photos.length}/5</span>
-            </button>
-            {photos.map((photo, index) => (
-              <div key={index} className={photoItem}>
-                <img
-                  src={photo}
-                  alt="preview"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 'inherit',
-                    objectFit: 'cover',
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 장소 정보 */}
-        <section>
-          <h3 className={sectionTitle}>방문한 장소</h3>
-          <Input
-            placeholder="어디를 방문하셨나요?"
-            readOnly
-            value="성수동 맛집 (지도에서 선택)"
-            onClick={() => setIsModalOpen(true)}
-            style={{ cursor: 'pointer' }}
+    <div className={content}>
+      {/* 사진 업로드 */}
+      <section>
+        <div className={photoSection}>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            onChange={handleFileChange}
           />
-        </section>
+          <button className={photoAddButton} onClick={handlePhotoAddClick}>
+            <span>📷</span>
+            <span>{photos.length}/5</span>
+          </button>
+          {photos.map((photo, index) => (
+            <div key={index} className={photoItem}>
+              <img
+                src={photo}
+                alt="preview"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 'inherit',
+                  objectFit: 'cover',
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
 
-        {/* 별점 */}
-        <section>
-          <h3 className={sectionTitle}>평점 ({rating}점)</h3>
-          <div className={starRating}>
-            {[0, 1, 2, 3, 4].map((index) => {
-              // 현재 별이 얼마나 채워져야 하는지 계산
-              let fillWidth = '0%';
-              if (rating >= index + 1) {
-                fillWidth = '100%';
-              } else if (rating === index + 0.5) {
-                fillWidth = '50%';
-              }
+      {/* 장소 정보 */}
+      <section>
+        <h3 className={sectionTitle}>방문한 장소</h3>
+        <Input
+          placeholder="어디를 방문하셨나요?"
+          readOnly
+          value="성수동 맛집 (지도에서 선택)"
+          onClick={() => setIsLocationModalOpen(true)}
+          style={{ cursor: 'pointer' }}
+        />
+      </section>
 
-              return (
-                <span
-                  key={index}
-                  className={starWrapper}
-                  onClick={(e) => handleStarClick(e, index)}
-                >
-                  <span className={starBase}>★</span>
-                  <span className={starOverlay} style={{ width: fillWidth }}>
-                    ★
-                  </span>
+      {/* 별점 */}
+      <section>
+        <h3 className={sectionTitle}>평점 ({rating}점)</h3>
+        <div className={starRating}>
+          {[0, 1, 2, 3, 4].map((index) => {
+            let fillWidth = '0%';
+            if (rating >= index + 1) {
+              fillWidth = '100%';
+            } else if (rating === index + 0.5) {
+              fillWidth = '50%';
+            }
+
+            return (
+              <span
+                key={index}
+                className={starWrapper}
+                onClick={(e) => handleStarClick(e, index)}
+              >
+                <span className={starBase}>★</span>
+                <span className={starOverlay} style={{ width: fillWidth }}>
+                  ★
                 </span>
-              );
-            })}
-          </div>
-        </section>
+              </span>
+            );
+          })}
+        </div>
+      </section>
 
-        {/* 후기 작성 */}
-        <section>
-          <h3 className={sectionTitle}>후기</h3>
-          <Textarea
-            placeholder="맛, 서비스, 분위기는 어땠나요?"
-            style={{ minHeight: '150px' }}
-          />
-        </section>
-      </div>
+      {/* 후기 작성 */}
+      <section>
+        <h3 className={sectionTitle}>후기</h3>
+        <Textarea
+          placeholder="맛, 서비스, 분위기는 어땠나요?"
+          style={{ minHeight: '150px' }}
+        />
+      </section>
 
       <LocationSearchModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
       />
     </div>
   );
 };
+
+PostForm.displayName = 'PostForm';
 
 export default PostForm;

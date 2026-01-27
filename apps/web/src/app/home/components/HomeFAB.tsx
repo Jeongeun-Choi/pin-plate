@@ -1,11 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-
-export const HomeFAB = () => {
+export const HomeFAB = ({ onClick }: { onClick: () => void }) => {
   return (
-    <Link
-      href="/post/new"
+    <button
+      onClick={onClick}
       style={{
         position: 'absolute',
         bottom: '30px',
@@ -20,7 +18,7 @@ export const HomeFAB = () => {
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: '30px',
-        textDecoration: 'none',
+        border: 'none',
         boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
         cursor: 'pointer',
         transition: 'transform 0.1s ease',
@@ -42,6 +40,6 @@ export const HomeFAB = () => {
       }}
     >
       +
-    </Link>
+    </button>
   );
 };

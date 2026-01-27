@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface LocationSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
