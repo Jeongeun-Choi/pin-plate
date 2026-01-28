@@ -6,6 +6,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = (props: InputProps) => {
-  const { ref, ...rest } = props;
-  return <input className={inputStyle} ref={ref} {...rest} />;
+  const { ref, className, ...rest } = props;
+  return (
+    <input className={`${inputStyle} ${className || ''}`} ref={ref} {...rest} />
+  );
 };

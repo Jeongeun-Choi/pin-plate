@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { Button } from '@pin-plate/ui';
 import PostForm, { PostFormHandle } from './PostForm';
-import * as styles from './PostModal.styles.css';
+import * as styles from './styles/PostModal.styles.css';
 
 interface PostModalProps {
   isOpen: boolean;
@@ -21,37 +21,33 @@ export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.content} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.overlay} onClick={onClose} role="presentation">
+      <div
+        className={styles.content}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="post-modal-title"
+      >
         {/* 모달 헤더 (Layout 영역) */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '16px',
-            borderBottom: '1px solid #eee',
-          }}
-        >
+        <header className={styles.header}>
           <button
+            type="button"
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '18px',
-              cursor: 'pointer',
-            }}
+            className={styles.headerCloseButton}
+            aria-label="닫기"
           >
+            {' '}
             ✕
           </button>
-          <span style={{ fontWeight: 'bold', fontSize: '18px' }}>
+          <span id="post-modal-title" className={styles.headerTitle}>
             맛집 기록
           </span>
           <Button onClick={handleRegister}>등록</Button>
-        </div>
+        </header>
 
         {/* 폼 컨텐츠 영역 (Content 영역) */}
-        <div style={{ padding: '20px', overflowY: 'auto', height: '100%' }}>
+        <div className={styles.formContainer}>
           <PostForm ref={formRef} />
         </div>
       </div>

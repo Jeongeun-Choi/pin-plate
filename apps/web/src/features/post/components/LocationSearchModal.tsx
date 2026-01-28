@@ -1,6 +1,7 @@
 import { Input } from '@pin-plate/ui';
 import { useRef, useState } from 'react';
 import { KakaoPlace, KakaoSearchResponse } from '../types/search';
+import * as styles from './styles/LocationSearchModal.css';
 
 interface LocationSearchModalProps {
   isOpen: boolean;
@@ -62,58 +63,23 @@ const LocationSearchModal = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
-    >
+    <div className={styles.overlay} role="presentation">
       <div
-        style={{
-          backgroundColor: '#fff',
-
-          padding: '20px',
-
-          borderRadius: '8px',
-
-          width: '90%',
-
-          maxWidth: '400px',
-
-          maxHeight: '80vh',
-
-          display: 'flex',
-
-          flexDirection: 'column',
-        }}
+        className={styles.modalContainer}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="location-search-title"
       >
-        <div
-          style={{
-            display: 'flex',
-
-            justifyContent: 'space-between',
-
-            marginBottom: '20px',
-          }}
-        >
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>장소 검색</h2>
+        <div className={styles.header}>
+          <h2 id="location-search-title" className={styles.title}>
+            장소 검색
+          </h2>
 
           <button
+            type="button"
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '20px',
-              cursor: 'pointer',
-            }}
+            className={styles.closeButton}
+            aria-label="닫기"
           >
             ✕
           </button>
@@ -125,72 +91,42 @@ const LocationSearchModal = ({
           onKeyDown={handleEnter}
         />
 
-        <div style={{ marginTop: '20px', overflowY: 'auto', flex: 1 }}>
+        <div className={styles.resultsContainer}>
           {isLoading ? (
             <p>검색 중...</p>
           ) : (
-            <ul style={{ listStyle: 'none', padding: 0 }}>
+            <ul className={styles.resultsList}>
               {searchResults.map((item) => (
-                <li
-                  key={item.id}
-                  style={{
-                    padding: '12px 0',
-
-                    borderBottom: '1px solid #eee',
-
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    onSelectPlace?.(item);
-                  }}
-                >
-                  <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-                    {item.place_name}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>
-                    {item.road_address_name || item.address_name}
-                  </div>
-                  {item.category_group_name && (
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        color: '#999',
-                        marginTop: '2px',
-                      }}
-                    >
-                      {item.category_group_name}
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    className={styles.resultItem}
+                    onClick={() => {
+                      onSelectPlace?.(item);
+                    }}
+                  >
+                    <div className={styles.resultItemTitle}>
+                      {item.place_name}
                     </div>
-                  )}
+                    <div className={styles.resultItemAddress}>
+                      {item.road_address_name || item.address_name}
+                    </div>
+                    {item.category_group_name && (
+                      <div className={styles.resultItemCategory}>
+                        {item.category_group_name}
+                      </div>
+                    )}
+                  </button>
                 </li>
               ))}
               {!isLoading && searchResults.length === 0 && (
-                <p
-                  style={{
-                    color: '#999',
-                    textAlign: 'center',
-                    marginTop: '20px',
-                  }}
-                >
-                  검색 결과가 없습니다.
-                </p>
+                <p className={styles.emptyState}>검색 결과가 없습니다.</p>
               )}
             </ul>
           )}
         </div>
 
-        <button
-          onClick={onClose}
-          style={{
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#000',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            marginTop: '20px',
-            cursor: 'pointer',
-          }}
-        >
+        <button onClick={onClose} className={styles.bottomCloseButton}>
           닫기
         </button>
       </div>

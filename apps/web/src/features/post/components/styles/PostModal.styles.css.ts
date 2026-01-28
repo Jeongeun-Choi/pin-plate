@@ -46,3 +46,29 @@ export const closeButton = style({
   zIndex: 10,
   padding: '8px',
 });
+
+export const header = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '16px',
+  borderBottom: '1px solid #eee',
+});
+
+export const headerCloseButton = style({
+  background: 'none',
+  border: 'none',
+  fontSize: '18px',
+  cursor: 'pointer',
+});
+
+export const headerTitle = style({
+  fontWeight: 'bold',
+  fontSize: '18px',
+});
+
+export const formContainer = style({
+  padding: '20px',
+  overflowY: 'auto',
+  height: '100%',
+});

@@ -19,7 +19,11 @@ import {
   starWrapper,
   starBase,
   starOverlay,
-} from './PostForm.styles.css';
+  hiddenInput,
+  previewImage,
+  clickableInput,
+  textarea,
+} from './styles/PostForm.styles.css';
 import LocationSearchModal from './LocationSearchModal';
 import { KakaoPlace } from '../types/search';
 
@@ -148,26 +152,22 @@ const PostForm = forwardRef<PostFormHandle>((_, ref) => {
             type="file"
             accept="image/*"
             multiple
-            style={{ display: 'none' }}
+            className={hiddenInput}
             ref={fileInputRef}
             onChange={handleFileChange}
           />
-          <button className={photoAddButton} onClick={handlePhotoAddClick}>
-            <span>📷</span>
+          <button
+            type="button"
+            className={photoAddButton}
+            onClick={handlePhotoAddClick}
+            aria-label="사진 추가하기"
+          >
+            <span aria-hidden="true">📷</span>
             <span>{photos.length}/5</span>
           </button>
           {photos.map((photo, index) => (
             <div key={index} className={photoItem}>
-              <img
-                src={photo}
-                alt="preview"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: 'inherit',
-                  objectFit: 'cover',
-                }}
-              />
+              <img src={photo} alt="preview" className={previewImage} />
             </div>
           ))}
         </div>
@@ -181,7 +181,10 @@ const PostForm = forwardRef<PostFormHandle>((_, ref) => {
           readOnly
           value={selectedPlace?.place_name || ''}
           onClick={handleLocationSearchOpen}
-          style={{ cursor: 'pointer' }}
+          className={clickableInput}
+          title="장소 검색 팝업 열기"
+          aria-haspopup="dialog"
+          role="button"
         />
       </section>
 
@@ -218,7 +221,7 @@ const PostForm = forwardRef<PostFormHandle>((_, ref) => {
         <h3 className={sectionTitle}>후기</h3>
         <Textarea
           placeholder="맛, 서비스, 분위기는 어땠나요?"
-          style={{ minHeight: '150px' }}
+          className={textarea}
         />
       </section>
 

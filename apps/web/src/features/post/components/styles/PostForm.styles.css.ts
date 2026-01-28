@@ -98,3 +98,22 @@ export const starOverlay = style({
   color: vars.colors.primary.default, // 활성 색상 (메인 컬러)
   pointerEvents: 'none', // 클릭 이벤트가 부모(Wrapper)로 전달되도록
 });
+
+export const hiddenInput = style({
+  display: 'none',
+});
+
+export const previewImage = style({
+  width: '100%',
+  height: '100%',
+  borderRadius: 'inherit',
+  objectFit: 'cover',
+});
+
+export const clickableInput = style({
+  cursor: 'pointer',
+});
+
+export const textarea = style({
+  minHeight: '150px',
+});
