@@ -1,12 +1,14 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as styles from './Map.styles.css';
+import { usePosts } from '@/features/post/hooks/usePosts';
 
 export const Map = () => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<naver.maps.Map | null>(null);
+  const [map, setMap] = useState<naver.maps.Map | null>(null);
+  const { data: posts } = usePosts();
 
   const initializeMap = () => {
     if (window.naver && mapRef.current) {
@@ -19,8 +21,8 @@ export const Map = () => {
         zoomControl: false,
         mapTypeControl: false,
       };
-      const map = new window.naver.maps.Map(mapRef.current, mapOptions);
-      mapInstance.current = map;
+      const mapInstance = new window.naver.maps.Map(mapRef.current, mapOptions);
+      setMap(mapInstance);
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
@@ -29,7 +31,7 @@ export const Map = () => {
             latitude,
             longitude,
           );
-          map.setCenter(currentPosition);
+          mapInstance.setCenter(currentPosition);
         });
       }
     }
@@ -41,6 +43,17 @@ export const Map = () => {
       initializeMap();
     }
   }, []);
+
+  useEffect(() => {
+    if (map && posts) {
+      posts.forEach((post) => {
+        new naver.maps.Marker({
+          position: new naver.maps.LatLng(post.lat, post.lng),
+          map: map,
+        });
+      });
+    }
+  }, [map, posts]);
 
   return (
     <>
