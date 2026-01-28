@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCreatePost } from './useCreatePost';
 import { KakaoPlace } from '../types/search';
+import { createClient } from '@/utils/supabase/client';
 
 export const usePostForm = (onSuccess?: () => void) => {
   const [content, setContent] = useState('');
@@ -99,7 +100,7 @@ export const usePostForm = (onSuccess?: () => void) => {
       // I need to fetch user inside here or rely on createPost to have userId?
       // createPost payload requires userId.
       // Let's import supabase client here to get user.
-      const supabase = (await import('@/utils/supabase/client')).createClient();
+      const supabase = createClient();
       // TODO: user 정보를 tanstack query로 관리하기
       const {
         data: { user },
