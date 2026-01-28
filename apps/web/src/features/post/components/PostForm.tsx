@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, ChangeEvent, MouseEvent } from 'react';
+import { useRef, ChangeEvent, MouseEvent } from 'react';
 import { Input, Textarea } from '@pin-plate/ui';
 import {
   content,
