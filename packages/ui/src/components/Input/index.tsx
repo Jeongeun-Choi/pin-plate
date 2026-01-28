@@ -1,8 +1,11 @@
-import { InputHTMLAttributes } from "react";
-import { inputStyle } from "./styles.css";
+import { InputHTMLAttributes, Ref } from 'react';
+import { inputStyle } from './styles.css';
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {}
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  ref?: Ref<HTMLInputElement | null>;
+}
 
 export const Input = (props: InputProps) => {
-  return <input className={inputStyle} {...props} />;
+  const { ref, ...rest } = props;
+  return <input className={inputStyle} ref={ref} {...rest} />;
 };

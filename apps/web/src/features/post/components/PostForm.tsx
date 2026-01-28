@@ -21,24 +21,55 @@ import {
   starOverlay,
 } from './PostForm.styles.css';
 import LocationSearchModal from './LocationSearchModal';
+import { KakaoPlace } from '../types/search';
 
 export interface PostFormHandle {
   submit: () => void;
 }
 
-const PostForm = ({ ref }: React.RefAttributes<PostFormHandle>) => {
+const PostForm = forwardRef<PostFormHandle>((_, ref) => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [rating, setRating] = useState(0);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    lng: number;
+  }>();
+  const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 부모 컴포넌트에서 호출할 수 있도록 submit 함수 노출
   useImperativeHandle(ref, () => ({
     submit: () => {
-      alert(`등록 시도! 별점: ${rating}, 사진: ${photos.length}장`);
+      alert(
+        `등록 시도!\n별점: ${rating}\n사진: ${photos.length}장\n장소: ${selectedPlace?.place_name || '미선택'}`,
+      );
       // 실제 API 호출 로직이 여기 들어갑니다.
     },
   }));
+
+  const handleLocationSearchOpen = () => {
+    setIsLocationModalOpen(true);
+    // 모달 열 때 현재 위치 확보 시도
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCurrentLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.warn('위치 정보를 가져올 수 없습니다.', error);
+        },
+      );
+    }
+  };
+
+  const handlePlaceSelect = (place: KakaoPlace) => {
+    setSelectedPlace(place);
+    setIsLocationModalOpen(false);
+  };
 
   const handlePhotoAddClick = () => {
     if (photos.length >= 5) {
@@ -148,8 +179,8 @@ const PostForm = ({ ref }: React.RefAttributes<PostFormHandle>) => {
         <Input
           placeholder="어디를 방문하셨나요?"
           readOnly
-          value="성수동 맛집 (지도에서 선택)"
-          onClick={() => setIsLocationModalOpen(true)}
+          value={selectedPlace?.place_name || ''}
+          onClick={handleLocationSearchOpen}
           style={{ cursor: 'pointer' }}
         />
       </section>
@@ -194,10 +225,12 @@ const PostForm = ({ ref }: React.RefAttributes<PostFormHandle>) => {
       <LocationSearchModal
         isOpen={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
+        currentLocation={currentLocation}
+        onSelectPlace={handlePlaceSelect}
       />
     </div>
   );
-};
+});
 
 PostForm.displayName = 'PostForm';
 
