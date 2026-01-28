@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef } from 'react';
 import { Button } from '@pin-plate/ui';
-import PostForm, { PostFormHandle } from './PostForm';
+import PostForm from './PostForm';
+import { usePostForm } from '../hooks/usePostForm';
 import * as styles from './styles/PostModal.styles.css';
 
 interface PostModalProps {
@@ -11,12 +11,7 @@ interface PostModalProps {
 }
 
 export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
-  const formRef = useRef<PostFormHandle>(null);
-
-  const handleRegister = () => {
-    // 자식 컴포넌트(PostForm)의 submit 함수 호출
-    formRef.current?.submit();
-  };
+  const { formState, handlers, submit } = usePostForm(onClose);
 
   if (!isOpen) return null;
 
@@ -37,18 +32,17 @@ export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
             className={styles.headerCloseButton}
             aria-label="닫기"
           >
-            {' '}
             ✕
           </button>
           <span id="post-modal-title" className={styles.headerTitle}>
             맛집 기록
           </span>
-          <Button onClick={handleRegister}>등록</Button>
+          <Button onClick={submit}>등록</Button>
         </header>
 
         {/* 폼 컨텐츠 영역 (Content 영역) */}
         <div className={styles.formContainer}>
-          <PostForm ref={formRef} />
+          <PostForm formState={formState} handlers={handlers} />
         </div>
       </div>
     </div>
