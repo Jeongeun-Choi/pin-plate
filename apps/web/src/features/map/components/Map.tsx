@@ -4,6 +4,7 @@ import Script from 'next/script';
 import { useEffect, useRef, useState } from 'react';
 import * as styles from './Map.styles.css';
 import { usePosts } from '@/features/post/hooks/usePosts';
+import { getMarkerIcon } from '../utils/marker';
 
 export const Map = () => {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -47,9 +48,16 @@ export const Map = () => {
   useEffect(() => {
     if (map && posts) {
       posts.forEach((post) => {
+        const markerContent = getMarkerIcon(); // Example custom color (Tomato-ish)
+
         new naver.maps.Marker({
           position: new naver.maps.LatLng(post.lat, post.lng),
           map: map,
+          icon: {
+            content: markerContent,
+            size: new naver.maps.Size(34, 42),
+            anchor: new naver.maps.Point(17, 42),
+          },
         });
       });
     }
