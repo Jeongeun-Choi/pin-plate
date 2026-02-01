@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@pin-plate/ui';
+import { Button, IcDismiss } from '@pin-plate/ui';
 import PostForm from './PostForm';
 import { usePostForm } from '../hooks/usePostForm';
 import * as styles from './styles/PostModal.styles.css';
@@ -26,14 +26,14 @@ export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
       >
         {/* 모달 헤더 (Layout 영역) */}
         <header className={styles.header}>
-          <button
+          <Button
             type="button"
             onClick={onClose}
             className={styles.headerCloseButton}
             aria-label="닫기"
           >
-            ✕
-          </button>
+            <IcDismiss />
+          </Button>
           <span id="post-modal-title" className={styles.headerTitle}>
             맛집 기록
           </span>

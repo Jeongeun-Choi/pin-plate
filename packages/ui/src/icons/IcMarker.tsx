@@ -1,0 +1,29 @@
+import { SVGProps } from 'react';
+
+export const IcMarker = (props: SVGProps<SVGSVGElement>) => {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M13.3333 6.66666C13.3333 9.99533 9.64066 13.462 8.40066 14.5327C8.28514 14.6195 8.14452 14.6665 7.99999 14.6665C7.85546 14.6665 7.71484 14.6195 7.59932 14.5327C6.35932 13.462 2.66666 9.99533 2.66666 6.66666C2.66666 5.25217 3.22856 3.89562 4.22875 2.89543C5.22895 1.89523 6.5855 1.33333 7.99999 1.33333C9.41448 1.33333 10.771 1.89523 11.7712 2.89543C12.7714 3.89562 13.3333 5.25217 13.3333 6.66666Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 8.66667C9.10457 8.66667 10 7.77124 10 6.66667C10 5.5621 9.10457 4.66667 8 4.66667C6.89543 4.66667 6 5.5621 6 6.66667C6 7.77124 6.89543 8.66667 8 8.66667Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
