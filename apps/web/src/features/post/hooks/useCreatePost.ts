@@ -1,15 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/utils/supabase/client';
+
 import { postKeys } from '../postKeys';
-import { CreatePostPayload } from '../types/post';
 
-const createPost = async (payload: CreatePostPayload) => {
-  const supabase = createClient();
-  const { data, error } = await supabase.from('posts').insert(payload).select();
-
-  if (error) throw error;
-  return data;
-};
+import { createPost } from '../api/createPost';
 
 export const useCreatePost = () => {
   const queryClient = useQueryClient();

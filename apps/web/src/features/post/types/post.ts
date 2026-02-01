@@ -9,3 +9,8 @@ export interface CreatePostPayload {
   kakao_place_id: string;
   user_id: string;
 }
+
+export interface Post extends CreatePostPayload {
+  id: number;
+  created_at: string;
+}
