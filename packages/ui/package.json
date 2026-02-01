@@ -12,7 +12,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint"
+    "lint": "eslint",
+    "icons": "npm run icons:fetch && npm run icons:gen",
+    "icons:fetch": "node scripts/fetch-icons.js",
+    "icons:gen": "node scripts/generate-icons.js"
   },
   "keywords": [],
   "author": "",

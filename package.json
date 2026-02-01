@@ -11,6 +11,7 @@
     "lint:check": "pnpm --filter web lint --check",
     "build:web": "pnpm --filter web build",
     "build:mobile": "pnpm --filter mobile build",
+    "icons": "pnpm --filter @pin-plate/ui run icons",
     "prettier:fix": "pnpm --filter web prettier --write",
     "prettier:check": "pnpm --filter web prettier --check"
   },
