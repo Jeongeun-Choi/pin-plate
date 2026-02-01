@@ -3,7 +3,6 @@
 import { Map } from '@/features/map/components/Map';
 import Link from 'next/link';
 import { usePosts } from '@/features/post/hooks/usePosts';
-import { Button } from '@pin-plate/ui';
 
 export default function Home() {
   const { data: posts } = usePosts();
