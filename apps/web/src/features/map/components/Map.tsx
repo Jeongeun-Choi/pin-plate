@@ -3,10 +3,12 @@
 import Script from 'next/script';
 import { useEffect, useRef, useState } from 'react';
 import * as styles from './Map.styles.css';
+import { useRouter } from 'next/navigation';
 import { usePosts } from '@/features/post/hooks/usePosts';
 import { getMarkerIcon } from '../utils/marker';
 
 export const Map = () => {
+  const router = useRouter();
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<naver.maps.Map | null>(null);
   const { data: posts } = usePosts();
@@ -58,6 +60,8 @@ export const Map = () => {
             size: new naver.maps.Size(34, 42),
             anchor: new naver.maps.Point(17, 42),
           },
+        }).addListener('click', () => {
+          router.push(`/post/${post.id}`);
         });
       });
     }
