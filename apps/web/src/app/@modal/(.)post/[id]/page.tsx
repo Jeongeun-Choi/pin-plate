@@ -7,5 +7,5 @@ export default async function PostInterceptionPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <PostDetailModal id={id} />;
+  return <PostDetailModal id={id} isIntercepted={true} />;
 }
