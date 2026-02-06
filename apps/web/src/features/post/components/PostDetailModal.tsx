@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Modal } from '@pin-plate/ui';
+import { Button, Modal, Popover } from '@pin-plate/ui';
 import { usePost } from '../hooks/usePost';
 
 import * as styles from './styles/PostDetailModal.styles.css';
@@ -34,7 +34,22 @@ const PostDetailInner = ({ id }: { id: string }) => {
     <>
       <Modal.Header>
         <Modal.Title>{isEditing ? '리뷰 수정' : '리뷰 상세'} </Modal.Title>
-        <Modal.Close />
+        {isEditing ? (
+          <Modal.Close />
+        ) : (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <Popover>
+              <Popover.Trigger>⋮</Popover.Trigger>
+              <Popover.Menu>
+                <Popover.Item onClick={handleOpenEditing}>
+                  수정하기
+                </Popover.Item>
+                <Popover.Item onClick={handleDelete}>삭제하기</Popover.Item>
+              </Popover.Menu>
+            </Popover>
+            <Modal.Close />
+          </div>
+        )}
       </Modal.Header>
 
       {/* Content */}
@@ -46,23 +61,22 @@ const PostDetailInner = ({ id }: { id: string }) => {
         )}
       </Modal.Body>
 
-      {/* Footer Actions */}
-      <Modal.Footer>
-        <Button
-          className={styles.editButton}
-          onClick={isEditing ? undefined : handleOpenEditing}
-          type={isEditing ? 'submit' : 'button'}
-          form={isEditing ? 'edit-post-form' : undefined}
-        >
-          {isEditing ? '완료' : '수정'}
-        </Button>
-        <Button
-          className={styles.deleteButton}
-          onClick={isEditing ? handleCancelEditing : handleDelete}
-        >
-          {isEditing ? '취소' : '삭제'}
-        </Button>
-      </Modal.Footer>
+      {/* Footer Actions - Only visible in Edit Mode */}
+      {isEditing && (
+        <Modal.Footer>
+          <Button
+            className={styles.editButton}
+            onClick={undefined}
+            type="submit"
+            form="edit-post-form"
+          >
+            완료
+          </Button>
+          <Button className={styles.deleteButton} onClick={handleCancelEditing}>
+            취소
+          </Button>
+        </Modal.Footer>
+      )}
     </>
   );
 };
