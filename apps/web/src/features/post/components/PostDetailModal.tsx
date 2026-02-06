@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, Popover } from '@pin-plate/ui';
 import { usePost } from '../hooks/usePost';
+import { useDeletePost } from '../hooks/useDeletePost';
 
 import * as styles from './styles/PostDetailModal.styles.css';
 import PostDetailContent from './PostDetailContent';
@@ -19,6 +20,11 @@ interface PostDetailModalProps {
 const PostDetailInner = ({ id }: { id: string }) => {
   const { data: post } = usePost(Number(id));
   const [isEditing, setIsEditing] = useState(false);
+  const router = useRouter();
+  const { mutate: deletePost } = useDeletePost(() => {
+    alert('게시글이 삭제되었습니다.');
+    router.back();
+  });
 
   const handleOpenEditing = () => setIsEditing(true);
 
@@ -26,7 +32,7 @@ const PostDetailInner = ({ id }: { id: string }) => {
 
   const handleDelete = () => {
     if (confirm('정말로 삭제하시겠습니까?')) {
-      // call delete mutation
+      deletePost(Number(id));
     }
   };
 

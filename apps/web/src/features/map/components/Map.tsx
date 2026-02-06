@@ -47,12 +47,19 @@ export const Map = () => {
     }
   }, []);
 
+  const markersRef = useRef<naver.maps.Marker[]>([]);
+
   useEffect(() => {
     if (map && posts) {
-      posts.forEach((post) => {
-        const markerContent = getMarkerIcon(); // Example custom color (Tomato-ish)
+      // Clear existing markers
+      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current = [];
 
-        new naver.maps.Marker({
+      // Add new markers
+      posts.forEach((post) => {
+        const markerContent = getMarkerIcon();
+
+        const marker = new naver.maps.Marker({
           position: new naver.maps.LatLng(post.lat, post.lng),
           map: map,
           icon: {
@@ -60,9 +67,13 @@ export const Map = () => {
             size: new naver.maps.Size(34, 42),
             anchor: new naver.maps.Point(17, 42),
           },
-        }).addListener('click', () => {
+        });
+
+        marker.addListener('click', () => {
           router.push(`/post/${post.id}`);
         });
+
+        markersRef.current.push(marker);
       });
     }
   }, [map, posts]);
