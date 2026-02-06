@@ -11,8 +11,8 @@ export const overlay = style({
   display: 'flex',
   justifyContent: 'center',
 
-  // Mobile: Bottom Sheet logic
-  alignItems: 'flex-end',
+  // Mobile: Full screen logic
+  alignItems: 'flex-start', // Start from top
   padding: '0',
 
   '@media': {
@@ -28,28 +28,27 @@ export const container = style({
   backgroundColor: vars.colors.secondary.surface, // #fff
   width: '100%',
 
-  // Mobile: Bottom Sheet styles
-  maxWidth: '100%',
-  borderRadius: `${vars.borderRadius.lg} ${vars.borderRadius.lg} 0 0`, // 32px top
-  border: `5px solid ${vars.colors.secondary.border}`,
-  borderBottom: 'none',
-  boxShadow: vars.boxShadow.float, // logical equivalent
+  // Mobile: Full screen styles
+  height: '100%',
+  maxHeight: 'none',
+  borderRadius: 0,
+  border: 'none',
+  boxShadow: 'none',
 
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
-  maxHeight: '90vh',
   transition: 'all 0.3s ease',
 
   '@media': {
     'screen and (min-width: 768px)': {
       // Desktop: Centered Modal styles
       maxWidth: '900px',
+      maxHeight: '90vh',
       height: '600px',
-      borderRadius: '32px', // Explicit to match PostDetailModal or vars.borderRadius.lg? PostDetailModal used 32px. vars.lg is 20px. 32px is not in vars.borderRadius.
-      // I'll use 32px to match exactly.
-      borderBottom: `5px solid ${vars.colors.secondary.border}`,
+      borderRadius: '32px',
+      border: `5px solid ${vars.colors.secondary.border}`,
       boxShadow: '0px 25px 50px -12px rgba(0,0,0,0.25)', // Custom shadow
     },
   },

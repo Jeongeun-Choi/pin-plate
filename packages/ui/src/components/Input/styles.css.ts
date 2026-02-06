@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '../../styles/vars.css';
 
 export const inputStyle = style({
+  width: '100%',
   display: 'flex',
   color: vars.colors.text.primary,
   padding: `${vars.spacing[1]} ${vars.spacing[5]}`,
