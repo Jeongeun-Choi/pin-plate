@@ -19,11 +19,11 @@ interface PostDetailModalProps {
 const PostDetailInner = ({ id }: { id: string }) => {
   const { data: post } = usePost(Number(id));
   const [isEditing, setIsEditing] = useState(false);
-  const router = useRouter();
 
-  const handleEdit = () => setIsEditing(true);
-  const handleEditCancel = () => setIsEditing(false);
-  const handleEditSuccess = () => setIsEditing(false);
+  const handleOpenEditing = () => setIsEditing(true);
+
+  const handleSubmitEdit = () => setIsEditing(false);
+  const handleCancelEditing = () => setIsEditing(false);
 
   const handleDelete = () => {
     if (confirm('정말로 삭제하시겠습니까?')) {
@@ -31,34 +31,35 @@ const PostDetailInner = ({ id }: { id: string }) => {
     }
   };
 
-  if (isEditing) {
-    return (
-      <EditPostContainer
-        id={id}
-        onCancel={handleEditCancel}
-        onSuccess={handleEditSuccess}
-      />
-    );
-  }
   return (
     <>
       <Modal.Header>
-        <Modal.Title>리뷰 상세</Modal.Title>
+        <Modal.Title>{isEditing ? '리뷰 수정' : '리뷰 상세'} </Modal.Title>
         <Modal.Close />
       </Modal.Header>
 
       {/* Content */}
       <Modal.Body>
-        <PostDetailContent post={post} />
+        {isEditing ? (
+          <EditPostContent post={post} />
+        ) : (
+          <PostDetailContent post={post} />
+        )}
       </Modal.Body>
 
       {/* Footer Actions */}
       <Modal.Footer>
-        <Button className={styles.editButton} onClick={handleEdit}>
-          수정
+        <Button
+          className={styles.editButton}
+          onClick={isEditing ? handleSubmitEdit : handleOpenEditing}
+        >
+          {isEditing ? '완료' : '수정'}
         </Button>
-        <Button className={styles.deleteButton} onClick={handleDelete}>
-          삭제
+        <Button
+          className={styles.deleteButton}
+          onClick={isEditing ? handleCancelEditing : handleDelete}
+        >
+          {isEditing ? '취소' : '삭제'}
         </Button>
       </Modal.Footer>
     </>
