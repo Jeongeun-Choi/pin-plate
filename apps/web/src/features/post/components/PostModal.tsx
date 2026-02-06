@@ -10,10 +10,8 @@ interface PostModalProps {
   onClose: () => void;
 }
 
-export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
+const PostModalContent = ({ onClose }: { onClose: () => void }) => {
   const { formState, handlers, submit } = usePostForm(onClose);
-
-  if (!isOpen) return null;
 
   return (
     <div className={styles.overlay} onClick={onClose} role="presentation">
@@ -47,4 +45,10 @@ export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
       </div>
     </div>
   );
+};
+
+export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
+  if (!isOpen) return null;
+
+  return <PostModalContent onClose={onClose} />;
 };
