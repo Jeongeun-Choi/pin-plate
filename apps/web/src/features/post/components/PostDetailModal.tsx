@@ -4,7 +4,7 @@ import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal } from '@pin-plate/ui';
 import { usePost } from '../hooks/usePost';
-import { EditPostContainer } from './EditPostContainer';
+
 import * as styles from './styles/PostDetailModal.styles.css';
 import PostDetailContent from './PostDetailContent';
 import EditPostContent from './EditPostContent';
@@ -22,7 +22,6 @@ const PostDetailInner = ({ id }: { id: string }) => {
 
   const handleOpenEditing = () => setIsEditing(true);
 
-  const handleSubmitEdit = () => setIsEditing(false);
   const handleCancelEditing = () => setIsEditing(false);
 
   const handleDelete = () => {
@@ -41,7 +40,7 @@ const PostDetailInner = ({ id }: { id: string }) => {
       {/* Content */}
       <Modal.Body>
         {isEditing ? (
-          <EditPostContent post={post} />
+          <EditPostContent post={post} onSuccess={() => setIsEditing(false)} />
         ) : (
           <PostDetailContent post={post} />
         )}
@@ -51,7 +50,9 @@ const PostDetailInner = ({ id }: { id: string }) => {
       <Modal.Footer>
         <Button
           className={styles.editButton}
-          onClick={isEditing ? handleSubmitEdit : handleOpenEditing}
+          onClick={isEditing ? undefined : handleOpenEditing}
+          type={isEditing ? 'submit' : 'button'}
+          form={isEditing ? 'edit-post-form' : undefined}
         >
           {isEditing ? '완료' : '수정'}
         </Button>
