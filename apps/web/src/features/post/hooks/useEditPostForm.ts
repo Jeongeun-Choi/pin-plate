@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useUpdatePost } from './useUpdatePost';
 import { KakaoPlace } from '../types/search';
-import { createClient } from '@/utils/supabase/client';
 import { Post } from '../types/post';
 
 export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {

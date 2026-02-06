@@ -14,6 +14,7 @@ export const form = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '10px',
+  overflow: 'auto',
 });
 
 export const fieldWrapper = style({

@@ -1,7 +1,7 @@
 import { ButtonHTMLAttributes } from 'react';
 import * as styles from './styles.css';
 
-interface AddPhotoButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
+type AddPhotoButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 export default function AddPhotoButton(props: AddPhotoButtonProps) {
   return (
