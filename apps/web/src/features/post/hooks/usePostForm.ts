@@ -51,36 +51,57 @@ export const usePostForm = (onSuccess?: () => void) => {
       return;
     }
 
+    // 1. Presigned URL Request
+    let presignedRes;
     try {
-      // 1. Presigned URL Request
-      const presignedRes = await fetch('/api/image', {
+      presignedRes = await fetch('/api/image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           files: fileList.map((f) => ({ filename: f.name, type: f.type })),
         }),
       });
+    } catch (err) {
+      console.error('Presigned URL Network Error:', err);
+      alert(`서버 연결 실패: /api/image 에 접근할 수 없습니다.\n${err}`);
+      return;
+    }
 
-      if (!presignedRes.ok) throw new Error('Failed to get presigned URLs');
+    if (!presignedRes.ok) {
+      const errorText = await presignedRes.text();
+      console.error('Presigned URL Server Error:', errorText);
+      alert(
+        `서버 에러 (${presignedRes.status}): 이미지 URL을 받아오지 못했습니다.`,
+      );
+      return;
+    }
 
-      const { urls } = await presignedRes.json();
+    const { urls } = await presignedRes.json();
 
-      // 2. Upload to S3
-      const uploadPromises = urls.map(async (item: any, index: number) => {
-        const file = fileList[index];
-        await fetch(item.url, {
+    // 2. Upload to S3
+    const uploadPromises = urls.map(async (item: any, index: number) => {
+      const file = fileList[index];
+      try {
+        const s3Res = await fetch(item.url, {
           method: 'PUT',
           body: file,
           headers: { 'Content-Type': file.type },
         });
+        if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
         return item.url.split('?')[0];
-      });
+      } catch (err) {
+        console.error('S3 Upload Error:', err);
+        throw new Error('S3 CORS or Network Error');
+      }
+    });
 
+    try {
       const s3Urls = await Promise.all(uploadPromises);
       setPhotos((prev) => [...prev, ...s3Urls]);
-    } catch (error) {
-      console.error(error);
-      alert('이미지 업로드에 실패했습니다.');
+    } catch (err) {
+      alert(
+        `이미지 업로드 실패: S3 CORS 설정이나 네트워크를 확인해주세요.\nPC에서는 되는데 모바일에서만 안된다면 99% S3 CORS 문제입니다.`,
+      );
     }
   };
 
