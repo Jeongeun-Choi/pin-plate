@@ -192,6 +192,9 @@ export const usePostForm = (onSuccess?: () => void) => {
       setContent,
       setRating,
       handleUploadAndSetImages,
+      handleRemovePhoto: (index: number) => {
+        setPhotos((prev) => prev.filter((_, i) => i !== index));
+      },
       handleLocationSearchOpen,
       handlePlaceSelect,
       handleLocationModalClose: () => setIsLocationModalOpen(false),

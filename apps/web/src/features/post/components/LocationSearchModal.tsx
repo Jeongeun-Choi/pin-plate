@@ -1,3 +1,5 @@
+'use client';
+
 import { Input } from '@pin-plate/ui';
 import { useRef, useState } from 'react';
 import { KakaoPlace, KakaoSearchResponse } from '../types/search';

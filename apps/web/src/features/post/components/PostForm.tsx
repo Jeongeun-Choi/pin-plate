@@ -1,23 +1,12 @@
 'use client';
 
-import { useRef, ChangeEvent, MouseEvent } from 'react';
-import { Input, Textarea } from '@pin-plate/ui';
-import {
-  photoSection,
-  photoAddButton,
-  photoItem,
-  sectionTitle,
-  starRating,
-  starWrapper,
-  starBase,
-  starOverlay,
-  hiddenInput,
-  previewImage,
-  clickableInput,
-  textarea,
-} from './styles/PostForm.styles.css';
+import { ChangeEvent, useRef } from 'react';
+import Image from 'next/image';
+import { Input, Rate, Textarea } from '@pin-plate/ui';
+import RatingBadge from '@/components/common/RatingBadge';
+import AddPhotoButton from '@/components/common/AddPhotoButton';
+import * as styles from './styles/PostForm.styles.css';
 import LocationSearchModal from './LocationSearchModal';
-
 import { KakaoPlace } from '../types/search';
 
 interface PostFormProps {
@@ -33,6 +22,7 @@ interface PostFormProps {
     setContent: (content: string) => void;
     setRating: (rating: number) => void;
     handleUploadAndSetImages: (files: File[]) => void;
+    handleRemovePhoto: (index: number) => void; // Added this
     handleLocationSearchOpen: () => void;
     handlePlaceSelect: (place: KakaoPlace) => void;
     handleLocationModalClose: () => void;
@@ -53,6 +43,7 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
     setContent,
     setRating,
     handleUploadAndSetImages,
+    handleRemovePhoto,
     handleLocationSearchOpen,
     handlePlaceSelect,
     handleLocationModalClose,
@@ -80,96 +71,87 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
     }
   };
 
-  const handleStarClick = (e: MouseEvent<HTMLSpanElement>, index: number) => {
-    const { offsetX } = e.nativeEvent;
-    const { offsetWidth } = e.currentTarget;
-    const isHalf = offsetX < offsetWidth / 2;
-    setRating(index + (isHalf ? 0.5 : 1));
-  };
-
   return (
-    <div className={content}>
-      {/* 사진 업로드 */}
-      <section>
-        <div className={photoSection}>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className={hiddenInput}
-            ref={fileInputRef}
-            onChange={handleFileChange}
+    <>
+      <div className={styles.form}>
+        <div className={styles.fieldWrapper}>
+          <label htmlFor="location" className={styles.label}>
+            장소 검색
+          </label>
+          <Input
+            id="location"
+            placeholder="장소를 검색해주세요"
+            value={selectedPlace?.place_name || ''}
+            readOnly
+            onClick={handleLocationSearchOpen}
+            className={styles.clickableInput}
           />
-          <button
-            type="button"
-            className={photoAddButton}
-            onClick={handlePhotoAddClick}
-            aria-label="사진 추가하기"
-          >
-            <span aria-hidden="true">📷</span>
-            <span>{photos.length}/5</span>
-          </button>
-          {photos.map((photo, index) => (
-            <div key={index} className={photoItem}>
-              <img src={photo} alt="preview" className={previewImage} />
-            </div>
-          ))}
         </div>
-      </section>
 
-      {/* 장소 정보 */}
-      <section>
-        <h3 className={sectionTitle}>방문한 장소</h3>
-        <Input
-          placeholder="어디를 방문하셨나요?"
-          readOnly
-          value={selectedPlace?.place_name || ''}
-          onClick={handleLocationSearchOpen}
-          className={clickableInput}
-          title="장소 검색 팝업 열기"
-          aria-haspopup="dialog"
-          role="button"
-        />
-      </section>
-
-      {/* 별점 */}
-      <section>
-        <h3 className={sectionTitle}>평점 ({rating}점)</h3>
-        <div className={starRating}>
-          {[0, 1, 2, 3, 4].map((index) => {
-            let fillWidth = '0%';
-            if (rating >= index + 1) {
-              fillWidth = '100%';
-            } else if (rating === index + 0.5) {
-              fillWidth = '50%';
-            }
-
-            return (
-              <span
-                key={index}
-                className={starWrapper}
-                onClick={(e) => handleStarClick(e, index)}
-              >
-                <span className={starBase}>★</span>
-                <span className={starOverlay} style={{ width: fillWidth }}>
-                  ★
-                </span>
-              </span>
-            );
-          })}
+        <div className={styles.fieldWrapper}>
+          <label className={styles.label}>평점</label>
+          <div className={styles.ratingContainer}>
+            <Rate value={rating} onChange={setRating} />
+            <RatingBadge score={rating} />
+          </div>
         </div>
-      </section>
 
-      {/* 후기 작성 */}
-      <section>
-        <h3 className={sectionTitle}>후기</h3>
-        <Textarea
-          placeholder="맛, 서비스, 분위기는 어땠나요?"
-          className={textarea}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-      </section>
+        <div className={styles.fieldWrapper}>
+          <label className={styles.label}>상세 설명</label>
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="맛, 서비스, 분위기는 어땠나요?"
+          />
+        </div>
+
+        <div className={styles.fieldWrapper}>
+          <label className={styles.label}>사진</label>
+          <div className={styles.imageList}>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              style={{ display: 'none' }}
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+            <AddPhotoButton onClick={handlePhotoAddClick} />
+            {photos.map((image, index) => (
+              <div key={index} style={{ position: 'relative' }}>
+                <Image
+                  src={image}
+                  width={110}
+                  height={110}
+                  alt={`uploaded-${index}`}
+                  className={styles.imageItem}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemovePhoto(index)}
+                  style={{
+                    position: 'absolute',
+                    top: -5,
+                    right: -5,
+                    background: 'black',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: 20,
+                    height: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <LocationSearchModal
         isOpen={isLocationModalOpen}
@@ -177,7 +159,7 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
         currentLocation={currentLocation}
         onSelectPlace={handlePlaceSelect}
       />
-    </div>
+    </>
   );
 };
 

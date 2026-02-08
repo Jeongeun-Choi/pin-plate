@@ -1,112 +1,46 @@
 import { style } from '@vanilla-extract/css';
-import { vars } from '@pin-plate/ui/vars';
+import { vars } from '@pin-plate/ui';
 
-export const container = style({
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100dvh',
-  backgroundColor: vars.colors.secondary.surface,
-});
-
-export const header = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: `${vars.spacing[3]} ${vars.spacing[4]}`,
-  borderBottom: `1px solid ${vars.colors.secondary.border}`,
-  position: 'sticky',
-  top: 0,
-  backgroundColor: vars.colors.secondary.surface,
-  zIndex: 10,
-});
-
-export const content = style({
-  flex: 1,
-  overflowY: 'auto',
-  padding: vars.spacing[4],
-  display: 'flex',
-  flexDirection: 'column',
-  gap: vars.spacing[6],
-});
-
-export const sectionTitle = style({
-  fontSize: vars.fontSize.body,
+export const label = style({
+  color: vars.colors.primary.text,
+  fontSize: vars.fontSize.caption,
   fontWeight: vars.fontWeight.bold,
-  marginBottom: vars.spacing[2],
-  color: vars.colors.text.primary,
 });
 
-export const photoSection = style({
-  display: 'flex',
-  gap: vars.spacing[2],
-  overflowX: 'auto',
-  paddingBottom: vars.spacing[2],
-  selectors: {
-    '&::-webkit-scrollbar': {
-      display: 'none',
-    },
-  },
-});
-
-export const photoAddButton = style({
-  width: '80px',
-  height: '80px',
-  borderRadius: vars.borderRadius.sm,
-  border: `1px dashed ${vars.colors.secondary.border}`,
+export const form = style({
+  width: '100%',
+  flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: vars.fontSize.tiny,
-  color: vars.colors.text.sub,
-  backgroundColor: vars.colors.secondary.bg,
-  flexShrink: 0,
+  gap: '10px',
+  overflow: 'visible', // PostModal handles scroll
 });
 
-export const photoItem = style({
-  width: '80px',
-  height: '80px',
-  borderRadius: vars.borderRadius.sm,
-  backgroundColor: vars.colors.secondary.bg,
-  position: 'relative',
-  flexShrink: 0,
-});
-
-export const starRating = style({
+export const fieldWrapper = style({
   display: 'flex',
-  gap: vars.spacing[1],
+  flexDirection: 'column',
+  gap: '12px',
 });
 
-export const starWrapper = style({
-  position: 'relative',
-  display: 'inline-block',
-  fontSize: '32px',
-  cursor: 'pointer',
-  lineHeight: 1,
+export const ratingContainer = style({
+  padding: '20px 0px',
+  height: '150px',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#FEF3E9',
+  gap: '12px',
+  borderRadius: '16px',
 });
 
-export const starBase = style({
-  color: vars.colors.secondary.border, // 비활성 색상 (회색)
+export const imageList = style({
+  display: 'flex',
+  gap: '8px',
 });
 
-export const starOverlay = style({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  color: vars.colors.primary.default, // 활성 색상 (메인 컬러)
-  pointerEvents: 'none', // 클릭 이벤트가 부모(Wrapper)로 전달되도록
-});
-
-export const hiddenInput = style({
-  display: 'none',
-});
-
-export const previewImage = style({
-  width: '100%',
-  height: '100%',
-  borderRadius: 'inherit',
+export const imageItem = style({
+  borderRadius: '16px',
   objectFit: 'cover',
 });
 
