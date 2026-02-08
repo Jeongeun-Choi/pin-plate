@@ -59,36 +59,60 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
       return;
     }
 
+    // 1. Presigned URL Request
+    let presignedRes;
     try {
-      // 1. Presigned URL Request
-      const presignedRes = await fetch('/api/image', {
+      presignedRes = await fetch('/api/image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           files: fileList.map((f) => ({ filename: f.name, type: f.type })),
         }),
       });
+    } catch (err) {
+      console.error('Presigned URL Network Error:', err);
+      alert(`서버 연결 실패: /api/image 에 접근할 수 없습니다.\n${err}`);
+      return;
+    }
 
-      if (!presignedRes.ok) throw new Error('Failed to get presigned URLs');
+    if (!presignedRes.ok) {
+      const errorText = await presignedRes.text();
+      console.error('Presigned URL Server Error:', errorText);
+      alert(
+        `서버 에러 (${presignedRes.status}): 이미지 URL을 받아오지 못했습니다.`,
+      );
+      return;
+    }
 
-      const { urls } = await presignedRes.json();
+    const { urls } = await presignedRes.json();
 
-      // 2. Upload to S3
-      const uploadPromises = urls.map(async (item: any, index: number) => {
+    // 2. Upload to S3
+    const uploadPromises = urls.map(
+      async (
+        item: { originalName: string; fileName: string; url: string },
+        index: number,
+      ) => {
         const file = fileList[index];
-        await fetch(item.url, {
-          method: 'PUT',
-          body: file,
-          headers: { 'Content-Type': file.type },
-        });
-        return item.url.split('?')[0];
-      });
+        try {
+          const s3Res = await fetch(item.url, {
+            method: 'PUT',
+            body: file,
+            headers: { 'Content-Type': file.type },
+          });
+          if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
+          return item.url.split('?')[0];
+        } catch (err) {
+          console.error('S3 Upload Error:', err);
+          throw new Error('S3 CORS or Network Error');
+        }
+      },
+    );
 
+    try {
       const s3Urls = await Promise.all(uploadPromises);
       setPhotos((prev) => [...prev, ...s3Urls]);
-    } catch (error) {
-      console.error(error);
-      alert('이미지 업로드에 실패했습니다.');
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -124,9 +148,19 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
 
       alert('게시글이 수정되었습니다!');
       onSuccess?.();
-    } catch (error) {
-      console.error(error);
-      alert('게시글 수정에 실패했습니다.');
+    } catch (error: any) {
+      console.error('Update Post Error:', error);
+
+      // Supabase error handling
+      if (error?.code) {
+        alert(
+          `게시글 수정 실패 (${error.code}): ${error.message}\n(내 글이 아니거나 권한이 없을 수 있습니다)`,
+        );
+      } else {
+        alert(
+          `게시글 수정에 실패했습니다.\n${error?.message || '알 수 없는 오류'}`,
+        );
+      }
     }
   };
 

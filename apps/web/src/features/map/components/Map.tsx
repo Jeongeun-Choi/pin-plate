@@ -50,7 +50,7 @@ export const Map = () => {
   const markersRef = useRef<naver.maps.Marker[]>([]);
 
   useEffect(() => {
-    if (map && posts) {
+    if (map && posts && window.naver && window.naver.maps) {
       // Clear existing markers
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
@@ -59,13 +59,13 @@ export const Map = () => {
       posts.forEach((post) => {
         const markerContent = getMarkerIcon();
 
-        const marker = new naver.maps.Marker({
-          position: new naver.maps.LatLng(post.lat, post.lng),
+        const marker = new window.naver.maps.Marker({
+          position: new window.naver.maps.LatLng(post.lat, post.lng),
           map: map,
           icon: {
             content: markerContent,
-            size: new naver.maps.Size(34, 42),
-            anchor: new naver.maps.Point(17, 42),
+            size: new window.naver.maps.Size(34, 42),
+            anchor: new window.naver.maps.Point(17, 42),
           },
         });
 
@@ -76,7 +76,7 @@ export const Map = () => {
         markersRef.current.push(marker);
       });
     }
-  }, [map, posts]);
+  }, [map, posts, router]);
 
   return (
     <>

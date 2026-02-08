@@ -16,7 +16,7 @@ export const useLogin = () => {
           // 선택적: 사용자에게 알림을 주거나, 인메모리 저장소로 대체할 수 있음
         }
         // Assuming we want to redirect to home on success
-        router.push('/home');
+        router.push('/');
       }
     },
   });
