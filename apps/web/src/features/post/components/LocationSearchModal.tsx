@@ -15,11 +15,8 @@ interface LocationSearchModalProps {
 
 const LocationSearchModal = ({
   isOpen,
-
   onClose,
-
   currentLocation,
-
   onSelectPlace,
 }: LocationSearchModalProps) => {
   const locationRef = useRef<HTMLInputElement>(null);

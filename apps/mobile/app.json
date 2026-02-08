@@ -13,7 +13,10 @@
       "backgroundColor": "#ffa07a"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "이 앱은 주변 맛집 검색을 위해 사용자의 현재 위치 권한을 필요로 합니다."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +25,11 @@
       },
       "usesCleartextTraffic": true,
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

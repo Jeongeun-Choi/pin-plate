@@ -19,6 +19,29 @@ export const usePostForm = (onSuccess?: () => void) => {
 
   const handleLocationSearchOpen = () => {
     setIsLocationModalOpen(true);
+
+    // 1. 이미 주입된 위치 정보가 있는지 확인
+    if (window.nativeLocation) {
+      const { coords } = window.nativeLocation;
+      setCurrentLocation({
+        lat: coords.latitude,
+        lng: coords.longitude,
+      });
+      return;
+    }
+
+    // 2. 앱 환경이라면 위치 정보 요청 (Bridge)
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({ type: 'REQ_LOCATION' }),
+      );
+      // 위치 정보가 비동기로 주입되므로, 잠시 후 다시 시도해달라는 메시지 표시
+      // (더 나은 UX는 주입될 때까지 로딩을 보여주는 것이지만, 일단 기능 동작 확인이 우선)
+      alert('위치 정보를 불러오는 중입니다. 잠시 후 닫았다가 다시 열어주세요.');
+      return;
+    }
+
+    // 3. 웹 환경 (HTTPS 필요)
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -29,6 +52,7 @@ export const usePostForm = (onSuccess?: () => void) => {
         },
         (error) => {
           console.warn('위치 정보를 가져올 수 없습니다.', error);
+          alert(`위치 정보 에러: ${error.code} - ${error.message}`);
         },
       );
     }
@@ -79,29 +103,32 @@ export const usePostForm = (onSuccess?: () => void) => {
     const { urls } = await presignedRes.json();
 
     // 2. Upload to S3
-    const uploadPromises = urls.map(async (item: any, index: number) => {
-      const file = fileList[index];
-      try {
-        const s3Res = await fetch(item.url, {
-          method: 'PUT',
-          body: file,
-          headers: { 'Content-Type': file.type },
-        });
-        if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
-        return item.url.split('?')[0];
-      } catch (err) {
-        console.error('S3 Upload Error:', err);
-        throw new Error('S3 CORS or Network Error');
-      }
-    });
+    const uploadPromises = urls.map(
+      async (
+        item: { originalName: string; fileName: string; url: string },
+        index: number,
+      ) => {
+        const file = fileList[index];
+        try {
+          const s3Res = await fetch(item.url, {
+            method: 'PUT',
+            body: file,
+            headers: { 'Content-Type': file.type },
+          });
+          if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
+          return item.url.split('?')[0];
+        } catch (err) {
+          console.error('S3 Upload Error:', err);
+          throw new Error('S3 CORS or Network Error');
+        }
+      },
+    );
 
     try {
       const s3Urls = await Promise.all(uploadPromises);
       setPhotos((prev) => [...prev, ...s3Urls]);
     } catch (err) {
-      alert(
-        `이미지 업로드 실패: S3 CORS 설정이나 네트워크를 확인해주세요.\nPC에서는 되는데 모바일에서만 안된다면 99% S3 CORS 문제입니다.`,
-      );
+      console.error(err);
     }
   };
 
