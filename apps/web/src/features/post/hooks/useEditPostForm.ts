@@ -87,29 +87,32 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
     const { urls } = await presignedRes.json();
 
     // 2. Upload to S3
-    const uploadPromises = urls.map(async (item: any, index: number) => {
-      const file = fileList[index];
-      try {
-        const s3Res = await fetch(item.url, {
-          method: 'PUT',
-          body: file,
-          headers: { 'Content-Type': file.type },
-        });
-        if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
-        return item.url.split('?')[0];
-      } catch (err) {
-        console.error('S3 Upload Error:', err);
-        throw new Error('S3 CORS or Network Error');
-      }
-    });
+    const uploadPromises = urls.map(
+      async (
+        item: { originalName: string; fileName: string; url: string },
+        index: number,
+      ) => {
+        const file = fileList[index];
+        try {
+          const s3Res = await fetch(item.url, {
+            method: 'PUT',
+            body: file,
+            headers: { 'Content-Type': file.type },
+          });
+          if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
+          return item.url.split('?')[0];
+        } catch (err) {
+          console.error('S3 Upload Error:', err);
+          throw new Error('S3 CORS or Network Error');
+        }
+      },
+    );
 
     try {
       const s3Urls = await Promise.all(uploadPromises);
       setPhotos((prev) => [...prev, ...s3Urls]);
     } catch (err) {
-      alert(
-        `이미지 업로드 실패: S3 CORS 설정이나 네트워크를 확인해주세요.\nPC에서는 되는데 모바일에서만 안된다면 99% S3 CORS 문제입니다.`,
-      );
+      console.error(err);
     }
   };
 
