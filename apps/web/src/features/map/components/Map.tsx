@@ -15,8 +15,15 @@ export const Map = () => {
 
   const initializeMap = () => {
     if (window.naver && mapRef.current) {
+      const initialCenter = window.nativeLocation
+        ? new window.naver.maps.LatLng(
+            window.nativeLocation.coords.latitude,
+            window.nativeLocation.coords.longitude,
+          )
+        : new window.naver.maps.LatLng(37.3595704, 127.105399);
+
       const mapOptions = {
-        center: new window.naver.maps.LatLng(37.3595704, 127.105399),
+        center: initialCenter,
         zoom: 15,
         scaleControl: false,
         logoControl: false,
@@ -27,22 +34,73 @@ export const Map = () => {
       const mapInstance = new window.naver.maps.Map(mapRef.current, mapOptions);
       setMap(mapInstance);
 
-      if (navigator.geolocation) {
+      const updateCenter = (lat: number, lng: number) => {
+        const currentPosition = new window.naver.maps.LatLng(lat, lng);
+        mapInstance.setCenter(currentPosition);
+      };
+
+      if (window.nativeLocation) {
+        updateCenter(
+          window.nativeLocation.coords.latitude,
+          window.nativeLocation.coords.longitude,
+        );
+      }
+
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({ type: 'REQ_LOCATION' }),
+        );
+      } else if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
-          const { latitude, longitude } = position.coords;
-          const currentPosition = new window.naver.maps.LatLng(
-            latitude,
-            longitude,
-          );
-          mapInstance.setCenter(currentPosition);
+          updateCenter(position.coords.latitude, position.coords.longitude);
         });
       }
+    } else {
+      console.error('initializeMap failed: window.naver or mapRef missing', {
+        hasNaver: !!window.naver,
+        hasRef: !!mapRef.current,
+      });
     }
   };
 
   useEffect(() => {
+    if (!map || !window.naver) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data =
+          typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data?.type === 'LOCATION') {
+          window.nativeLocation = data.payload;
+          const currentPosition = new window.naver.maps.LatLng(
+            data.payload.coords.latitude,
+            data.payload.coords.longitude,
+          );
+          map.setCenter(currentPosition);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    document.addEventListener(
+      'message',
+      handleMessage as unknown as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      document.removeEventListener(
+        'message',
+        handleMessage as unknown as EventListener,
+      );
+    };
+  }, [map]);
+
+  useEffect(() => {
     // 이미 스크립트가 로드되어 있는 경우 (페이지 이동 후 복귀 등)
-    if (window.naver && mapRef.current) {
+    if (window.naver && mapRef.current && window.naver.maps) {
       initializeMap();
     }
   }, []);

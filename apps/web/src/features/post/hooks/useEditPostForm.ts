@@ -30,6 +30,25 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
   const { mutateAsync: updatePost } = useUpdatePost();
 
   const fetchCurrentLocation = useCallback(() => {
+    // 1. 이미 주입된 위치 정보가 있는지 확인
+    if (window.nativeLocation) {
+      const { coords } = window.nativeLocation;
+      setCurrentLocation({
+        lat: coords.latitude,
+        lng: coords.longitude,
+      });
+      return;
+    }
+
+    // 2. 앱 환경이라면 위치 정보 요청 (Bridge)
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({ type: 'REQ_LOCATION' }),
+      );
+      return;
+    }
+
+    // 3. 웹 환경 (HTTPS 필요)
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
