@@ -45,7 +45,7 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
     }
   }, []);
 
-  const handlePlaceSelect = (place: KakaoPlace) => {
+  const handlePlaceSelect = (place: KakaoPlace | null) => {
     setSelectedPlace(place);
   };
 

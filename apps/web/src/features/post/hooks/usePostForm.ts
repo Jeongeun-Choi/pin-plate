@@ -55,7 +55,7 @@ export const usePostForm = (onSuccess?: () => void) => {
     }
   }, []);
 
-  const handlePlaceSelect = (place: KakaoPlace) => {
+  const handlePlaceSelect = (place: KakaoPlace | null) => {
     setSelectedPlace(place);
   };
 

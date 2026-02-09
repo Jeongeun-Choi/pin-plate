@@ -2,12 +2,13 @@
 
 import { ChangeEvent, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { Input, Rate, Textarea } from '@pin-plate/ui';
+import { Rate, Textarea } from '@pin-plate/ui';
 import RatingBadge from '@/components/common/RatingBadge';
 import AddPhotoButton from '@/components/common/AddPhotoButton';
 import * as styles from './styles/PostForm.styles.css';
 import LocationSearch from './LocationSearch';
 import { KakaoPlace } from '../types/search';
+import SelectedPlace from './SelectedPlace';
 
 interface PostFormProps {
   formState: {
@@ -23,7 +24,7 @@ interface PostFormProps {
     handleUploadAndSetImages: (files: File[]) => void;
     handleRemovePhoto: (index: number) => void;
     fetchCurrentLocation: () => void;
-    handlePlaceSelect: (place: KakaoPlace) => void;
+    handlePlaceSelect: (place: KakaoPlace | null) => void;
   };
 }
 
@@ -69,44 +70,21 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
     <>
       <div className={styles.form}>
         <div className={styles.fieldWrapper}>
-          <label htmlFor="location" className={styles.label}>
-            장소 검색
-          </label>
           {selectedPlace ? (
-            <div style={{ position: 'relative', width: '100%' }}>
-              <Input
-                id="location"
-                value={selectedPlace.place_name}
-                readOnly
-                className={styles.clickableInput}
-              />
-              <button
-                type="button"
-                onClick={() => handlePlaceSelect(null as any)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '18px',
-                  color: '#999',
-                  padding: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                ✕
-              </button>
-            </div>
-          ) : (
-            <LocationSearch
-              currentLocation={currentLocation}
-              onSelectPlace={handlePlaceSelect}
+            <SelectedPlace
+              place={selectedPlace}
+              onReset={() => handlePlaceSelect(null)}
             />
+          ) : (
+            <>
+              <label htmlFor="location" className={styles.label}>
+                장소 검색
+              </label>
+              <LocationSearch
+                currentLocation={currentLocation}
+                onSelectPlace={handlePlaceSelect}
+              />
+            </>
           )}
         </div>
 
