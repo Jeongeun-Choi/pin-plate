@@ -77,3 +77,7 @@ export const icon = style({
   justifyContent: 'center',
   color: '#8B6F5C',
 });
+
+export const clickableInput = style({
+  cursor: 'pointer',
+});

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useCreatePost } from './useCreatePost';
 import { KakaoPlace } from '../types/search';
 import { createClient } from '@/utils/supabase/client';
@@ -9,7 +9,6 @@ export const usePostForm = (onSuccess?: () => void) => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(null);
 
-  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
@@ -17,9 +16,7 @@ export const usePostForm = (onSuccess?: () => void) => {
 
   const { mutateAsync: createPost } = useCreatePost();
 
-  const handleLocationSearchOpen = () => {
-    setIsLocationModalOpen(true);
-
+  const fetchCurrentLocation = useCallback(() => {
     // 1. 이미 주입된 위치 정보가 있는지 확인
     if (window.nativeLocation) {
       const { coords } = window.nativeLocation;
@@ -37,7 +34,7 @@ export const usePostForm = (onSuccess?: () => void) => {
       );
       // 위치 정보가 비동기로 주입되므로, 잠시 후 다시 시도해달라는 메시지 표시
       // (더 나은 UX는 주입될 때까지 로딩을 보여주는 것이지만, 일단 기능 동작 확인이 우선)
-      alert('위치 정보를 불러오는 중입니다. 잠시 후 닫았다가 다시 열어주세요.');
+      // alert('위치 정보를 불러오는 중입니다. 잠시 후 닫았다가 다시 열어주세요.');
       return;
     }
 
@@ -52,15 +49,14 @@ export const usePostForm = (onSuccess?: () => void) => {
         },
         (error) => {
           console.warn('위치 정보를 가져올 수 없습니다.', error);
-          alert(`위치 정보 에러: ${error.code} - ${error.message}`);
+          // alert(`위치 정보 에러: ${error.code} - ${error.message}`);
         },
       );
     }
-  };
+  }, []);
 
   const handlePlaceSelect = (place: KakaoPlace) => {
     setSelectedPlace(place);
-    setIsLocationModalOpen(false);
   };
 
   // Fixing the bug: The original code had a separate logic inside handleFileChange.
@@ -185,7 +181,6 @@ export const usePostForm = (onSuccess?: () => void) => {
       rating,
       photos,
       selectedPlace,
-      isLocationModalOpen,
       currentLocation,
     },
     handlers: {
@@ -195,9 +190,8 @@ export const usePostForm = (onSuccess?: () => void) => {
       handleRemovePhoto: (index: number) => {
         setPhotos((prev) => prev.filter((_, i) => i !== index));
       },
-      handleLocationSearchOpen,
+      fetchCurrentLocation,
       handlePlaceSelect,
-      handleLocationModalClose: () => setIsLocationModalOpen(false),
     },
     submit: handleSubmit,
   };

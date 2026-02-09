@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useUpdatePost } from './useUpdatePost';
 import { KakaoPlace } from '../types/search';
 import { Post } from '../types/post';
@@ -22,7 +22,6 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
     place_url: '',
   });
 
-  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
@@ -30,8 +29,7 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
 
   const { mutateAsync: updatePost } = useUpdatePost();
 
-  const handleLocationSearchOpen = () => {
-    setIsLocationModalOpen(true);
+  const fetchCurrentLocation = useCallback(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -45,11 +43,10 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
         },
       );
     }
-  };
+  }, []);
 
   const handlePlaceSelect = (place: KakaoPlace) => {
     setSelectedPlace(place);
-    setIsLocationModalOpen(false);
   };
 
   const handleUploadAndSetImages = async (fileList: File[]) => {
@@ -170,17 +167,15 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
       rating,
       photos,
       selectedPlace,
-      isLocationModalOpen,
       currentLocation,
     },
     handlers: {
       setContent,
       setRating,
       handleUploadAndSetImages,
-      handleRemovePhoto, // Added this new handler
-      handleLocationSearchOpen,
+      handleRemovePhoto,
+      fetchCurrentLocation,
       handlePlaceSelect,
-      handleLocationModalClose: () => setIsLocationModalOpen(false),
     },
     submit: handleSubmit,
   };

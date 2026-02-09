@@ -1,12 +1,12 @@
 'use client';
 
-import { ChangeEvent, useRef } from 'react';
+import { ChangeEvent, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Input, Rate, Textarea } from '@pin-plate/ui';
 import RatingBadge from '@/components/common/RatingBadge';
 import AddPhotoButton from '@/components/common/AddPhotoButton';
 import * as styles from './styles/PostForm.styles.css';
-import LocationSearchModal from './LocationSearchModal';
+import LocationSearch from './LocationSearch';
 import { KakaoPlace } from '../types/search';
 
 interface PostFormProps {
@@ -15,39 +15,33 @@ interface PostFormProps {
     rating: number;
     photos: string[];
     selectedPlace: KakaoPlace | null;
-    isLocationModalOpen: boolean;
     currentLocation?: { lat: number; lng: number };
   };
   handlers: {
     setContent: (content: string) => void;
     setRating: (rating: number) => void;
     handleUploadAndSetImages: (files: File[]) => void;
-    handleRemovePhoto: (index: number) => void; // Added this
-    handleLocationSearchOpen: () => void;
+    handleRemovePhoto: (index: number) => void;
+    fetchCurrentLocation: () => void;
     handlePlaceSelect: (place: KakaoPlace) => void;
-    handleLocationModalClose: () => void;
   };
 }
 
 const PostForm = ({ formState, handlers }: PostFormProps) => {
-  const {
-    content,
-    rating,
-    photos,
-    selectedPlace,
-    isLocationModalOpen,
-    currentLocation,
-  } = formState;
+  const { content, rating, photos, selectedPlace, currentLocation } = formState;
 
   const {
     setContent,
     setRating,
     handleUploadAndSetImages,
     handleRemovePhoto,
-    handleLocationSearchOpen,
     handlePlaceSelect,
-    handleLocationModalClose,
+    fetchCurrentLocation,
   } = handlers;
+
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, [fetchCurrentLocation]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -78,14 +72,42 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
           <label htmlFor="location" className={styles.label}>
             장소 검색
           </label>
-          <Input
-            id="location"
-            placeholder="장소를 검색해주세요"
-            value={selectedPlace?.place_name || ''}
-            readOnly
-            onClick={handleLocationSearchOpen}
-            className={styles.clickableInput}
-          />
+          {selectedPlace ? (
+            <div style={{ position: 'relative', width: '100%' }}>
+              <Input
+                id="location"
+                value={selectedPlace.place_name}
+                readOnly
+                className={styles.clickableInput}
+              />
+              <button
+                type="button"
+                onClick={() => handlePlaceSelect(null as any)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  color: '#999',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            <LocationSearch
+              currentLocation={currentLocation}
+              onSelectPlace={handlePlaceSelect}
+            />
+          )}
         </div>
 
         <div className={styles.fieldWrapper}>
@@ -152,13 +174,6 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
           </div>
         </div>
       </div>
-
-      <LocationSearchModal
-        isOpen={isLocationModalOpen}
-        onClose={handleLocationModalClose}
-        currentLocation={currentLocation}
-        onSelectPlace={handlePlaceSelect}
-      />
     </>
   );
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, useRef } from 'react';
+import { ChangeEvent, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import * as styles from './styles/EditPostContent.styles.css';
 import { Post } from '../types/post';
@@ -8,7 +8,7 @@ import { Input, Rate, Textarea } from '@pin-plate/ui';
 import RatingBadge from '@/components/common/RatingBadge';
 import AddPhotoButton from '@/components/common/AddPhotoButton';
 import { useEditPostForm } from '../hooks/useEditPostForm';
-import LocationSearchModal from './LocationSearchModal';
+import LocationSearch from './LocationSearch';
 
 interface IEditPostContentProps {
   post: Post;
@@ -20,23 +20,19 @@ export default function EditPostContent({
   onSuccess,
 }: IEditPostContentProps) {
   const { formState, handlers, submit } = useEditPostForm(post, onSuccess);
-  const {
-    content,
-    rating,
-    photos,
-    selectedPlace,
-    isLocationModalOpen,
-    currentLocation,
-  } = formState;
+  const { content, rating, photos, selectedPlace, currentLocation } = formState;
   const {
     setContent,
     setRating,
     handleUploadAndSetImages,
     handleRemovePhoto,
-    handleLocationSearchOpen,
     handlePlaceSelect,
-    handleLocationModalClose,
+    fetchCurrentLocation,
   } = handlers;
+
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, [fetchCurrentLocation]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -73,13 +69,42 @@ export default function EditPostContent({
           <label htmlFor="location" className={styles.label}>
             장소 검색
           </label>
-          <Input
-            id="location"
-            value={selectedPlace?.place_name || ''}
-            readOnly
-            onClick={handleLocationSearchOpen}
-            style={{ cursor: 'pointer' }}
-          />
+          {selectedPlace ? (
+            <div style={{ position: 'relative', width: '100%' }}>
+              <Input
+                id="location"
+                value={selectedPlace.place_name}
+                readOnly
+                className={styles.clickableInput}
+              />
+              <button
+                type="button"
+                onClick={() => handlePlaceSelect(null as any)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  color: '#999',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            <LocationSearch
+              currentLocation={currentLocation}
+              onSelectPlace={handlePlaceSelect}
+            />
+          )}
         </div>
 
         <div className={styles.fieldWrapper}>
@@ -151,13 +176,6 @@ export default function EditPostContent({
           </div>
         </div>
       </form>
-
-      <LocationSearchModal
-        isOpen={isLocationModalOpen}
-        onClose={handleLocationModalClose}
-        currentLocation={currentLocation}
-        onSelectPlace={handlePlaceSelect}
-      />
     </>
   );
 }
