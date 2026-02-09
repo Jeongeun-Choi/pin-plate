@@ -15,8 +15,15 @@ export const Map = () => {
 
   const initializeMap = () => {
     if (window.naver && mapRef.current) {
+      const initialCenter = window.nativeLocation
+        ? new window.naver.maps.LatLng(
+            window.nativeLocation.coords.latitude,
+            window.nativeLocation.coords.longitude,
+          )
+        : new window.naver.maps.LatLng(37.3595704, 127.105399);
+
       const mapOptions = {
-        center: new window.naver.maps.LatLng(37.3595704, 127.105399),
+        center: initialCenter,
         zoom: 15,
         scaleControl: false,
         logoControl: false,
@@ -27,22 +34,64 @@ export const Map = () => {
       const mapInstance = new window.naver.maps.Map(mapRef.current, mapOptions);
       setMap(mapInstance);
 
-      if (navigator.geolocation) {
+      const updateCenter = (lat: number, lng: number) => {
+        const currentPosition = new window.naver.maps.LatLng(lat, lng);
+        mapInstance.setCenter(currentPosition);
+      };
+
+      if (window.nativeLocation) {
+        console.log(
+          'Found window.nativeLocation immediately:',
+          window.nativeLocation,
+        );
+        updateCenter(
+          window.nativeLocation.coords.latitude,
+          window.nativeLocation.coords.longitude,
+        );
+      } else if (window.ReactNativeWebView) {
+        console.log('window.ReactNativeWebView found, requesting location');
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({ type: 'REQ_LOCATION' }),
+        );
+
+        window.addEventListener(
+          'nativeLocationInjected',
+          () => {
+            console.log('nativeLocationInjected event fired');
+            if (window.nativeLocation) {
+              console.log('Location injected:', window.nativeLocation);
+              // alert('Location injected: ' + JSON.stringify(window.nativeLocation)); // Debug
+              updateCenter(
+                window.nativeLocation.coords.latitude,
+                window.nativeLocation.coords.longitude,
+              );
+            } else {
+              console.warn(
+                'nativeLocationInjected fired but window.nativeLocation is null',
+              );
+              // alert('nativeLocationInjected event fired but window.nativeLocation is null'); // Debug
+            }
+          },
+          { once: true },
+        );
+      } else if (navigator.geolocation) {
+        console.log('Using navigator.geolocation');
         navigator.geolocation.getCurrentPosition((position) => {
-          const { latitude, longitude } = position.coords;
-          const currentPosition = new window.naver.maps.LatLng(
-            latitude,
-            longitude,
-          );
-          mapInstance.setCenter(currentPosition);
+          console.log('navigator.geolocation success:', position);
+          updateCenter(position.coords.latitude, position.coords.longitude);
         });
       }
+    } else {
+      console.error('initializeMap failed: window.naver or mapRef missing', {
+        hasNaver: !!window.naver,
+        hasRef: !!mapRef.current,
+      });
     }
   };
 
   useEffect(() => {
     // 이미 스크립트가 로드되어 있는 경우 (페이지 이동 후 복귀 등)
-    if (window.naver && mapRef.current) {
+    if (window.naver && mapRef.current && window.naver.maps) {
       initializeMap();
     }
   }, []);
