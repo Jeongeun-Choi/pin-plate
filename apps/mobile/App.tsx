@@ -31,19 +31,13 @@ export default function App() {
   }, []);
 
   const injectLocation = (loc: Location.LocationObject) => {
-    const script = `
-      window.nativeLocation = ${JSON.stringify(loc)};
-      window.dispatchEvent(new Event('nativeLocationInjected'));
-      true;
-    `;
-    webViewRef.current?.injectJavaScript(script);
+    webViewRef.current?.postMessage(JSON.stringify({ type: "LOCATION", payload: loc }));
   };
 
   const handleWebViewMessage = (event: any) => {
     try {
       const message = JSON.parse(event.nativeEvent.data);
       if (message.type === "REQ_LOCATION") {
-        console.log("Received REQ_LOCATION from Web");
         if (nativeLocation) {
           injectLocation(nativeLocation);
         } else {

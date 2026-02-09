@@ -40,44 +40,18 @@ export const Map = () => {
       };
 
       if (window.nativeLocation) {
-        console.log(
-          'Found window.nativeLocation immediately:',
-          window.nativeLocation,
-        );
         updateCenter(
           window.nativeLocation.coords.latitude,
           window.nativeLocation.coords.longitude,
         );
-      } else if (window.ReactNativeWebView) {
-        console.log('window.ReactNativeWebView found, requesting location');
+      }
+
+      if (window.ReactNativeWebView) {
         window.ReactNativeWebView.postMessage(
           JSON.stringify({ type: 'REQ_LOCATION' }),
         );
-
-        window.addEventListener(
-          'nativeLocationInjected',
-          () => {
-            console.log('nativeLocationInjected event fired');
-            if (window.nativeLocation) {
-              console.log('Location injected:', window.nativeLocation);
-              // alert('Location injected: ' + JSON.stringify(window.nativeLocation)); // Debug
-              updateCenter(
-                window.nativeLocation.coords.latitude,
-                window.nativeLocation.coords.longitude,
-              );
-            } else {
-              console.warn(
-                'nativeLocationInjected fired but window.nativeLocation is null',
-              );
-              // alert('nativeLocationInjected event fired but window.nativeLocation is null'); // Debug
-            }
-          },
-          { once: true },
-        );
       } else if (navigator.geolocation) {
-        console.log('Using navigator.geolocation');
         navigator.geolocation.getCurrentPosition((position) => {
-          console.log('navigator.geolocation success:', position);
           updateCenter(position.coords.latitude, position.coords.longitude);
         });
       }
@@ -88,6 +62,41 @@ export const Map = () => {
       });
     }
   };
+
+  useEffect(() => {
+    if (!map || !window.naver) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data =
+          typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data?.type === 'LOCATION') {
+          window.nativeLocation = data.payload;
+          const currentPosition = new window.naver.maps.LatLng(
+            data.payload.coords.latitude,
+            data.payload.coords.longitude,
+          );
+          map.setCenter(currentPosition);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    document.addEventListener(
+      'message',
+      handleMessage as unknown as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      document.removeEventListener(
+        'message',
+        handleMessage as unknown as EventListener,
+      );
+    };
+  }, [map]);
 
   useEffect(() => {
     // 이미 스크립트가 로드되어 있는 경우 (페이지 이동 후 복귀 등)
