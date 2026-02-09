@@ -1,14 +1,16 @@
 'use client';
 
-import { ChangeEvent, useRef } from 'react';
+import { ChangeEvent, useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import * as styles from './styles/EditPostContent.styles.css';
 import { Post } from '../types/post';
-import { Input, Rate, Textarea } from '@pin-plate/ui';
+import { Rate, Textarea, IcSearch } from '@pin-plate/ui';
 import RatingBadge from '@/components/common/RatingBadge';
 import AddPhotoButton from '@/components/common/AddPhotoButton';
 import { useEditPostForm } from '../hooks/useEditPostForm';
-import LocationSearchModal from './LocationSearchModal';
+import LocationSearch from './LocationSearch';
+import MobileLocationSearch from './MobileLocationSearch';
+import SelectedPlace from './SelectedPlace';
 
 interface IEditPostContentProps {
   post: Post;
@@ -20,23 +22,21 @@ export default function EditPostContent({
   onSuccess,
 }: IEditPostContentProps) {
   const { formState, handlers, submit } = useEditPostForm(post, onSuccess);
-  const {
-    content,
-    rating,
-    photos,
-    selectedPlace,
-    isLocationModalOpen,
-    currentLocation,
-  } = formState;
+  const { content, rating, photos, selectedPlace, currentLocation } = formState;
   const {
     setContent,
     setRating,
     handleUploadAndSetImages,
     handleRemovePhoto,
-    handleLocationSearchOpen,
     handlePlaceSelect,
-    handleLocationModalClose,
+    fetchCurrentLocation,
   } = handlers;
+
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, [fetchCurrentLocation]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,6 +61,13 @@ export default function EditPostContent({
 
   return (
     <>
+      <MobileLocationSearch
+        isOpen={isMobileSearchOpen}
+        onClose={() => setIsMobileSearchOpen(false)}
+        onSelectPlace={handlePlaceSelect}
+        currentLocation={currentLocation}
+      />
+
       <form
         id="edit-post-form"
         className={styles.form}
@@ -70,16 +77,41 @@ export default function EditPostContent({
         }}
       >
         <div className={styles.fieldWrapper}>
-          <label htmlFor="location" className={styles.label}>
-            장소 검색
-          </label>
-          <Input
-            id="location"
-            value={selectedPlace?.place_name || ''}
-            readOnly
-            onClick={handleLocationSearchOpen}
-            style={{ cursor: 'pointer' }}
-          />
+          {selectedPlace ? (
+            <SelectedPlace
+              place={selectedPlace}
+              onReset={() => handlePlaceSelect(null)}
+            />
+          ) : (
+            <>
+              <label htmlFor="location" className={styles.label}>
+                장소 검색
+              </label>
+
+              {/* Mobile Trigger Button */}
+              <button
+                type="button"
+                className={styles.mobileSearchTrigger}
+                onClick={() => setIsMobileSearchOpen(true)}
+              >
+                <div className={styles.mobileSearchPlaceholder}>
+                  장소를 입력하세요
+                </div>
+                <div className={styles.mobileSearchIcon}>
+                  <IcSearch width={20} height={20} />
+                  <span>검색</span>
+                </div>
+              </button>
+
+              {/* Desktop Search Component */}
+              <div className={styles.desktopSearchContainer}>
+                <LocationSearch
+                  currentLocation={currentLocation}
+                  onSelectPlace={handlePlaceSelect}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <div className={styles.fieldWrapper}>
@@ -151,13 +183,6 @@ export default function EditPostContent({
           </div>
         </div>
       </form>
-
-      <LocationSearchModal
-        isOpen={isLocationModalOpen}
-        onClose={handleLocationModalClose}
-        currentLocation={currentLocation}
-        onSelectPlace={handlePlaceSelect}
-      />
     </>
   );
 }

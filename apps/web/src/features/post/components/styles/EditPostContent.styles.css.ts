@@ -77,3 +77,48 @@ export const icon = style({
   justifyContent: 'center',
   color: '#8B6F5C',
 });
+
+export const clickableInput = style({
+  cursor: 'pointer',
+});
+
+export const mobileSearchTrigger = style({
+  display: 'none', // Default hidden (Desktop)
+  width: '100%',
+  height: '50px',
+  padding: '0 16px',
+  borderRadius: '16px',
+  border: '2px solid #fde4d8',
+  backgroundColor: '#fff',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  cursor: 'pointer',
+  '@media': {
+    'screen and (max-width: 768px)': {
+      display: 'flex', // Visible on Mobile
+    },
+  },
+});
+
+export const mobileSearchPlaceholder = style({
+  color: 'rgba(107, 93, 82, 0.5)',
+  fontSize: '16px',
+});
+
+export const mobileSearchIcon = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  color: '#ffa07a',
+  fontWeight: vars.fontWeight.bold,
+  fontSize: '14px',
+});
+
+export const desktopSearchContainer = style({
+  display: 'block', // Default visible
+  '@media': {
+    'screen and (max-width: 768px)': {
+      display: 'none', // Hidden on Mobile
+    },
+  },
+});
