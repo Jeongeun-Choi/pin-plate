@@ -1,15 +1,15 @@
 'use client';
 
-import { ChangeEvent, useRef, useEffect } from 'react';
+import { ChangeEvent, useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import * as styles from './styles/EditPostContent.styles.css';
 import { Post } from '../types/post';
-import { Rate, Textarea } from '@pin-plate/ui';
+import { Rate, Textarea, IcSearch } from '@pin-plate/ui';
 import RatingBadge from '@/components/common/RatingBadge';
 import AddPhotoButton from '@/components/common/AddPhotoButton';
 import { useEditPostForm } from '../hooks/useEditPostForm';
 import LocationSearch from './LocationSearch';
-
+import MobileLocationSearch from './MobileLocationSearch';
 import SelectedPlace from './SelectedPlace';
 
 interface IEditPostContentProps {
@@ -31,6 +31,8 @@ export default function EditPostContent({
     handlePlaceSelect,
     fetchCurrentLocation,
   } = handlers;
+
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   useEffect(() => {
     fetchCurrentLocation();
@@ -59,6 +61,13 @@ export default function EditPostContent({
 
   return (
     <>
+      <MobileLocationSearch
+        isOpen={isMobileSearchOpen}
+        onClose={() => setIsMobileSearchOpen(false)}
+        onSelectPlace={handlePlaceSelect}
+        currentLocation={currentLocation}
+      />
+
       <form
         id="edit-post-form"
         className={styles.form}
@@ -78,10 +87,29 @@ export default function EditPostContent({
               <label htmlFor="location" className={styles.label}>
                 장소 검색
               </label>
-              <LocationSearch
-                currentLocation={currentLocation}
-                onSelectPlace={handlePlaceSelect}
-              />
+
+              {/* Mobile Trigger Button */}
+              <button
+                type="button"
+                className={styles.mobileSearchTrigger}
+                onClick={() => setIsMobileSearchOpen(true)}
+              >
+                <div className={styles.mobileSearchPlaceholder}>
+                  장소를 입력하세요
+                </div>
+                <div className={styles.mobileSearchIcon}>
+                  <IcSearch width={20} height={20} />
+                  <span>검색</span>
+                </div>
+              </button>
+
+              {/* Desktop Search Component */}
+              <div className={styles.desktopSearchContainer}>
+                <LocationSearch
+                  currentLocation={currentLocation}
+                  onSelectPlace={handlePlaceSelect}
+                />
+              </div>
             </>
           )}
         </div>

@@ -1,12 +1,11 @@
-'use client';
-
-import { ChangeEvent, useRef, useEffect } from 'react';
+import { ChangeEvent, useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Rate, Textarea } from '@pin-plate/ui';
+import { Rate, Textarea, IcSearch } from '@pin-plate/ui';
 import RatingBadge from '@/components/common/RatingBadge';
 import AddPhotoButton from '@/components/common/AddPhotoButton';
 import * as styles from './styles/PostForm.styles.css';
 import LocationSearch from './LocationSearch';
+import MobileLocationSearch from './MobileLocationSearch';
 import { KakaoPlace } from '../types/search';
 import SelectedPlace from './SelectedPlace';
 
@@ -40,6 +39,8 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
     fetchCurrentLocation,
   } = handlers;
 
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
   useEffect(() => {
     fetchCurrentLocation();
   }, [fetchCurrentLocation]);
@@ -68,6 +69,13 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
 
   return (
     <>
+      <MobileLocationSearch
+        isOpen={isMobileSearchOpen}
+        onClose={() => setIsMobileSearchOpen(false)}
+        onSelectPlace={handlePlaceSelect}
+        currentLocation={currentLocation}
+      />
+
       <div className={styles.form}>
         <div className={styles.fieldWrapper}>
           {selectedPlace ? (
@@ -80,10 +88,29 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
               <label htmlFor="location" className={styles.label}>
                 장소 검색
               </label>
-              <LocationSearch
-                currentLocation={currentLocation}
-                onSelectPlace={handlePlaceSelect}
-              />
+
+              {/* Mobile Trigger Button */}
+              <button
+                type="button"
+                className={styles.mobileSearchTrigger}
+                onClick={() => setIsMobileSearchOpen(true)}
+              >
+                <div className={styles.mobileSearchPlaceholder}>
+                  장소를 입력하세요
+                </div>
+                <div className={styles.mobileSearchIcon}>
+                  <IcSearch width={20} height={20} />
+                  <span>검색</span>
+                </div>
+              </button>
+
+              {/* Desktop Search Component */}
+              <div className={styles.desktopSearchContainer}>
+                <LocationSearch
+                  currentLocation={currentLocation}
+                  onSelectPlace={handlePlaceSelect}
+                />
+              </div>
             </>
           )}
         </div>

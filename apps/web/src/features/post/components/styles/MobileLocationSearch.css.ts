@@ -2,16 +2,49 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@pin-plate/ui/vars';
 
 export const container = style({
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: '#fff',
+  zIndex: 1000, // High z-index to overlay everything
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
-  width: '100%',
+  padding: 0,
+});
+
+export const header = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '16px 20px',
+  borderBottom: '1px solid #fde4d8',
+  backgroundColor: '#fff',
+});
+
+export const closeButton = style({
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: '4px',
+  color: '#6b5d52',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+export const title = style({
+  fontSize: '18px',
+  fontWeight: vars.fontWeight.bold,
+  color: '#6b5d52',
 });
 
 export const searchContainer = style({
+  padding: '16px 20px',
+  backgroundColor: '#fff',
   display: 'flex',
-  gap: '8px',
-  width: '100%',
+  gap: '12px',
 });
 
 export const searchInputWrapper = style({
@@ -23,7 +56,6 @@ export const searchInputWrapper = style({
   display: 'flex',
   alignItems: 'center',
   backgroundColor: '#fff',
-  boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.1)',
 });
 
 export const searchInput = style({
@@ -32,6 +64,7 @@ export const searchInput = style({
   outline: 'none',
   fontSize: '16px',
   color: '#6b5d52',
+  backgroundColor: 'transparent',
   '::placeholder': {
     color: 'rgba(107, 93, 82, 0.5)',
   },
@@ -41,7 +74,7 @@ export const searchButton = style({
   width: '80px',
   height: '50px',
   backgroundColor: '#ffa07a',
-  border: '2px solid #fff',
+  border: 'none',
   borderRadius: '16px',
   color: '#fff',
   fontWeight: vars.fontWeight.bold,
@@ -50,24 +83,17 @@ export const searchButton = style({
   justifyContent: 'center',
   gap: '4px',
   cursor: 'pointer',
-  boxShadow: '0px 4px 6px rgba(0,0,0,0.1)',
-  transition: 'all 0.2s ease',
-  ':hover': {
-    backgroundColor: '#ff8c69',
+  fontSize: '16px',
+  transition: 'background-color 0.2s',
+  ':active': {
+    backgroundColor: '#ff8c5a',
   },
 });
 
 export const resultsContainer = style({
-  width: '100%',
-  maxHeight: '300px', // Limit height for scrolling within the form
+  flex: 1,
   overflowY: 'auto',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '12px',
-  padding: '4px', // Space for shadows
-  border: '1px solid #fde4d8',
-  borderRadius: '16px',
-  backgroundColor: '#fff',
+  padding: '0 20px',
 });
 
 export const resultsList = style({
@@ -76,7 +102,7 @@ export const resultsList = style({
   margin: 0,
   display: 'flex',
   flexDirection: 'column',
-  gap: '8px',
+  gap: '12px',
 });
 
 export const resultItem = style({
@@ -85,16 +111,11 @@ export const resultItem = style({
   background: '#fff',
   border: 'none',
   borderBottom: '1px solid rgba(0,0,0,0.05)',
-  padding: '12px',
+  padding: '16px 0',
   cursor: 'pointer',
   display: 'flex',
   gap: '12px',
   alignItems: 'flex-start',
-  transition: 'background-color 0.2s',
-  borderRadius: '12px',
-  ':hover': {
-    backgroundColor: '#fff8ed',
-  },
   ':last-child': {
     borderBottom: 'none',
   },
@@ -109,42 +130,83 @@ export const iconWrapper = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  flexShrink: 0,
   color: '#ffa07a',
+  flexShrink: 0,
 });
 
 export const textContent = style({
+  flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: '2px',
+  gap: '4px',
 });
 
 export const resultItemTitle = style({
-  fontSize: '15px',
+  fontSize: '16px',
   fontWeight: vars.fontWeight.bold,
   color: '#6b5d52',
 });
 
 export const resultItemCategory = style({
-  fontSize: '11px',
+  fontSize: '12px',
+  color: '#ffa07a',
   fontWeight: vars.fontWeight.medium,
-  color: '#daa520',
 });
 
 export const resultItemAddress = style({
-  fontSize: '13px',
-  color: '#c9a68a',
-  letterSpacing: '-0.15px',
+  fontSize: '14px',
+  color: '#6b5d52',
+  opacity: 0.8,
 });
 
 export const resultItemPhone = style({
-  fontSize: '11px',
-  color: '#b8a390',
+  fontSize: '13px',
+  color: '#999',
   marginTop: '2px',
 });
 
-export const emptyState = style({
-  color: '#999',
+export const emptyStateContainer = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flex: 1,
+  gap: '16px',
+  padding: '40px',
+  backgroundColor: '#fef3e9',
+  margin: '20px',
+  borderRadius: '16px',
+  border: '2px solid #fde4d8',
+});
+
+export const emptyStateIcon = style({
+  width: '64px',
+  height: '64px',
+  backgroundColor: '#fff',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: '#ffa07a',
+  fontSize: '32px',
+  border: '2px solid #fde4d8',
+});
+
+export const emptyStateTitle = style({
+  fontSize: '18px',
+  fontWeight: vars.fontWeight.bold,
+  color: '#6b5d52',
+  marginBottom: '4px',
+});
+
+export const emptyStateDesc = style({
+  fontSize: '14px',
+  color: '#c9a68a',
+  textAlign: 'center',
+});
+
+export const loadingState = style({
   textAlign: 'center',
   padding: '20px',
+  color: '#999',
 });
