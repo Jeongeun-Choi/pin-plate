@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { Input } from '@pin-plate/ui';
+import { Input, Button } from '@pin-plate/ui';
 import { signup } from '../actions';
 import * as styles from './SignUpForm.styles.css';
 
@@ -68,7 +68,7 @@ export function SignUpForm() {
         </div>
       )}
 
-      <button className={styles.cta} type="submit" disabled={isPending}>
+      <Button type="submit" size="full" disabled={isPending}>
         {isPending ? (
           '가입 중...'
         ) : (
@@ -77,7 +77,7 @@ export function SignUpForm() {
             회원가입
           </>
         )}
-      </button>
+      </Button>
     </form>
   );
 }

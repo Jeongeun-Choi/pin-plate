@@ -30,7 +30,7 @@ export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
         </Modal.Body>
 
         <Modal.Footer>
-          <Button onClick={submit} className={styles.submitButton}>
+          <Button onClick={submit} size="full">
             등록하기
           </Button>
         </Modal.Footer>

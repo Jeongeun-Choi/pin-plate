@@ -2,6 +2,32 @@ import { createGlobalTheme } from '@vanilla-extract/css';
 
 export const vars = createGlobalTheme(':root', {
   colors: {
+    common: {
+      white: '#ffffff',
+      black: '#000000',
+    },
+    btn: {
+      solid: {
+        bg: '#ffa07a',
+        border: '#ffffff',
+        bgHover: '#ff8c69',
+        text: '#ffffff',
+      },
+      outline: {
+        border: '#ffa07a',
+        text: '#ffa07a',
+        bgHover: '#fff4e6',
+      },
+      ghost: {
+        text: '#1a1a1a',
+        bgHover: '#fff4e6',
+      },
+      danger: {
+        bg: '#ff6b6b',
+        text: '#ffffff',
+        hover: 'rgba(255, 107, 107, 0.9)', // 90% opacity of #ff6b6b
+      },
+    },
     primary: {
       default: '#ffa07a', // brand-primary (Peach Orange)
       hover: '#ff8c69', // brand-primary-dark (Dark Peach Orange)
@@ -14,10 +40,10 @@ export const vars = createGlobalTheme(':root', {
       border: '#ffe4d6', // border-light (Peach Cream Border)
     },
     text: {
-      primary: '#8b4513', // text-primary (Chocolate Brown)
-      body: '#a0522d', // text-secondary (Sienna Brown)
-      sub: '#d2691e', // text-tertiary (Caramel Brown)
-      caption: '#daa520', // text-accent (Goldenrod)
+      primary: '#1a1a1a', // text-primary
+      body: '#4a4a4a', // text-secondary
+      sub: '#6b6b6b', // text-tertiary
+      caption: '#ff8c69', // text-accent
     },
     status: {
       success: '#4CAF50', // Existing green (Keep standard for now)
@@ -93,6 +119,11 @@ export const vars = createGlobalTheme(':root', {
   boxShadow: {
     card: '0 2px 8px rgba(139, 69, 19, 0.08)', // Brownish shadow matching text
     float: '0 4px 16px rgba(139, 69, 19, 0.12)',
+    sm: '0 1px 3px 0 rgba(0, 0, 0, 0.10), 0 1px 2px -1px rgba(0, 0, 0, 0.10)',
+    base: '0 1px 3px 0 rgba(0, 0, 0, 0.10), 0 1px 2px -1px rgba(0, 0, 0, 0.10)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.10)',
+    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.10)',
+    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.10)',
     none: 'none',
   },
 

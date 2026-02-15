@@ -1,11 +1,26 @@
 import { ButtonHTMLAttributes } from 'react';
-import { buttonStyle } from './styles.css';
+import { RecipeVariants } from '@vanilla-extract/recipes';
+import { buttonRecipe } from './styles.css';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
+type ButtonVariants = RecipeVariants<typeof buttonRecipe>;
 
-export const Button = ({ children, className, ...props }: ButtonProps) => {
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  ButtonVariants & {
+    className?: string;
+  };
+
+export const Button = ({
+  children,
+  className,
+  variant = 'solid',
+  size,
+  ...props
+}: ButtonProps) => {
   return (
-    <button className={`${buttonStyle} ${className || ''}`} {...props}>
+    <button
+      className={`${buttonRecipe({ variant, size })} ${className || ''}`}
+      {...props}
+    >
       {children}
     </button>
   );

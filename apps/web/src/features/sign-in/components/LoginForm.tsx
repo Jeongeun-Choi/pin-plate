@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Input } from '@pin-plate/ui';
+import { Input, Button } from '@pin-plate/ui';
 import * as styles from './LoginForm.styles.css';
 import { useLogin } from '../hooks/useLogin';
 import { getAuthErrorMessage, isValidEmail } from '../utils/validation';
@@ -92,9 +92,9 @@ export function LoginForm() {
         </div>
       )}
 
-      <button className={styles.cta} type="submit" disabled={isPending}>
+      <Button type="submit" size="full" disabled={isPending}>
         {isPending ? '로그인 중...' : '로그인'}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -11,7 +11,8 @@ globalStyle('*, *::before, *::after', {
 globalStyle('html, body', {
   height: '100%',
   fontSize: '100%',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
 });
 
 // 3. Set core body defaults
