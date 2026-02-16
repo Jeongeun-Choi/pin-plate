@@ -73,9 +73,14 @@ export const menu = style({
       marginTop: '4px',
       paddingTop: 0,
       paddingBottom: 0,
-      borderRadius: vars.borderRadius.md,
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
       border: `1px solid ${vars.colors.secondary.border}`,
+      backgroundColor: vars.colors.secondary.surface,
+      padding: vars.spacing[2],
+      borderRadius: vars.borderRadius.xl,
+      boxShadow: vars.boxShadow.lg, // Assuming we want a larger shadow for popover
+      fontSize: vars.fontSize.sm,
+      color: vars.colors.text.primary,
+      zIndex: vars.zIndex.toast,
     },
   },
 });
@@ -83,7 +88,7 @@ export const menu = style({
 export const item = style({
   padding: '16px 20px', // Larger touch target for mobile
   cursor: 'pointer',
-  fontSize: vars.fontSize.body,
+  fontSize: vars.fontSize.base,
   color: vars.colors.text.primary,
   border: 'none',
   background: 'none',

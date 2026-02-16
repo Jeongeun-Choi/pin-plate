@@ -75,11 +75,13 @@ export const vars = createGlobalTheme(':root', {
   },
 
   fontSize: {
-    h1: '24px',
-    h2: '20px',
-    body: '16px',
-    caption: '14px',
-    tiny: '12px',
+    '4xl': '36px',
+    '3xl': '30px',
+    '2xl': '24px',
+    xl: '20px',
+    base: '16px',
+    sm: '14px',
+    xs: '12px',
   },
 
   fontWeight: {
@@ -109,10 +111,10 @@ export const vars = createGlobalTheme(':root', {
   },
 
   borderRadius: {
-    sm: '8px', // Button, Input
-    md: '12px', // Card
-    lg: '20px', // Modal, Bottom Sheet
-    full: '9999px', // Rounded Button
+    xl: '12px',
+    '2xl': '16px',
+    '3xl': '24px',
+    full: '9999px',
   },
 
   // Retaining existing shadow structure for compatibility, mapped to new values or kept generic

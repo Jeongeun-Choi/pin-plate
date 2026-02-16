@@ -7,9 +7,9 @@ export const textareaStyle = style({
   minHeight: '100px', // 기본 높이 설정
   color: vars.colors.text.primary,
   padding: `${vars.spacing[3]} ${vars.spacing[4]}`, // Input보다 위아래 패딩을 조금 넉넉하게
-  borderRadius: vars.borderRadius.sm,
+  borderRadius: vars.borderRadius.xl,
   border: `1px solid ${vars.colors.secondary.border}`,
-  fontSize: vars.fontSize.tiny, // 가독성을 위해 본문 사이즈 사용 (원하시면 tiny로 변경 가능)
+  fontSize: vars.fontSize.base, // 가독성을 위해 본문 사이즈 사용 (원하시면 tiny로 변경 가능)
   fontWeight: vars.fontWeight.regular,
   fontFamily: vars.fontFamily.body,
   resize: 'none', // 크기 조절 기능 비활성화
@@ -26,6 +26,7 @@ export const textareaStyle = style({
   },
 
   '::placeholder': {
-    color: vars.colors.text.caption,
+    color: vars.colors.text.sub,
+    fontSize: vars.fontSize.sm,
   },
 });

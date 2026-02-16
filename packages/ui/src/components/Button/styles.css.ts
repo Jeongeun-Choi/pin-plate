@@ -9,7 +9,7 @@ export const buttonRecipe = recipe({
     alignItems: 'center',
     justifyContent: 'center',
     gap: vars.spacing[2],
-    borderRadius: vars.borderRadius.sm,
+    borderRadius: vars.borderRadius.xl,
     fontWeight: vars.fontWeight.medium,
     transition: 'all 0.2s ease',
     width: 'fit-content',
@@ -57,20 +57,20 @@ export const buttonRecipe = recipe({
     size: {
       sm: {
         padding: `${vars.spacing[1]} ${vars.spacing[3]}`,
-        fontSize: vars.fontSize.caption,
+        fontSize: vars.fontSize.sm,
       },
       md: {
         padding: `${vars.spacing[2]} ${vars.spacing[4]}`,
-        fontSize: vars.fontSize.body,
+        fontSize: vars.fontSize.base,
       },
       lg: {
         padding: `${vars.spacing[3]} ${vars.spacing[6]}`,
-        fontSize: vars.fontSize.h2,
+        fontSize: vars.fontSize.xl,
       },
       full: {
         width: '100%',
         padding: vars.spacing[3],
-        fontSize: vars.fontSize.body,
+        fontSize: vars.fontSize.base,
       },
     },
   },
