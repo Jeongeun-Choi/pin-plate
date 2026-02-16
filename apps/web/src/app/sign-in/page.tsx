@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Image from 'next/image';
 import * as styles from '@/features/sign-in/components/LoginForm.styles.css';
 import LoginForm from '@/features/sign-in/components/LoginForm';
 
@@ -11,7 +11,7 @@ export default function LoginPage() {
       <div className={styles.card}>
         <section className={styles.topSection}>
           <div className={styles.topIconWrap}>
-            <img src={topIcon} alt="pin" width={32} height={32} />
+            <Image src={topIcon} alt="pin" width={32} height={32} />
           </div>
 
           <h1 className={styles.title}>Pin plate</h1>
@@ -19,12 +19,6 @@ export default function LoginPage() {
         </section>
 
         <LoginForm />
-
-        <div style={{ width: '100%', marginTop: '16px' }}>
-          <Link href="/sign-up" style={{ textDecoration: 'none' }}>
-            <div className={styles.signupLink}>계정이 없으신가요? 회원가입</div>
-          </Link>
-        </div>
       </div>
     </div>
   );
