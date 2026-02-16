@@ -28,6 +28,7 @@ const LocationSearch = ({
       if (currentLocation) {
         apiUrl += `&x=${currentLocation.lng}&y=${currentLocation.lat}`;
       }
+
       const response = await fetch(apiUrl);
       const data: KakaoSearchResponse = await response.json();
       setSearchResults(data.documents || []);

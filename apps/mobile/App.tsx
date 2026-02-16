@@ -7,8 +7,8 @@ import * as Location from "expo-location";
 
 export default function App() {
   // Use 10.0.2.2 for Android Emulator to access localhost
-  const LOCAL_URL =
-    Platform.OS === "android" ? "http://192.168.0.13:3000" : "https://localhost:3000";
+  // const LOCAL_URL = Platform.OS === "android" ? "http://10.0.2.2:3000" : "http://192.168.1.4:3000";
+  const LOCAL_URL = "http://192.168.1.4:3000";
 
   // TODO: Replace with production URL when deploying
   const TARGET_URL = __DEV__ ? LOCAL_URL : "https://pin-plate.com";
@@ -31,19 +31,13 @@ export default function App() {
   }, []);
 
   const injectLocation = (loc: Location.LocationObject) => {
-    const script = `
-      window.nativeLocation = ${JSON.stringify(loc)};
-      console.log("Native location injected via Bridge");
-      true;
-    `;
-    webViewRef.current?.injectJavaScript(script);
+    webViewRef.current?.postMessage(JSON.stringify({ type: "LOCATION", payload: loc }));
   };
 
   const handleWebViewMessage = (event: any) => {
     try {
       const message = JSON.parse(event.nativeEvent.data);
       if (message.type === "REQ_LOCATION") {
-        console.log("Received REQ_LOCATION from Web");
         if (nativeLocation) {
           injectLocation(nativeLocation);
         } else {
