@@ -1,101 +1,73 @@
 'use client';
 
-import { useState } from 'react';
-import { Input, Button } from '@pin-plate/ui';
+import Image from 'next/image';
 import * as styles from './LoginForm.styles.css';
-import { useLogin } from '../hooks/useLogin';
-import { getAuthErrorMessage, isValidEmail } from '../utils/validation';
 
 export function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const { mutate: login, isPending, error: mutationError } = useLogin();
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationError(null);
-
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
-
-    if (!trimmedEmail) {
-      setValidationError('이메일을 입력해주세요.');
-      return;
-    }
-
-    if (!isValidEmail(trimmedEmail)) {
-      setValidationError('올바른 이메일 형식이 아닙니다.');
-      return;
-    }
-
-    if (!trimmedPassword) {
-      setValidationError('비밀번호를 입력해주세요.');
-      return;
-    }
-
-    if (trimmedPassword.length < 8) {
-      setValidationError('비밀번호는 최소 8자 이상이어야 합니다.');
-      return;
-    }
-
-    login({ email: trimmedEmail, password: trimmedPassword });
+  const handleGoogleLogin = () => {
+    alert('Google 로 로그인 준비중입니다.');
   };
 
-  const displayError =
-    validationError || getAuthErrorMessage(mutationError as Error);
+  const handleKakaoLogin = () => {
+    alert('Kakao 로 로그인 준비중입니다.');
+  };
+
+  const handleAppleLogin = () => {
+    alert('Apple 로 로그인 준비중입니다.');
+  };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="email">
-          이메일
-        </label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          className={styles.input as unknown as string}
-          placeholder="example@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={isPending}
-          required
+    <div className={styles.form}>
+      <button
+        type="button"
+        className={styles.googleButton}
+        onClick={handleGoogleLogin}
+      >
+        <Image
+          src="/assets/ic-google.svg"
+          alt="Google"
+          width={24}
+          height={24}
+          className={styles.buttonIcon}
         />
-      </div>
+        <span className={styles.buttonText}>Google로 계속하기</span>
+      </button>
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="password">
-          비밀번호
-        </label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          className={styles.input as unknown as string}
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (validationError) setValidationError(null);
-          }}
-          disabled={isPending}
-          required
+      <button
+        type="button"
+        className={styles.kakaoButton}
+        onClick={handleKakaoLogin}
+      >
+        <Image
+          src="/assets/ic-kakao.svg"
+          alt="Kakao"
+          width={24}
+          height={24}
+          className={styles.buttonIcon}
         />
+        <span className={styles.buttonText}>Kakao로 계속하기</span>
+      </button>
+
+      <button
+        type="button"
+        className={styles.appleButton}
+        onClick={handleAppleLogin}
+      >
+        <Image
+          src="/assets/ic-apple.svg"
+          alt="Apple"
+          width={24}
+          height={24}
+          className={styles.buttonIcon}
+        />
+        <span className={styles.buttonText}>Apple로 계속하기</span>
+      </button>
+
+      <div className={styles.policyText}>
+        로그인하면 Pin-Plate의 서비스 약관 및<br />
+        개인정보 처리방침에 동의하게 됩니다.
       </div>
-
-      {displayError && (
-        <div
-          style={{ color: '#FB2C36', fontSize: '14px', textAlign: 'center' }}
-        >
-          {displayError}
-        </div>
-      )}
-
-      <Button type="submit" size="full" disabled={isPending}>
-        {isPending ? '로그인 중...' : '로그인'}
-      </Button>
-    </form>
+    </div>
   );
 }
 

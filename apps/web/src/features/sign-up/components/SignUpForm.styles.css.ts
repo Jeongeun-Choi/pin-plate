@@ -38,7 +38,7 @@ export const topIconWrap = style({
   alignItems: 'center',
   justifyContent: 'center',
   boxShadow: '0px 10px 15px rgba(0,0,0,0.1), 0px 4px 6px rgba(0,0,0,0.1)',
-  backgroundImage: 'linear-gradient(135deg, #FF6900 0%, #FB2C36 100%)',
+  backgroundImage: `linear-gradient(135deg, ${vars.colors.primary.default} 0%, ${vars.colors.status.error} 100%)`,
 });
 
 export const title = style({
@@ -92,7 +92,7 @@ export const input = style({
 export const cta = style({
   height: 56,
   borderRadius: 14,
-  backgroundImage: 'linear-gradient(90deg, #FF6900 0%, #FB2C36 100%)',
+  backgroundImage: `linear-gradient(90deg, ${vars.colors.primary.default} 0%, ${vars.colors.status.error} 100%)`,
   color: '#fff',
   display: 'flex',
   alignItems: 'center',
@@ -110,7 +110,7 @@ export const cta = style({
 export const loginLink = style({
   width: '100%',
   textAlign: 'center',
-  color: '#F54900',
+  color: vars.colors.primary.hover,
   fontFamily: vars.fontFamily.body,
   fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.medium,
