@@ -65,7 +65,7 @@ export const header = style({
 });
 
 export const headerTitle = style({
-  fontSize: '20px', // h2
+  fontSize: vars.fontSize.xl, // h2
   fontWeight: vars.fontWeight.bold,
   color: vars.colors.text.primary,
 });
@@ -145,7 +145,7 @@ export const titleRow = style({
 });
 
 export const title = style({
-  fontSize: '24px',
+  fontSize: vars.fontSize['2xl'],
   fontWeight: '900', // Black as per Figma
   color: '#6b5d52', // Specific color from Figma
   flex: 1,
@@ -157,7 +157,7 @@ export const ratingBadge = style({
   gap: '4px',
   backgroundColor: '#fff8ed', // Light yellow/beige
   border: '2px solid #ffe4d6',
-  borderRadius: '12px',
+  borderRadius: vars.borderRadius.xl,
   padding: '4px 12px',
   color: '#6b5d52',
   fontWeight: vars.fontWeight.bold,
@@ -173,16 +173,16 @@ export const infoRow = style({
   alignItems: 'center',
   gap: '8px',
   color: '#6b5d52',
-  fontSize: '14px',
+  fontSize: vars.fontSize.sm,
 });
 
 export const descriptionBox = style({
   backgroundColor: '#fff8ed', // Beige background
   border: '1px solid #ffe4d6',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   padding: '16px',
   color: '#6b5d52',
-  fontSize: '14px',
+  fontSize: vars.fontSize.sm,
   lineHeight: '1.6',
 });
 
@@ -200,9 +200,9 @@ export const actionFooter = style({
 export const actionButton = style({
   flex: 1,
   height: '48px',
-  borderRadius: '12px',
+  borderRadius: vars.borderRadius.xl,
   border: 'none',
-  fontSize: '16px',
+  fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.bold,
   cursor: 'pointer',
   display: 'flex',

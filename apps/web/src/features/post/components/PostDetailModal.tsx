@@ -6,7 +6,6 @@ import { Button, Modal, Popover } from '@pin-plate/ui';
 import { usePost } from '../hooks/usePost';
 import { useDeletePost } from '../hooks/useDeletePost';
 
-import * as styles from './styles/PostDetailModal.styles.css';
 import PostDetailContent from './PostDetailContent';
 import EditPostContent from './EditPostContent';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
@@ -71,14 +70,15 @@ const PostDetailInner = ({ id }: { id: string }) => {
       {isEditing && (
         <Modal.Footer>
           <Button
-            className={styles.editButton}
             onClick={undefined}
             type="submit"
             form="edit-post-form"
+            variant="solid"
+            size="full"
           >
             완료
           </Button>
-          <Button className={styles.deleteButton} onClick={handleCancelEditing}>
+          <Button onClick={handleCancelEditing} variant="danger" size="full">
             취소
           </Button>
         </Modal.Footer>

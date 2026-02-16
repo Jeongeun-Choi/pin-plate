@@ -3,7 +3,7 @@ import { vars } from '@pin-plate/ui';
 
 export const label = style({
   color: vars.colors.primary.text,
-  fontSize: vars.fontSize.caption,
+  fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.bold,
 });
 
@@ -32,7 +32,7 @@ export const ratingContainer = style({
   alignItems: 'center',
   backgroundColor: '#FEF3E9',
   gap: '12px',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
 });
 
 export const imageList = style({
@@ -41,14 +41,14 @@ export const imageList = style({
 });
 
 export const imageItem = style({
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   objectFit: 'cover',
 });
 
 export const addPhotoButton = style({
   width: '110px',
   height: '110px',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   backgroundColor: '#FEF3E9',
   border: '2px solid #FDE4D8',
   display: 'flex',

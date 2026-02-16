@@ -25,20 +25,15 @@ export const overlay = style({
 });
 
 export const container = style({
-  backgroundColor: vars.colors.secondary.surface, // #fff
-  width: '100%',
-
-  // Mobile: Full screen styles
-  height: '100%',
-  maxHeight: 'none',
-  borderRadius: 0,
-  border: 'none',
-  boxShadow: 'none',
-
-  overflow: 'hidden',
+  width: '100vw',
+  maxWidth: '430px',
+  backgroundColor: vars.colors.secondary.surface,
+  borderRadius: `${vars.borderRadius['3xl']} ${vars.borderRadius['3xl']} 0 0`,
   display: 'flex',
   flexDirection: 'column',
+  maxHeight: '90vh',
   position: 'relative',
+  flexShrink: 0,
   transition: 'all 0.3s ease',
 
   '@media': {
@@ -63,8 +58,9 @@ export const header = style({
   flexShrink: 0,
 });
 
-export const headerTitle = style({
-  fontSize: vars.fontSize.h2, // 20px
+export const title = style({
+  margin: 0,
+  fontSize: vars.fontSize['2xl'],
   fontWeight: vars.fontWeight.bold,
   color: vars.colors.text.primary,
 });
