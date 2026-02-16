@@ -16,7 +16,7 @@ export const header = style({
 });
 
 export const headerTitle = style({
-  fontSize: '16px',
+  fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.bold, // or 900
   color: '#6b5d52',
   letterSpacing: '-0.3px',
@@ -25,11 +25,11 @@ export const headerTitle = style({
 export const retestButton = style({
   height: '35px',
   padding: '0 12px',
-  borderRadius: '14px',
+  borderRadius: '14px', // Custom
   backgroundColor: '#fef3e9',
   border: '1.4px solid #fde4d8',
   color: '#f4a68a',
-  fontSize: '14px',
+  fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.bold,
   display: 'flex',
   alignItems: 'center',
@@ -45,7 +45,7 @@ export const card = style({
   width: '100%',
   backgroundColor: '#fef3e9',
   border: '3px solid #fde4d8',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   padding: '19px',
   paddingBottom: '3px',
   display: 'flex',
@@ -65,7 +65,7 @@ export const iconWrapper = style({
   height: '40px',
   backgroundColor: '#fff',
   border: '3px solid #fde4d8',
-  borderRadius: '14px',
+  borderRadius: '14px', // Custom
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -81,14 +81,14 @@ export const textContent = style({
 });
 
 export const placeName = style({
-  fontSize: '16px',
+  fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.bold,
   color: '#6b5d52',
   lineHeight: '24px',
 });
 
 export const address = style({
-  fontSize: '14px',
+  fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.medium,
   color: '#c9a68a',
   lineHeight: '20px',
@@ -98,7 +98,7 @@ export const mapContainer = style({
   width: '100%',
   height: '200px',
   backgroundColor: '#ddd',
-  borderRadius: '14px',
+  borderRadius: '14px', // Custom
   overflow: 'hidden',
   border: '3px solid #fde4d8',
   marginBottom: '15px',

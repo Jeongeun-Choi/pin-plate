@@ -18,7 +18,7 @@ export const searchInputWrapper = style({
   flex: 1,
   height: '50px',
   border: '2px solid #fde4d8',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   padding: '0 16px',
   display: 'flex',
   alignItems: 'center',
@@ -30,7 +30,7 @@ export const searchInput = style({
   width: '100%',
   border: 'none',
   outline: 'none',
-  fontSize: '16px',
+  fontSize: vars.fontSize.base,
   color: '#6b5d52',
   '::placeholder': {
     color: 'rgba(107, 93, 82, 0.5)',
@@ -42,7 +42,7 @@ export const searchButton = style({
   height: '50px',
   backgroundColor: '#ffa07a',
   border: '2px solid #fff',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   color: '#fff',
   fontWeight: vars.fontWeight.bold,
   display: 'flex',
@@ -66,7 +66,7 @@ export const resultsContainer = style({
   gap: '12px',
   padding: '4px', // Space for shadows
   border: '1px solid #fde4d8',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   backgroundColor: '#fff',
 });
 
@@ -91,7 +91,7 @@ export const resultItem = style({
   gap: '12px',
   alignItems: 'flex-start',
   transition: 'background-color 0.2s',
-  borderRadius: '12px',
+  borderRadius: vars.borderRadius.xl,
   ':hover': {
     backgroundColor: '#fff8ed',
   },
@@ -105,7 +105,7 @@ export const iconWrapper = style({
   height: '36px',
   backgroundColor: '#fef3e9',
   border: '2px solid #fde4d8',
-  borderRadius: '12px',
+  borderRadius: vars.borderRadius.xl,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

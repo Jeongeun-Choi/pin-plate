@@ -51,7 +51,7 @@ export const searchInputWrapper = style({
   flex: 1,
   height: '50px',
   border: '2px solid #fde4d8',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   padding: '0 16px',
   display: 'flex',
   alignItems: 'center',
@@ -62,7 +62,7 @@ export const searchInput = style({
   width: '100%',
   border: 'none',
   outline: 'none',
-  fontSize: '16px',
+  fontSize: vars.fontSize.base,
   color: '#6b5d52',
   backgroundColor: 'transparent',
   '::placeholder': {
@@ -75,7 +75,7 @@ export const searchButton = style({
   height: '50px',
   backgroundColor: '#ffa07a',
   border: 'none',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   color: '#fff',
   fontWeight: vars.fontWeight.bold,
   display: 'flex',
@@ -83,7 +83,7 @@ export const searchButton = style({
   justifyContent: 'center',
   gap: '4px',
   cursor: 'pointer',
-  fontSize: '16px',
+  fontSize: vars.fontSize.base,
   transition: 'background-color 0.2s',
   ':active': {
     backgroundColor: '#ff8c5a',
@@ -126,7 +126,7 @@ export const iconWrapper = style({
   height: '36px',
   backgroundColor: '#fef3e9',
   border: '2px solid #fde4d8',
-  borderRadius: '12px',
+  borderRadius: vars.borderRadius.xl,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -142,19 +142,19 @@ export const textContent = style({
 });
 
 export const resultItemTitle = style({
-  fontSize: '16px',
+  fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.bold,
   color: '#6b5d52',
 });
 
 export const resultItemCategory = style({
-  fontSize: '12px',
+  fontSize: vars.fontSize.xs,
   color: '#ffa07a',
   fontWeight: vars.fontWeight.medium,
 });
 
 export const resultItemAddress = style({
-  fontSize: '14px',
+  fontSize: vars.fontSize.sm,
   color: '#6b5d52',
   opacity: 0.8,
 });
@@ -175,7 +175,7 @@ export const emptyStateContainer = style({
   padding: '40px',
   backgroundColor: '#fef3e9',
   margin: '20px',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   border: '2px solid #fde4d8',
 });
 

@@ -3,7 +3,7 @@ import { vars } from '@pin-plate/ui';
 
 export const label = style({
   color: vars.colors.primary.text,
-  fontSize: vars.fontSize.caption,
+  fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.bold,
 });
 
@@ -31,7 +31,7 @@ export const ratingContainer = style({
   alignItems: 'center',
   backgroundColor: '#FEF3E9',
   gap: '12px',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
 });
 
 export const imageList = style({
@@ -40,7 +40,7 @@ export const imageList = style({
 });
 
 export const imageItem = style({
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   objectFit: 'cover',
 });
 
@@ -55,7 +55,7 @@ export const mobileSearchTrigger = style({
   width: '100%',
   height: '50px',
   padding: '0 16px',
-  borderRadius: '16px',
+  borderRadius: vars.borderRadius['2xl'],
   border: '2px solid #fde4d8',
   backgroundColor: '#fff',
   alignItems: 'center',
@@ -70,7 +70,7 @@ export const mobileSearchTrigger = style({
 
 export const mobileSearchPlaceholder = style({
   color: 'rgba(107, 93, 82, 0.5)',
-  fontSize: '16px',
+  fontSize: vars.fontSize.base,
 });
 
 export const mobileSearchIcon = style({
@@ -79,7 +79,7 @@ export const mobileSearchIcon = style({
   gap: '4px',
   color: '#ffa07a',
   fontWeight: vars.fontWeight.bold,
-  fontSize: '14px',
+  fontSize: vars.fontSize.sm,
 });
 
 export const desktopSearchContainer = style({
