@@ -54,7 +54,7 @@ export const title = style({
 export const subtitle = style({
   margin: 0,
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.body,
+  fontSize: vars.fontSize.base,
   color: '#4A5565',
   textAlign: 'center',
 });
@@ -75,7 +75,7 @@ export const field = style({
 
 export const label = style({
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.caption,
+  fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.medium,
   color: '#364153',
 });
@@ -99,7 +99,7 @@ export const cta = style({
   justifyContent: 'center',
   gap: vars.spacing[2],
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.body,
+  fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.medium,
   boxShadow:
     '0px 10px 15px rgba(255,105,0,0.3), 0px 4px 6px rgba(255,105,0,0.3)',
@@ -112,7 +112,7 @@ export const loginLink = style({
   textAlign: 'center',
   color: '#F54900',
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.body,
+  fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.medium,
 });
 
@@ -133,7 +133,7 @@ export const dividerLine = style({
 export const dividerText = style({
   backgroundColor: vars.colors.secondary.surface,
   padding: '0 8px',
-  fontSize: vars.fontSize.caption,
+  fontSize: vars.fontSize.sm,
   color: vars.colors.text.sub,
 });
 
@@ -146,14 +146,14 @@ export const googleBtn = style({
   justifyContent: 'center',
   gap: vars.spacing[3],
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.body,
+  fontSize: vars.fontSize.base,
   color: '#364153',
   background: vars.colors.secondary.surface,
   cursor: 'pointer',
 });
 
 export const footerText = style({
-  fontSize: vars.fontSize.tiny,
+  fontSize: vars.fontSize.xs,
   color: '#6A7282',
   textAlign: 'center',
 });

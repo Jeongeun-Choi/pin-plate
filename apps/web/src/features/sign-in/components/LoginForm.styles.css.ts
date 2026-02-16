@@ -54,7 +54,7 @@ export const title = style({
 export const subtitle = style({
   margin: 0,
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.body,
+  fontSize: vars.fontSize.base,
   color: '#4A5565',
   textAlign: 'center',
 });
@@ -75,7 +75,7 @@ export const field = style({
 
 export const label = style({
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.caption,
+  fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.medium,
   color: '#364153',
 });
@@ -99,7 +99,7 @@ export const cta = style({
   justifyContent: 'center',
   gap: vars.spacing[2],
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.body,
+  fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.medium,
   boxShadow:
     '0px 10px 15px rgba(255,105,0,0.3), 0px 4px 6px rgba(255,105,0,0.3)',
@@ -113,7 +113,7 @@ export const signupLink = style({
   textAlign: 'center',
   color: '#F54900',
   fontFamily: vars.fontFamily.body,
-  fontSize: vars.fontSize.body,
+  fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.medium,
   cursor: 'pointer',
   textDecoration: 'none',
