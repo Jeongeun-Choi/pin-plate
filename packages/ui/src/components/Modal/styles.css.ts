@@ -34,6 +34,7 @@ export const container = style({
   maxHeight: '90vh',
   position: 'relative',
   flexShrink: 0,
+  overflow: 'hidden', // Ensure children are clipped to border radius
   transition: 'all 0.3s ease',
 
   '@media': {

@@ -1,18 +1,16 @@
 'use client';
 
-import { useState } from 'react';
 import { Map } from '@/features/map/components/Map';
-import { HomeFAB } from './components/HomeFAB';
-import { PostModal } from '@/features/post/components/PostModal';
+
+import { Navigation } from '@/components/Navigation';
+import { GlobalPostModal } from '@/components/GlobalPostModal';
 
 export default function Home() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   return (
     <main style={{ position: 'relative', width: '100%', height: '100dvh' }}>
       <Map />
-      <HomeFAB onClick={() => setIsModalOpen(true)} />
-      <PostModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <Navigation />
+      <GlobalPostModal />
     </main>
   );
 }
