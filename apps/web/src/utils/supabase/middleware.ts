@@ -49,6 +49,35 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // 1. 이미 로그인한 사용자가 로그인/회원가입 페이지에 접근하려 할 때 -> 메인으로 리다이렉트
+  if (
+    user &&
+    (request.nextUrl.pathname.startsWith('/sign-in') ||
+      request.nextUrl.pathname.startsWith('/sign-up')) &&
+    // 단, 프로필 설정 페이지는 제외 (아래에서 별도 체크)
+    !request.nextUrl.pathname.startsWith('/sign-up/profile')
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
+
+  // 2. 프로필 설정 페이지(`/sign-up/profile`) 접근 제어
+  if (user && request.nextUrl.pathname.startsWith('/sign-up/profile')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('nickname')
+      .eq('id', user.id)
+      .single();
+
+    // 이미 닉네임이 있는(온보딩 완료된) 유저는 메인으로 보냄
+    if (profile?.nickname) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

@@ -10,6 +10,20 @@ const nextConfig = {
   // pnpm workspace의 루트를 추적하도록 설정 (이미 잘 설정하셨습니다)
   outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
 
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+        ],
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [
       {
