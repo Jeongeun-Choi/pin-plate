@@ -1,6 +1,6 @@
 import { SVGProps } from 'react';
 
-export const IcPlus = (props: SVGProps<SVGSVGElement>) => {
+export const IcArrowLeft = (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg
       width="16"
@@ -11,16 +11,16 @@ export const IcPlus = (props: SVGProps<SVGSVGElement>) => {
       {...props}
     >
       <path
-        d="M3.33334 8H12.6667"
+        d="M8 12.6667L3.33333 8.00001L8 3.33334"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.33333"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M8 3.33334V12.6666"
+        d="M12.6667 8H3.33333"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.33333"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

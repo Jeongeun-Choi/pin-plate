@@ -1,6 +1,6 @@
 import { SVGProps } from 'react';
 
-export const IcSort = (props: SVGProps<SVGSVGElement>) => {
+export const IcLogout = (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg
       width="16"
@@ -11,30 +11,23 @@ export const IcSort = (props: SVGProps<SVGSVGElement>) => {
       {...props}
     >
       <path
-        d="M14 10.6667L11.3333 13.3333L8.66666 10.6667"
+        d="M10.6667 11.3333L14 7.99999L10.6667 4.66666"
         stroke="currentColor"
-        strokeWidth="1.66601"
+        strokeWidth="1.33333"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M11.3333 13.3333V2.66666"
+        d="M14 8H6"
         stroke="currentColor"
-        strokeWidth="1.66601"
+        strokeWidth="1.33333"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M2 5.33332L4.66667 2.66666L7.33333 5.33332"
+        d="M6 14H3.33333C2.97971 14 2.64057 13.8595 2.39052 13.6095C2.14048 13.3594 2 13.0203 2 12.6667V3.33333C2 2.97971 2.14048 2.64057 2.39052 2.39052C2.64057 2.14048 2.97971 2 3.33333 2H6"
         stroke="currentColor"
-        strokeWidth="1.66601"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4.66666 2.66666V13.3333"
-        stroke="currentColor"
-        strokeWidth="1.66601"
+        strokeWidth="1.33333"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
