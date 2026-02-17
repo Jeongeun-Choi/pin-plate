@@ -15,34 +15,6 @@ export const container = style({
   gap: 16,
 });
 
-export const avatarContainer = style({
-  position: 'relative',
-  width: 80,
-  height: 80,
-  borderRadius: '50%',
-  overflow: 'hidden',
-  backgroundColor: '#ffa07a',
-  border: `4px solid #ffe4d6`,
-  boxShadow:
-    '0px 10px 15px -3px rgba(0,0,0,0.1), 0px 4px 6px -4px rgba(0,0,0,0.1)',
-  flexShrink: 0,
-});
-
-export const avatarImage = style({
-  objectFit: 'cover',
-});
-
-export const placeholderAvatar = style({
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: 32,
-  fontWeight: 700,
-  color: vars.colors.common.white,
-});
-
 export const infoContainer = style({
   display: 'flex',
   flexDirection: 'column',

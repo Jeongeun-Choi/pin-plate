@@ -22,14 +22,17 @@ export const MyPageMenu = ({ className }: MyPageMenuProps) => {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.replace('/login');
+  };
+
+  const handleGoToProfile = () => {
+    router.push('/my-page/edit');
   };
 
   const menuItems: MenuItem[] = [
     {
       label: '프로필 수정',
-      onClick: () => alert('준비 중입니다.'),
+      onClick: handleGoToProfile,
       icon: <IcEdit width={16} height={16} />,
     },
     {
