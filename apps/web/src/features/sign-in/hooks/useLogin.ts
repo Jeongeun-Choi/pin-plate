@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { login, LoginParams } from '../services/auth.service';
+import { createClient } from '@/utils/supabase/client';
+import { login, loginWithGoogle, LoginParams } from '../services/auth.service';
 
 export const useLogin = () => {
   const router = useRouter();
@@ -20,4 +21,47 @@ export const useLogin = () => {
       }
     },
   });
+};
+
+export const useGoogleLogin = () => {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: () => loginWithGoogle(),
+    onSuccess: async () => {
+      const supabase = createClient();
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.push('/');
+        return;
+      }
+
+      await checkUserProfileAndRedirect(supabase, session.user.id, router);
+    },
+    onError: (error) => {
+      console.error('Google login failed:', error);
+    },
+  });
+};
+
+const checkUserProfileAndRedirect = async (
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  router: ReturnType<typeof useRouter>,
+) => {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('nickname')
+    .eq('id', userId)
+    .single();
+
+  if (!profile?.nickname) {
+    router.push('/sign-up/profile');
+  } else {
+    router.push('/');
+  }
 };

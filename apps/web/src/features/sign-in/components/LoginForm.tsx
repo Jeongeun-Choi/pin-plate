@@ -2,10 +2,13 @@
 
 import Image from 'next/image';
 import * as styles from './LoginForm.styles.css';
+import { useGoogleLogin } from '../hooks/useLogin';
 
 export function LoginForm() {
+  const { mutate: loginWithGoogle } = useGoogleLogin();
+
   const handleGoogleLogin = () => {
-    alert('Google 로 로그인 준비중입니다.');
+    loginWithGoogle();
   };
 
   const handleKakaoLogin = () => {

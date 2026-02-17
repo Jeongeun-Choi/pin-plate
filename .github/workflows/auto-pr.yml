@@ -55,6 +55,9 @@ jobs:
         run: cd apps/mobile && npx tsc --noEmit
 
       - name: Build (Web)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_API_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_API_KEY }}
         run: pnpm --filter web build
 
       - name: Create Pull Request (Auto)
