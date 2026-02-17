@@ -27,9 +27,6 @@ export const menuItem = style({
   transition: 'background-color 0.2s',
   borderBottom: `2px solid #ffe4d6`,
   gap: 16,
-  ':hover': {
-    backgroundColor: '#fff8ed', // Light orange hover
-  },
   selectors: {
     '&:last-child': {
       borderBottom: 'none',
@@ -48,10 +45,8 @@ export const menuIcon = style({
 
 export const menuText = style({
   fontSize: 16,
-  fontWeight: 900,
+  fontWeight: vars.fontWeight.medium,
   color: '#2d2d2d',
-  flex: 1,
-  textAlign: 'center',
   marginRight: 16, // Balance the icon on the left
 });
 

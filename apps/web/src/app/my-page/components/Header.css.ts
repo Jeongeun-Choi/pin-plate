@@ -1,12 +1,23 @@
+import { vars } from '@pin-plate/ui';
 import { style } from '@vanilla-extract/css';
 
 export const header = style({
   width: '100%',
   height: 60,
   display: 'flex',
-  alignItems: 'center',
-  padding: '16px 0',
+  justifyContent: 'center',
+  backgroundColor: '#ffffff',
+  borderBottom: `4px solid ${vars.colors.secondary.border}`,
   marginBottom: 20,
+});
+
+export const headerContent = style({
+  width: '100%',
+  maxWidth: 600,
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  padding: '0 20px',
   gap: 16,
 });
 

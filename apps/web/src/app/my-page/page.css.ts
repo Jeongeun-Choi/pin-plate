@@ -1,5 +1,4 @@
 import { style } from '@vanilla-extract/css';
-// vars import removed
 
 export const mainContent = style({
   width: '100%',
@@ -11,7 +10,7 @@ export const mainContent = style({
 
 export const footerMessage = style({
   marginTop: 24,
-  padding: '28px 28px 4px',
+  padding: '24px',
   backgroundColor: '#fff4e6',
   borderRadius: 16,
   border: `4px solid #ffe4d6`,

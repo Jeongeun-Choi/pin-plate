@@ -21,10 +21,12 @@ export const Header = () => {
 
   return (
     <header className={styles.header}>
-      <div className={styles.backButton} onClick={handleBack}>
-        <IcArrowLeft width={24} height={24} />
+      <div className={styles.headerContent}>
+        <div className={styles.backButton} onClick={handleBack}>
+          <IcArrowLeft width={24} height={24} />
+        </div>
+        <h1 className={styles.title}>{getTitle()}</h1>
       </div>
-      <h1 className={styles.title}>{getTitle()}</h1>
     </header>
   );
 };

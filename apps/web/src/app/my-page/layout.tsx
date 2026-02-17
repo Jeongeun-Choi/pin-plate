@@ -6,7 +6,7 @@ export default function MyPageLayout({ children }: { children: ReactNode }) {
   return (
     <div className={styles.container}>
       <Header />
-      {children}
+      <div className={styles.contentWrapper}>{children}</div>
     </div>
   );
 }

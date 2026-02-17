@@ -1,6 +1,7 @@
 export * from './IcArrowLeft';
 export * from './IcCalendar';
 export * from './IcDismiss';
+export * from './IcEdit';
 export * from './IcFilledstar';
 export * from './IcLogout';
 export * from './IcMap';
@@ -9,5 +10,6 @@ export * from './IcOutlinestar';
 export * from './IcPlus';
 export * from './IcSearch';
 export * from './IcSort';
+export * from './IcTrash';
 export * from './IcUser';
 export * from './IcVerticalmore';
