@@ -2,40 +2,34 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@pin-plate/ui';
 
 export const container = style({
-  position: 'fixed',
+  position: 'sticky',
   top: 0,
-  left: 0,
-  right: 0,
-  height: 68,
+  zIndex: 1,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: '0 24px',
-  backgroundColor: vars.colors.primary.default,
-  zIndex: vars.zIndex.header,
-  borderBottom: '4px solid rgba(0, 0, 0, 0.05)',
-  boxShadow: '0px 4px 6px 0px rgba(0,0,0,0.1), 0px 2px 4px 0px rgba(0,0,0,0.1)',
+  padding: '10px 16px',
+  backgroundColor: '#FF9E7D',
+  boxShadow:
+    '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+  '@media': {
+    '(min-width: 768px)': {
+      padding: '10px 24px',
+    },
+  },
 });
 
 export const leftSection = style({
   display: 'flex',
   alignItems: 'center',
-  gap: 16,
+  gap: 24,
   flex: 1,
-  minWidth: 0, // flex item overflow 방지
 });
 
 export const logoContainer = style({
+  cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
-  gap: 8,
-  cursor: 'pointer',
-  flexShrink: 0, // 로고 크기 유지
-});
-
-export const logoIcon = style({
-  width: 40,
-  height: 40,
   flexShrink: 0,
 });
 
@@ -43,38 +37,35 @@ export const logoText = style({
   fontSize: 20,
   fontWeight: 900,
   color: vars.colors.common.white,
-  fontFamily: '"Inter", sans-serif',
-  letterSpacing: '-0.95px',
+  margin: 0,
+  letterSpacing: '-0.05em',
 });
 
 export const searchContainer = style({
   position: 'relative',
-  flex: 1, // 남은 공간 차지
-  minWidth: 200, // 너무 작아지지 않도록 최소 너비 설정
-  height: 48,
-  marginRight: '16px',
+  display: 'none',
+  flex: 1,
+  maxWidth: '36rem',
+  margin: '0 auto',
+  '@media': {
+    '(min-width: 768px)': {
+      display: 'block',
+    },
+  },
 });
 
 export const searchInput = style({
   width: '100%',
-  height: '100%',
-  borderRadius: 20,
-  border: '2px solid rgba(255, 255, 255, 0.5)',
   backgroundColor: vars.colors.common.white,
-  padding: '0 48px',
+  borderRadius: 9999,
+  padding: '10px 16px 10px 44px',
   fontSize: 14,
-  fontWeight: vars.fontWeight.medium,
-  color: 'rgba(26, 26, 26, 0.5)',
-  boxShadow:
-    '0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1)',
+  border: 'none',
   outline: 'none',
-  transition: 'all 0.2s ease',
+  boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+  color: vars.colors.text.primary,
   '::placeholder': {
-    color: 'rgba(26, 26, 26, 0.5)',
-  },
-  ':focus': {
-    border: `2px solid ${vars.colors.common.white}`,
-    color: vars.colors.text.primary,
+    color: '#9CA3AF',
   },
 });
 
@@ -83,91 +74,98 @@ export const searchIcon = style({
   left: 16,
   top: '50%',
   transform: 'translateY(-50%)',
-  color: 'rgba(26, 26, 26, 0.5)',
+  color: '#9CA3AF',
   pointerEvents: 'none',
 });
 
 export const rightSection = style({
-  display: 'none',
+  display: 'flex',
   alignItems: 'center',
-  gap: 16,
-
-  '@media': {
-    '(min-width: 768px)': {
-      display: 'flex',
-    },
-  },
+  gap: 12,
+  flexShrink: 0,
+  marginLeft: 16,
 });
 
 export const toggleContainer = style({
   display: 'flex',
-  backgroundColor: vars.colors.common.white,
-  borderRadius: 16,
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
   padding: 4,
-  gap: 8,
-  height: 48,
-  alignItems: 'center',
-  boxShadow: '0px 4px 6px 0px rgba(0,0,0,0.1), 0px 2px 4px 0px rgba(0,0,0,0.1)',
+  borderRadius: 9999,
+  border: '1px solid rgba(255, 255, 255, 0.3)',
+  backdropFilter: 'blur(4px)',
 });
 
 export const toggleButton = style({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  gap: 8,
-  width: 86,
-  height: 40,
-  borderRadius: 16,
-  border: 'none',
-  backgroundColor: 'transparent',
-  color: '#4a4a4a',
-  fontSize: 14,
-  fontWeight: vars.fontWeight.bold,
-  cursor: 'pointer',
+  gap: 6,
+  padding: '6px 16px',
+  borderRadius: 9999,
+  fontSize: 12,
+  fontWeight: 'bold',
   transition: 'all 0.2s ease',
+  border: 'none',
+  cursor: 'pointer',
+  color: 'rgba(255, 255, 255, 0.8)',
+  backgroundColor: 'transparent',
+  ':hover': {
+    color: vars.colors.common.white,
+  },
 });
 
 export const activeToggleButton = style({
-  backgroundColor: '#fff4e6',
-  color: vars.colors.primary.default,
-  boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px 0px rgba(0,0,0,0.1)',
+  backgroundColor: vars.colors.common.white,
+  color: '#FF9E7D',
+  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+  ':hover': {
+    color: '#FF9E7D',
+  },
 });
 
 export const writeButton = style({
+  backgroundColor: vars.colors.common.white,
+  color: '#FF9E7D',
+  padding: '8px 16px',
+  borderRadius: 9999,
+  fontSize: 14,
+  fontWeight: 'bold',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
   gap: 8,
-  height: 48,
-  padding: '0 24px',
-  borderRadius: 20,
-  border: 'none',
-  backgroundColor: vars.colors.common.white,
-  color: vars.colors.primary.default,
-  fontSize: 14,
-  fontWeight: vars.fontWeight.bold,
-  cursor: 'pointer',
   transition: 'all 0.2s ease',
-  boxShadow:
-    '0px 10px 15px -3px rgba(0,0,0,0.1), 0px 4px 6px -4px rgba(0,0,0,0.1)',
+  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+  border: 'none',
+  cursor: 'pointer',
   ':hover': {
-    backgroundColor: vars.colors.primary.light,
+    backgroundColor: '#FFF7ED',
+  },
+  ':active': {
+    transform: 'scale(0.95)',
+  },
+});
+
+export const writeButtonText = style({
+  display: 'none',
+  '@media': {
+    '(min-width: 640px)': {
+      display: 'inline',
+    },
   },
 });
 
 export const profileIcon = style({
-  width: 40,
-  height: 40,
-  borderRadius: vars.borderRadius.full,
-  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-  color: vars.colors.primary.default,
+  width: 36,
+  height: 36,
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  borderRadius: 9999,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  color: vars.colors.common.white,
+  transition: 'background-color 0.2s',
+  border: '1px solid rgba(255, 255, 255, 0.4)',
   cursor: 'pointer',
-  transition: 'all 0.2s ease',
-  boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px 0px rgba(0,0,0,0.1)',
   ':hover': {
-    backgroundColor: vars.colors.common.white,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
 });
