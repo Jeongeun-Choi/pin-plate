@@ -56,14 +56,12 @@ export const Header = () => {
             onClick={() => setViewMode('map')}
           >
             <IcMap width={14} height={14} color="currentColor" />
-            <span>지도</span>
           </button>
           <button
             className={`${styles.toggleButton} ${viewMode === 'list' ? styles.activeToggleButton : ''}`}
             onClick={() => setViewMode('list')}
           >
             <IcSort width={14} height={14} color="currentColor" />
-            <span>리스트</span>
           </button>
         </div>
 

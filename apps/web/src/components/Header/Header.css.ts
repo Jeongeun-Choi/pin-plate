@@ -43,15 +43,9 @@ export const logoText = style({
 
 export const searchContainer = style({
   position: 'relative',
-  display: 'none',
+  display: 'block',
   flex: 1,
-  maxWidth: '36rem',
   margin: '0 auto',
-  '@media': {
-    '(min-width: 768px)': {
-      display: 'block',
-    },
-  },
 });
 
 export const searchInput = style({
@@ -79,11 +73,16 @@ export const searchIcon = style({
 });
 
 export const rightSection = style({
-  display: 'flex',
+  display: 'none',
   alignItems: 'center',
   gap: 12,
   flexShrink: 0,
   marginLeft: 16,
+  '@media': {
+    '(min-width: 768px)': {
+      display: 'flex',
+    },
+  },
 });
 
 export const toggleContainer = style({
