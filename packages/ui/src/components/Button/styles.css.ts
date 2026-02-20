@@ -45,6 +45,16 @@ export const buttonRecipe = recipe({
           backgroundColor: vars.colors.btn.ghost.bgHover,
         },
       },
+      secondary: {
+        backgroundColor: vars.colors.btn.secondary.bg,
+        border: `3px solid ${vars.colors.btn.secondary.border}`,
+        color: vars.colors.btn.secondary.text,
+        boxShadow: vars.boxShadow.md,
+        borderRadius: vars.borderRadius['2xl'],
+        ':hover': {
+          backgroundColor: vars.colors.btn.secondary.bgHover,
+        },
+      },
       danger: {
         backgroundColor: vars.colors.btn.danger.bg,
         color: vars.colors.btn.danger.text,

@@ -18,6 +18,12 @@ export const vars = createGlobalTheme(':root', {
         text: '#ffa07a',
         bgHover: '#fff4e6',
       },
+      secondary: {
+        bg: '#fff4e6',
+        border: '#ffe4d6',
+        text: '#2d2d2d',
+        bgHover: '#ffe4d6',
+      },
       ghost: {
         text: '#1a1a1a',
         bgHover: '#fff4e6',
