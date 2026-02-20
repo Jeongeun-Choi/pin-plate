@@ -14,14 +14,7 @@ export default function Home() {
   return (
     <main style={{ position: 'relative', width: '100%', height: '100dvh' }}>
       <Header />
-      {viewMode === 'map' ? (
-        <Map />
-      ) : (
-        <div style={{ paddingTop: 80 }}>
-          {' '}
-          <PostList />{' '}
-        </div>
-      )}
+      {viewMode === 'map' ? <Map /> : <PostList />}
       <Navigation />
       <GlobalPostModal />
     </main>

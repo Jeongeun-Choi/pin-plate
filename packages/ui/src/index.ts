@@ -6,3 +6,4 @@ export * from './components/Rate';
 export * from './components/Modal';
 export * from './icons';
 export * from './components/Popover';
+export * from './components/Card';
