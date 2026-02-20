@@ -23,21 +23,21 @@ export const mobileContainer = style({
 });
 
 // Desktop Container
-export const desktopContainer = style({
-  display: 'none',
-  position: 'fixed', // Fixed ensures it stays relative to viewport
+// Desktop Container removed - integrated into Header
 
-  '@media': {
-    '(min-width: 768px)': {
-      display: 'flex',
-      position: 'fixed',
-      bottom: 40,
-      right: 40,
-      flexDirection: 'column',
-      gap: 16,
-      alignItems: 'flex-end',
-    },
-  },
+export const logo = style({
+  width: 40,
+  height: 40,
+  borderRadius: '50%',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: vars.colors.common.white,
+  fontSize: 12,
+  fontWeight: 700,
+  marginBottom: 24,
+  cursor: 'pointer',
 });
 
 // Mobile Nav Item
@@ -61,48 +61,19 @@ export const activeNavItem = style({
   color: vars.colors.text.primary,
 });
 
-// Desktop Buttons
-export const desktopButton = style({
-  width: 56,
-  height: 56,
-  borderRadius: '50%',
-  padding: 0,
-  backgroundColor: vars.colors.common.white,
-  color: vars.colors.text.primary,
-  boxShadow: vars.boxShadow.float,
-  ':hover': {
-    transform: 'scale(1.05)',
-  },
-});
-
-export const activeDesktopButton = style({
-  backgroundColor: vars.colors.primary.light,
-  color: vars.colors.primary.default,
-  border: `2px solid ${vars.colors.primary.default}`,
-});
-
-export const desktopWriteButton = style({
-  // pointerEvents removed
-  width: 64,
-  height: 64,
-  borderRadius: '50%',
-  padding: 0,
-  boxShadow: vars.boxShadow.float,
-  ':hover': {
-    transform: 'scale(1.05)',
-  },
-});
-
 export const label = style({
-  fontSize: 10,
+  fontSize: 11,
   fontWeight: 500,
-  marginTop: 2,
+  marginTop: 0,
 });
 
 export const icon = style({
   width: 24,
   height: 24,
 });
+
+// Desktop Buttons
+// Desktop styles removed
 
 // Legacy support if needed, or remove if unused
 export const writeIcon = style({

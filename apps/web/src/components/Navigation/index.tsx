@@ -3,11 +3,8 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useSetAtom } from 'jotai';
 import { IcMap, IcPlus, IcUser } from '@pin-plate/ui/icons';
-// @ts-expect-error: Vanilla Extract requires .css.ts extension
-import * as styles from './Navigation.css.ts';
+import * as styles from './Navigation.css';
 import { isPostModalOpenAtom } from '@/features/post/atoms';
-
-import { Button } from '@pin-plate/ui';
 
 export const Navigation = () => {
   const pathname = usePathname();
@@ -45,36 +42,6 @@ export const Navigation = () => {
           <span className={styles.label}>마이</span>
         </button>
       </nav>
-
-      {/* Desktop Navigation */}
-      <div className={styles.desktopContainer}>
-        <Button
-          variant="solid"
-          size="lg"
-          // className={`${styles.desktopButton} ${isActive('/') ? styles.activeDesktopButton : ''}`}
-          onClick={() => router.push('/')}
-        >
-          <IcMap width={16} height={16} color="currentColor" />
-        </Button>
-
-        <Button
-          variant="solid"
-          size="lg"
-          // className={styles.desktopWriteButton}
-          onClick={handleWriteClick}
-        >
-          <IcPlus width={16} height={16} color="currentColor" />
-        </Button>
-
-        <Button
-          variant="solid"
-          size="lg"
-          // className={`${styles.desktopButton} ${isActive('/my-page') ? styles.activeDesktopButton : ''}`}
-          onClick={() => router.push('/my-page')}
-        >
-          <IcUser width={16} height={16} color="currentColor" />
-        </Button>
-      </div>
     </>
   );
 };
