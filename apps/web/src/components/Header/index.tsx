@@ -10,12 +10,24 @@ import { AccountPopover } from './AccountPopover';
 export const Header = () => {
   const [viewMode, setViewMode] = useAtom(viewModeAtom);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const router = useRouter();
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
 
-  const togglePopover = (e: React.MouseEvent) => {
+  const togglePopover = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    setIsPopoverOpen((prev) => !prev);
+    if (isPopoverOpen) {
+      setIsPopoverOpen(false);
+      setAnchorEl(null);
+    } else {
+      setIsPopoverOpen(true);
+      setAnchorEl(e.currentTarget);
+    }
+  };
+
+  const handlePopoverClose = () => {
+    setIsPopoverOpen(false);
+    setAnchorEl(null);
   };
 
   return (
@@ -23,11 +35,11 @@ export const Header = () => {
       {/* Left: Logo & Search */}
       <div className={styles.leftSection}>
         <div className={styles.logoContainer} onClick={() => router.push('/')}>
-          <p className={styles.logoText}>Pin-Plate</p>
+          <h1 className={styles.logoText}>Pin-Plate</h1>
         </div>
 
         <div className={styles.searchContainer}>
-          <IcSearch className={styles.searchIcon} width={20} height={20} />
+          <IcSearch className={styles.searchIcon} width={16} height={16} />
           <input
             type="text"
             className={styles.searchInput}
@@ -37,20 +49,20 @@ export const Header = () => {
       </div>
 
       <div className={styles.rightSection}>
-        {/* Toggle (Middle previously, now Right Section) */}
+        {/* Toggle */}
         <div className={styles.toggleContainer}>
           <button
             className={`${styles.toggleButton} ${viewMode === 'map' ? styles.activeToggleButton : ''}`}
             onClick={() => setViewMode('map')}
           >
-            <IcMap width={16} height={16} />
+            <IcMap width={14} height={14} color="currentColor" />
             <span>지도</span>
           </button>
           <button
             className={`${styles.toggleButton} ${viewMode === 'list' ? styles.activeToggleButton : ''}`}
             onClick={() => setViewMode('list')}
           >
-            <IcSort width={16} height={16} />
+            <IcSort width={14} height={14} color="currentColor" />
             <span>리스트</span>
           </button>
         </div>
@@ -60,8 +72,8 @@ export const Header = () => {
           className={styles.writeButton}
           onClick={() => setIsPostModalOpen(true)}
         >
-          <IcPlus width={20} height={20} color="currentColor" />
-          <span>작성하기</span>
+          <IcPlus width={16} height={16} color="currentColor" />
+          <span className={styles.writeButtonText}>작성하기</span>
         </button>
 
         {/* Profile Icon */}
@@ -70,7 +82,10 @@ export const Header = () => {
             <IcUser width={20} height={20} color="currentColor" />
           </div>
           {isPopoverOpen && (
-            <AccountPopover onClose={() => setIsPopoverOpen(false)} />
+            <AccountPopover
+              onClose={handlePopoverClose}
+              anchorElement={anchorEl}
+            />
           )}
         </div>
       </div>
