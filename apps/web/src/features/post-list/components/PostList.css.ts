@@ -67,6 +67,7 @@ export const filterButton = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  gap: '6px',
   whiteSpace: 'nowrap',
   cursor: 'pointer',
   transition: 'all 0.2s ease',
@@ -79,7 +80,6 @@ export const activeFilterButton = style({
   backgroundColor: '#ffa07a',
   borderColor: '#ffa07a',
   color: vars.colors.common.white,
-  boxShadow: '0 4px 6px 0 rgba(0,0,0,0.1), 0 2px 4px 0 rgba(0,0,0,0.1)',
 });
 
 export const reviewCount = style({
