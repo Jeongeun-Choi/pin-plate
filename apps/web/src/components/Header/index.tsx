@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSetAtom, useAtom } from 'jotai';
-import { IcSearch, IcMap, IcSort, IcPlus, IcUser } from '@pin-plate/ui/icons';
+import { IcSearch, IcMap, IcPlus, IcUser, IcList } from '@pin-plate/ui/icons';
 import { viewModeAtom } from '@/app/atoms';
 import * as styles from './Header.css';
 import { isPostModalOpenAtom } from '@/features/post/atoms';
@@ -56,12 +56,14 @@ export const Header = () => {
             onClick={() => setViewMode('map')}
           >
             <IcMap width={14} height={14} color="currentColor" />
+            <span>지도</span>
           </button>
           <button
             className={`${styles.toggleButton} ${viewMode === 'list' ? styles.activeToggleButton : ''}`}
             onClick={() => setViewMode('list')}
           >
-            <IcSort width={14} height={14} color="currentColor" />
+            <IcList width={14} height={14} color="currentColor" />
+            <span>리스트</span>
           </button>
         </div>
 
