@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useUpdatePost } from './useUpdatePost';
 import { KakaoPlace } from '../types/search';
 import { Post } from '../types/post';
+import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 
 export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
   const [content, setContent] = useState(initialData.content);
@@ -22,47 +23,10 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
     place_url: '',
   });
 
-  const [currentLocation, setCurrentLocation] = useState<{
-    lat: number;
-    lng: number;
-  }>();
+  const { location: currentLocation, fetchLocation: fetchCurrentLocation } =
+    useCurrentLocation();
 
   const { mutateAsync: updatePost } = useUpdatePost();
-
-  const fetchCurrentLocation = useCallback(() => {
-    // 1. 이미 주입된 위치 정보가 있는지 확인
-    if (window.nativeLocation) {
-      const { coords } = window.nativeLocation;
-      setCurrentLocation({
-        lat: coords.latitude,
-        lng: coords.longitude,
-      });
-      return;
-    }
-
-    // 2. 앱 환경이라면 위치 정보 요청 (Bridge)
-    if (window.ReactNativeWebView) {
-      window.ReactNativeWebView.postMessage(
-        JSON.stringify({ type: 'REQ_LOCATION' }),
-      );
-      return;
-    }
-
-    // 3. 웹 환경 (HTTPS 필요)
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.warn('위치 정보를 가져올 수 없습니다.', error);
-        },
-      );
-    }
-  }, []);
 
   const handlePlaceSelect = (place: KakaoPlace | null) => {
     setSelectedPlace(place);

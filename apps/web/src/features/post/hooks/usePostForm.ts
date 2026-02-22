@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useCreatePost } from './useCreatePost';
 import { KakaoPlace } from '../types/search';
 import { createClient } from '@/utils/supabase/client';
+import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 
 export const usePostForm = (onSuccess?: () => void) => {
   const [content, setContent] = useState('');
@@ -9,51 +10,10 @@ export const usePostForm = (onSuccess?: () => void) => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(null);
 
-  const [currentLocation, setCurrentLocation] = useState<{
-    lat: number;
-    lng: number;
-  }>();
+  const { location: currentLocation, fetchLocation: fetchCurrentLocation } =
+    useCurrentLocation();
 
   const { mutateAsync: createPost } = useCreatePost();
-
-  const fetchCurrentLocation = useCallback(() => {
-    // 1. 이미 주입된 위치 정보가 있는지 확인
-    if (window.nativeLocation) {
-      const { coords } = window.nativeLocation;
-      setCurrentLocation({
-        lat: coords.latitude,
-        lng: coords.longitude,
-      });
-      return;
-    }
-
-    // 2. 앱 환경이라면 위치 정보 요청 (Bridge)
-    if (window.ReactNativeWebView) {
-      window.ReactNativeWebView.postMessage(
-        JSON.stringify({ type: 'REQ_LOCATION' }),
-      );
-      // 위치 정보가 비동기로 주입되므로, 잠시 후 다시 시도해달라는 메시지 표시
-      // (더 나은 UX는 주입될 때까지 로딩을 보여주는 것이지만, 일단 기능 동작 확인이 우선)
-      // alert('위치 정보를 불러오는 중입니다. 잠시 후 닫았다가 다시 열어주세요.');
-      return;
-    }
-
-    // 3. 웹 환경 (HTTPS 필요)
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.warn('위치 정보를 가져올 수 없습니다.', error);
-          // alert(`위치 정보 에러: ${error.code} - ${error.message}`);
-        },
-      );
-    }
-  }, []);
 
   const handlePlaceSelect = (place: KakaoPlace | null) => {
     setSelectedPlace(place);

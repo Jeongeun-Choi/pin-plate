@@ -1,16 +1,76 @@
 'use client';
 
 import * as styles from './PostList.css';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, IcClock, IcNavigation, IcOutlinestar } from '@pin-plate/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { getPosts } from '../../post/api/getPosts';
 import { Post } from '../../post/types/post';
+import { useCurrentLocation } from '@/hooks/useCurrentLocation';
+import { postKeys } from '../../post/postKeys';
+
+type SortType = 'latest' | 'rating' | 'distance';
+
+// Haversine formula to calculate distance
+const getDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c; // Distance in km
+  return d;
+};
 
 export const PostList = () => {
+  const [sortBy, setSortBy] = useState<SortType>('latest');
+  const { location: currentLocation, fetchLocation } = useCurrentLocation();
+  const router = useRouter();
+
   // Fetch real data using TanStack Query
   const { data: posts } = useSuspenseQuery<Post[]>({
-    queryKey: ['posts'],
+    queryKey: postKeys.lists(),
     queryFn: getPosts,
+  });
+
+  const sortedPosts = [...posts].sort((a, b) => {
+    if (sortBy === 'latest') {
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    }
+    if (sortBy === 'rating') {
+      return Number(b.rating) - Number(a.rating);
+    }
+    if (sortBy === 'distance') {
+      if (!currentLocation) return 0;
+      if (!a.lat || !a.lng || !b.lat || !b.lng) return 0;
+      const distA = getDistance(
+        currentLocation.lat,
+        currentLocation.lng,
+        a.lat,
+        a.lng,
+      );
+      const distB = getDistance(
+        currentLocation.lat,
+        currentLocation.lng,
+        b.lat,
+        b.lng,
+      );
+      return distA - distB;
+    }
+    return 0;
   });
 
   return (
@@ -19,16 +79,30 @@ export const PostList = () => {
       <div className={styles.filterBar}>
         <div className={styles.filterButtonGroup}>
           <button
-            className={`${styles.filterButton} ${styles.activeFilterButton}`}
+            className={`${styles.filterButton} ${sortBy === 'latest' ? styles.activeFilterButton : ''}`}
+            onClick={() => setSortBy('latest')}
           >
             <IcClock width={16} height={16} />
             <span>최신순</span>
           </button>
-          <button className={styles.filterButton}>
+          <button
+            className={`${styles.filterButton} ${sortBy === 'rating' ? styles.activeFilterButton : ''}`}
+            onClick={() => setSortBy('rating')}
+          >
             <IcOutlinestar width={16} height={16} />
             <span>별점순</span>
           </button>
-          <button className={styles.filterButton}>
+          <button
+            className={`${styles.filterButton} ${sortBy === 'distance' ? styles.activeFilterButton : ''}`}
+            onClick={() => {
+              setSortBy('distance');
+              if (!currentLocation) {
+                fetchLocation().catch((err) =>
+                  console.error('Error getting location for sorting', err),
+                );
+              }
+            }}
+          >
             <IcNavigation width={16} height={16} />
             <span>거리순</span>
           </button>
@@ -40,9 +114,11 @@ export const PostList = () => {
       {/* Main Grid */}
       <div className={styles.contentWrapper}>
         <div className={styles.grid}>
-          {posts.map((post) => (
+          {sortedPosts.map((post) => (
             <Card
               key={post.id}
+              onClick={() => router.push(`/post/${post.id}`)}
+              style={{ cursor: 'pointer' }}
               title={post.place_name || '이름 없음'}
               rating={Number(post.rating).toFixed(1) || '0.0'}
               location={post.address || '주소 정보 없음'}
