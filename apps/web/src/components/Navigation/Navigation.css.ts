@@ -75,8 +75,18 @@ export const icon = style({
 // Desktop Buttons
 // Desktop styles removed
 
-// Legacy support if needed, or remove if unused
+export const writeIconWrapper = style({
+  width: 36,
+  height: 36,
+  borderRadius: '50%',
+  backgroundColor: '#FF9E7D',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: vars.colors.common.white,
+});
+
 export const writeIcon = style({
-  width: 24,
-  height: 24,
+  width: 20,
+  height: 20,
 });

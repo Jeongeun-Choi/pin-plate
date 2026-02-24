@@ -115,19 +115,19 @@ export const PostDetailModal = ({
     if (isIntercepted) {
       router.back();
     } else {
-      router.replace('/home');
+      router.replace('/');
     }
   };
 
   return (
     <Modal isOpen={true} onClose={handleClose}>
-      <Modal.Container>
+      <Modal.FullScreenContainer>
         <ErrorBoundary fallback={<PostDetailError />}>
           <Suspense fallback={<PostDetailSkeleton />}>
             <PostDetailInner id={id} />
           </Suspense>
         </ErrorBoundary>
-      </Modal.Container>
+      </Modal.FullScreenContainer>
     </Modal>
   );
 };

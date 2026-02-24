@@ -18,14 +18,13 @@ export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
     if (!isOpen) {
       handlers.resetForm();
     }
-  }, [isOpen, handlers]); // Only running when isOpen changes
-
+  }, [isOpen, handlers]);
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <Modal.Container>
+      <Modal.FullScreenContainer>
         <Modal.Header>
           <Modal.Title>맛집 기록</Modal.Title>
-          <Modal.Close onClick={onClose} />
+          <Modal.Close />
         </Modal.Header>
 
         <Modal.Body>
@@ -39,7 +38,7 @@ export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
             등록하기
           </Button>
         </Modal.Footer>
-      </Modal.Container>
+      </Modal.FullScreenContainer>
     </Modal>
   );
 };

@@ -1,17 +1,19 @@
-import ModalMain from './Modal';
-import ModalBody from './ModalBody';
-import ModalClose from './ModalClose';
+import ModalComponent from './Modal';
 import ModalContainer from './ModalContainer';
-import ModalFooter from './ModalFooter';
+import FullScreenModalContainer from './FullScreenModalContainer';
 import ModalHeader from './ModalHeader';
+import ModalBody from './ModalBody';
+import ModalFooter from './ModalFooter';
 import ModalTitle from './ModalTitle';
+import ModalClose from './ModalClose';
 
-export const Modal = Object.assign(ModalMain, {
-  Container: ModalContainer, // This renders the Overlay + Container wrapper
+export const Modal = Object.assign(ModalComponent, {
+  Container: ModalContainer,
+  FullScreenContainer: FullScreenModalContainer,
   Header: ModalHeader,
-  Title: ModalTitle,
   Body: ModalBody,
   Footer: ModalFooter,
+  Title: ModalTitle,
   Close: ModalClose,
 });
 

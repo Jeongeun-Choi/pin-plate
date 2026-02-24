@@ -14,7 +14,45 @@ export const container = style({
     '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
   '@media': {
     '(min-width: 768px)': {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       padding: '10px 24px',
+      gap: 0,
+    },
+  },
+});
+
+export const mobileTopRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%',
+  '@media': {
+    '(min-width: 768px)': {
+      display: 'none',
+    },
+  },
+});
+
+export const mobileShareButton = style({
+  width: 36,
+  height: 36,
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: vars.colors.common.white,
+  border: 'none',
+  cursor: 'pointer',
+});
+
+export const desktopLogo = style({
+  display: 'none',
+  '@media': {
+    '(min-width: 768px)': {
+      display: 'flex',
     },
   },
 });
