@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { IcLogout, IcUser } from '@pin-plate/ui/icons';
+import { IcLogout, IcSetting } from '@pin-plate/ui/icons';
 import * as styles from './AccountPopover.css';
 import { useMyProfile } from '@/features/my-page';
 
@@ -78,9 +78,6 @@ export const AccountPopover = ({
       style={positionStyle}
     >
       <div className={styles.topSection}>
-        <div className={styles.avatar}>
-          <IcUser width={32} height={32} color="currentColor" />
-        </div>
         <div className={styles.userInfo}>
           <p className={styles.userName}>
             {profile?.nickname || profile?.name}
@@ -90,7 +87,9 @@ export const AccountPopover = ({
       </div>
       <div className={styles.bottomSection}>
         <button className={styles.menuItem} onClick={handleMyPageClick}>
-          <div className={styles.standardMenuIcon}></div>
+          <div className={styles.standardMenuIcon}>
+            <IcSetting width={20} height={20} />
+          </div>
           <span className={styles.standardMenuText}>마이페이지</span>
         </button>
         <button className={styles.menuItem} onClick={handleLogoutClick}>
