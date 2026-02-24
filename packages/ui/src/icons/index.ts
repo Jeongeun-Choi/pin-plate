@@ -12,6 +12,7 @@ export * from './IcNavigation';
 export * from './IcOutlinestar';
 export * from './IcPlus';
 export * from './IcSearch';
+export * from './IcSetting';
 export * from './IcSort';
 export * from './IcTrash';
 export * from './IcUser';
