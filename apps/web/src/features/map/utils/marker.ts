@@ -1,3 +1,5 @@
+import { vars } from '@pin-plate/ui';
+
 export const getMarkerIcon = (color: string = '#FF0000') => {
   return `
     <div style="width: 34px; height: 42px;">
@@ -26,4 +28,20 @@ export const getPinIcon = (
       </svg>
     </div>
   `;
+};
+
+export const getPinColor = (rating: number) => {
+  switch (true) {
+    case rating <= 1:
+      return vars.colors.pin[100];
+    case rating <= 2:
+      return vars.colors.pin[200];
+    case rating <= 3:
+      return vars.colors.pin[300];
+    case rating <= 4:
+      return vars.colors.pin[400];
+    case rating <= 5:
+    default:
+      return vars.colors.pin[500];
+  }
 };
