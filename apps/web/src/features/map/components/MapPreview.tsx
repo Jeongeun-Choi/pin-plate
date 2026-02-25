@@ -3,7 +3,8 @@
 import Script from 'next/script';
 import { useEffect, useRef, useCallback } from 'react';
 import * as styles from './MapPreview.styles.css';
-import { getMarkerIcon } from '../utils/marker';
+import { getPinIcon } from '../utils/marker';
+import { vars } from '@pin-plate/ui';
 
 interface MapPreviewProps {
   lat: number;
@@ -33,14 +34,19 @@ export const MapPreview = ({ lat, lng }: MapPreviewProps) => {
       const mapInstance = new window.naver.maps.Map(mapRef.current, mapOptions);
 
       // Add marker
-      const markerContent = getMarkerIcon();
+      const pinWidth = 40;
+      const pinHeight = pinWidth * 2;
+      const markerContent = getPinIcon(
+        vars.colors.pin[500],
+        pinWidth,
+        pinHeight,
+      );
       new window.naver.maps.Marker({
         position: position,
         map: mapInstance,
         icon: {
           content: markerContent,
-          size: new window.naver.maps.Size(34, 42),
-          anchor: new window.naver.maps.Point(17, 42),
+          anchor: new window.naver.maps.Point(pinWidth / 2, pinHeight),
         },
       });
     }
