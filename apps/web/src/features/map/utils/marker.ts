@@ -1,3 +1,5 @@
+import { vars } from '@pin-plate/ui';
+
 export const getMarkerIcon = (color: string = '#FF0000') => {
   return `
     <div style="width: 34px; height: 42px;">
@@ -7,4 +9,39 @@ export const getMarkerIcon = (color: string = '#FF0000') => {
       </svg>
     </div>
   `;
+};
+
+export const getPinIcon = (
+  color: string = '#FF6B00',
+  width: number = 16,
+  height: number = 80,
+) => {
+  return `
+    <div style="width: ${width}px; height: ${height}px; position: relative;">
+      <svg width="100%" height="100%" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+        <circle cx="50" cy="45" r="38" fill="#FFFFFF" stroke="${color}" stroke-width="2.5" />
+        <circle cx="50" cy="45" r="30" stroke="${color}" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.6" />
+        <path d="M38 82C38 82 40 88 50 88C60 88 62 82 62 82" stroke="${color}" stroke-width="3" stroke-linecap="round" />
+        <path d="M42 89H58" stroke="${color}" stroke-width="2" stroke-linecap="round" opacity="0.8" />
+        <line x1="50" y1="89" x2="50" y2="145" stroke="${color}" stroke-width="4" stroke-linecap="round" />
+        <circle cx="50" cy="145" r="5" fill="${color}" />
+      </svg>
+    </div>
+  `;
+};
+
+export const getPinColor = (rating: number) => {
+  switch (true) {
+    case rating <= 1:
+      return vars.colors.pin[100];
+    case rating <= 2:
+      return vars.colors.pin[200];
+    case rating <= 3:
+      return vars.colors.pin[300];
+    case rating <= 4:
+      return vars.colors.pin[400];
+    case rating <= 5:
+    default:
+      return vars.colors.pin[500];
+  }
 };

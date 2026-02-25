@@ -64,6 +64,13 @@ export const vars = createGlobalTheme(':root', {
       '4': '#ffa07a', // Peach Orange
       '5': '#ff6b6b', // Tomato Red
     },
+    pin: {
+      '500': '#ffab91', // 최고예요
+      '400': '#F2D9A2', // 좋아요
+      '300': '#A8D8B9', // 보통이에요
+      '200': '#9BB1D6', // 아쉬워요
+      '100': '#D1D5DB', // 별로예요
+    },
     shadow: {
       primary: 'rgba(255, 160, 122, 0.5)',
       rating5: 'rgba(255, 107, 107, 0.5)',
