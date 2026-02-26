@@ -28,7 +28,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'pin-plate-image.s3.ap-southeast-2.amazonaws.com',
+        hostname: 'pin-plate.s3.ap-northeast-2.amazonaws.com',
         port: '',
         pathname: '/**',
       },
