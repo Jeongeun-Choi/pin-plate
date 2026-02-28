@@ -52,7 +52,7 @@ jobs:
       - name: Type Check (Mobile)
         # Mobile app doesn't have a specific script for tsc, so running it via pnpm exec or adding a script would be ideal.
         # Here we run tsc directly in the package context.
-        run: cd apps/mobile && npx tsc --noEmit
+        run: cd apps/pin-plate/mobile && npx tsc --noEmit
 
       - name: Build (Web)
         env:
