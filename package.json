@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:web": "pnpm --filter web dev",
-    "dev:mobile": "npx --filter mobile expo start",
+    "dev:pin-plate:web": "pnpm --filter web dev",
+    "dev:pin-plate:mobile": "npx --filter mobile expo start",
     "lint:fix": "pnpm --filter web lint --fix",
     "lint:check": "pnpm --filter web lint --check",
-    "build:web": "pnpm --filter web build",
-    "build:mobile": "pnpm --filter mobile build",
+    "build:pin-plate:web": "pnpm --filter web build",
+    "build:pin-plate:mobile": "pnpm --filter mobile build",
     "icons": "pnpm --filter @pin-plate/ui run icons",
     "prettier:fix": "pnpm --filter web prettier --write",
     "prettier:check": "pnpm --filter web prettier --check"
