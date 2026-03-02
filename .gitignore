@@ -25,3 +25,7 @@ web-build/
 
 # Pnpm
 .pnpm-store
+
+# SST
+.sst/
+.open-next
