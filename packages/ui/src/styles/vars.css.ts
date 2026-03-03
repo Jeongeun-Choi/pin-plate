@@ -65,20 +65,22 @@ export const vars = createGlobalTheme(':root', {
       '5': '#ff6b6b', // Tomato Red
     },
     pin: {
-      '500': '#ffab91', // 최고예요
-      '400': '#F2D9A2', // 좋아요
-      '300': '#A8D8B9', // 보통이에요
-      '200': '#9BB1D6', // 아쉬워요
-      '100': '#D1D5DB', // 별로예요
+      '0': '#E8E8E8', // Silver Grey (미방문)
+      '100': '#fff2eb', // Almost White Peach (별로예요)
+      '200': '#ffe6d9', // Cream Peach (아쉬워요)
+      '300': '#ffccb3', // Pastel Peach (보통이에요)
+      '400': '#ffb399', // Light Peach (좋아요)
+      '500': '#ff9966', // Dark Peach Orange (최고예요)
+      wishlist: '#ffd93d', // Butter Yellow (가고 싶어요)
     },
     shadow: {
       primary: 'rgba(255, 160, 122, 0.5)',
-      rating5: 'rgba(255, 107, 107, 0.5)',
-      rating4: 'rgba(255, 160, 122, 0.5)',
-      rating3: 'rgba(255, 217, 61, 0.5)',
-      rating2: 'rgba(255, 184, 77, 0.5)',
-      rating1: 'rgba(244, 162, 97, 0.5)',
-      rating0: 'rgba(233, 196, 106, 0.5)',
+      rating5: 'rgba(255, 153, 102, 0.5)',
+      rating4: 'rgba(255, 179, 153, 0.5)',
+      rating3: 'rgba(255, 204, 179, 0.5)',
+      rating2: 'rgba(255, 230, 217, 0.5)',
+      rating1: 'rgba(255, 242, 235, 0.5)',
+      rating0: 'rgba(232, 232, 232, 0.5)',
     },
     overlay: 'rgba(139, 69, 19, 0.4)', // Chocolate Brown with opacity for modal backdrop
   },
