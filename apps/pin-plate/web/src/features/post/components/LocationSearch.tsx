@@ -70,7 +70,9 @@ const LocationSearch = ({
       {hasSearched && (
         <div className={styles.resultsContainer}>
           {isLoading ? (
-            <div className={styles.emptyState}><Spinner size={36} /></div>
+            <div className={styles.emptyState}>
+              <Spinner size={36} />
+            </div>
           ) : (
             <ul className={styles.resultsList}>
               {searchResults.map((item) => (
