@@ -9,6 +9,7 @@ import { Header } from '@/components/Header';
 import { PostList } from '@/features/post-list/components/PostList';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Suspense } from 'react';
+import { Spinner } from '@pin-plate/ui';
 import * as styles from './page.css';
 
 export default function Home() {
@@ -29,7 +30,9 @@ export default function Home() {
         >
           <Suspense
             fallback={
-              <div className={styles.fallbackContainer}>로딩 중...</div>
+              <div className={styles.fallbackContainer}>
+                <Spinner />
+              </div>
             }
           >
             <PostList />

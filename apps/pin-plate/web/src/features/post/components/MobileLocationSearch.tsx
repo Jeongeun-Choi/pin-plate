@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { KakaoPlace } from '../types/search';
 import { useLocationSearch } from '../hooks/useLocationSearch';
 import * as styles from './styles/MobileLocationSearch.css';
-import { IcSearch, IcMarker, IcDismiss } from '@pin-plate/ui';
+import { IcSearch, IcMarker, IcDismiss, Spinner } from '@pin-plate/ui';
 
 interface MobileLocationSearchProps {
   currentLocation?: { lat: number; lng: number } | null;
@@ -83,7 +83,9 @@ const MobileLocationSearch = ({
       {hasSearched && (
         <div className={styles.resultsContainer}>
           {isLoading ? (
-            <p className={styles.loadingState}>검색 중...</p>
+            <div className={styles.loadingState}>
+              <Spinner size={36} />
+            </div>
           ) : (
             <ul className={styles.resultsList}>
               {searchResults.map((item) => (

@@ -145,6 +145,8 @@ export const resultItemPhone = style({
 
 export const emptyState = style({
   color: '#999',
-  textAlign: 'center',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
   padding: '20px',
 });

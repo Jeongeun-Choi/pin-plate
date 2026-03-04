@@ -1,7 +1,7 @@
 import { useRef, useState, KeyboardEvent } from 'react';
 import { KakaoPlace, KakaoSearchResponse } from '../types/search';
 import * as styles from './styles/LocationSearch.css';
-import { IcSearch, IcMarker } from '@pin-plate/ui';
+import { IcSearch, IcMarker, Spinner } from '@pin-plate/ui';
 
 interface LocationSearchProps {
   currentLocation?: { lat: number; lng: number } | null;
@@ -70,7 +70,9 @@ const LocationSearch = ({
       {hasSearched && (
         <div className={styles.resultsContainer}>
           {isLoading ? (
-            <p className={styles.emptyState}>검색 중...</p>
+            <div className={styles.emptyState}>
+              <Spinner size={36} />
+            </div>
           ) : (
             <ul className={styles.resultsList}>
               {searchResults.map((item) => (

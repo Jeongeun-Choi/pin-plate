@@ -34,6 +34,14 @@ export const cardImage = style({
   objectFit: 'cover',
 });
 
+export const imagePlaceholder = style({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
 export const cardInfo = style({
   padding: '16px 12px',
   display: 'flex',

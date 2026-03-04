@@ -206,7 +206,9 @@ export const emptyStateDesc = style({
 });
 
 export const loadingState = style({
-  textAlign: 'center',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
   padding: '20px',
   color: '#999',
 });

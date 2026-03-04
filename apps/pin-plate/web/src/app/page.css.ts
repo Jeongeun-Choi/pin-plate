@@ -7,6 +7,8 @@ export const mainWrapper = style({
 });
 
 export const fallbackContainer = style({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
   padding: '80px 20px',
-  textAlign: 'center',
 });

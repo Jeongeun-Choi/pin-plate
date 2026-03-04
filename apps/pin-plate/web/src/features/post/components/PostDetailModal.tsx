@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Modal, Popover } from '@pin-plate/ui';
+import { Button, Modal, Popover, Spinner } from '@pin-plate/ui';
 import { usePost } from '../hooks/usePost';
 import { useDeletePost } from '../hooks/useDeletePost';
 
@@ -91,7 +91,7 @@ const PostDetailInner = ({ id }: { id: string }) => {
 const PostDetailSkeleton = () => (
   <Modal.Body>
     <div style={{ padding: '20px', display: 'flex', justifyContent: 'center' }}>
-      Loading...
+      <Spinner />
     </div>
   </Modal.Body>
 );

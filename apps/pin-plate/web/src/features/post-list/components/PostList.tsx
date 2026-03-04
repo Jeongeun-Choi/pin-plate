@@ -128,10 +128,7 @@ export const PostList = () => {
                 month: 'long',
                 day: 'numeric',
               })}
-              imageUrl={
-                post.image_urls?.[0] ||
-                'https://images.unsplash.com/photo-1544025162-d76f60b52c30?q=80&w=600&auto=format&fit=crop'
-              } // Fallback image setup
+              imageUrl={post.image_urls?.[0]}
             />
           ))}
         </div>

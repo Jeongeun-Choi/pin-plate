@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import * as styles from './styles/PostDetailModal.styles.css';
 import { Post } from '../types/post';
+import { IcFork } from '@pin-plate/ui';
 
 interface IPostDetailContentProps {
   post: Post;
@@ -8,9 +9,6 @@ interface IPostDetailContentProps {
 
 export default function PostDetailContent({ post }: IPostDetailContentProps) {
   const hasImages = post.image_urls && post.image_urls.length > 0;
-  const displayImage = hasImages
-    ? post.image_urls[0]
-    : 'https://via.placeholder.com/600x400?text=No+Image';
 
   // Format date
   const formattedDate = new Date(post.created_at).toLocaleString('ko-KR', {
@@ -25,13 +23,19 @@ export default function PostDetailContent({ post }: IPostDetailContentProps) {
     <>
       {/* Image */}
       <div className={styles.imageContainer}>
-        <Image
-          src={displayImage}
-          alt={post.place_name}
-          fill
-          className={styles.postImage}
-          priority
-        />
+        {hasImages ? (
+          <Image
+            src={post.image_urls[0]}
+            alt={post.place_name}
+            fill
+            className={styles.postImage}
+            priority
+          />
+        ) : (
+          <div className={styles.imagePlaceholder}>
+            <IcFork size={72} color="#ffa07a" />
+          </div>
+        )}
       </div>
 
       {/* Content */}

@@ -121,6 +121,15 @@ export const postImage = style({
   objectFit: 'cover',
 });
 
+export const imagePlaceholder = style({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: vars.colors.primary.light,
+});
+
 export const content = style({
   padding: '20px',
   display: 'flex',

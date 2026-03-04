@@ -1,5 +1,6 @@
 export * from './IcArrowLeft';
 export * from './IcCalendar';
+export * from './IcFork';
 export * from './IcClock';
 export * from './IcDismiss';
 export * from './IcEdit';
