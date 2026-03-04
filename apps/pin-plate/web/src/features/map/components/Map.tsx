@@ -118,7 +118,12 @@ export const Map = () => {
         const ratingColor = getPinColor(post.rating);
         const pinWidth = 40;
         const pinHeight = pinWidth * 2;
-        const markerContent = getPinIcon(ratingColor, pinWidth, pinHeight); // 브랜드 컬러 등 원하는 색상 밎 크기 주입
+        const markerContent = getPinIcon(
+          ratingColor,
+          pinWidth,
+          pinHeight,
+          post.rating,
+        );
 
         const marker = new window.naver.maps.Marker({
           position: new window.naver.maps.LatLng(post.lat, post.lng),
