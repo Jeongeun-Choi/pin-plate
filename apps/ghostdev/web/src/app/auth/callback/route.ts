@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { encryptToken } from '@/lib/token-crypto';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -22,13 +23,14 @@ export async function GET(request: NextRequest) {
   const avatarUrl = user.user_metadata?.avatar_url as string | undefined;
 
   if (githubLogin && githubNodeId) {
-    // access token은 저장 안 함 — 식별 정보만 upsert
+    const providerToken = data.session.provider_token;
     await supabase.from('ghostdev_users').upsert(
       {
         id: user.id,
         github_login: githubLogin,
         github_node_id: githubNodeId,
         avatar_url: avatarUrl ?? null,
+        github_access_token: providerToken ? encryptToken(providerToken) : null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'id' },

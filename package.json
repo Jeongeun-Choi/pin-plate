@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:pin-plate:web": "pnpm --filter web dev",
     "dev:pin-plate:mobile": "npx --filter mobile expo start",
+    "dev:ghost-web": "pnpm --filter ghostdev-web dev",
     "lint:fix": "pnpm --filter web lint --fix",
     "lint:check": "pnpm --filter web lint --check",
     "build:pin-plate:web": "pnpm --filter web build",
