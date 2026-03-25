@@ -8,6 +8,7 @@ const createTicketSchema = z.object({
   description: z.string().optional(),
   baseBranch: z.string().optional(),
   targetWorkspace: z.string().nullable().optional(),
+  priority: z.number().int().min(1).max(3).optional().default(2),
 });
 
 export async function POST(request: NextRequest) {
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
       description: parsed.data.description ?? null,
       base_branch: parsed.data.baseBranch ?? null,
       target_workspace: parsed.data.targetWorkspace ?? null,
+      priority: parsed.data.priority,
       status: 'TODO',
     })
     .select()
