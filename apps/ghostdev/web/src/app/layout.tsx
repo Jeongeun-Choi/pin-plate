@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
+import { type ReactNode, Suspense } from 'react';
 import { Space_Mono } from 'next/font/google';
+import { Providers } from '@/components/Providers';
 import '@/styles/global.css';
 
 const spaceMono = Space_Mono({
@@ -17,7 +18,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko" className={spaceMono.variable}>
-      <body>{children}</body>
+      <body>
+        <Providers>
+          <Suspense fallback={null}>{children}</Suspense>
+        </Providers>
+      </body>
     </html>
   );
 }
