@@ -19,6 +19,7 @@ interface DispatchInputs {
   ticket_description: string;
   base_branch: string;
   supabase_url: string;
+  target_workspace: string;
 }
 
 export async function POST(_request: NextRequest, { params }: Params) {
@@ -75,6 +76,7 @@ export async function POST(_request: NextRequest, { params }: Params) {
     ticket_description: ticket.description ?? "",
     base_branch: ticket.base_branch ?? project.default_branch,
     supabase_url: process.env.SUPABASE_URL!,
+    target_workspace: ticket.target_workspace ?? "",
   };
 
   try {

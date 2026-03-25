@@ -8,6 +8,7 @@ async function main() {
   const ticketTitle = process.env.GHOSTDEV_TICKET_TITLE;
   const ticketDescription = process.env.GHOSTDEV_TICKET_DESCRIPTION ?? '';
   const baseBranch = process.env.GHOSTDEV_BASE_BRANCH ?? 'main';
+  const targetWorkspace = process.env.GHOSTDEV_TARGET_WORKSPACE || undefined;
   const supabaseUrl = process.env.GHOSTDEV_SUPABASE_URL;
   const supabaseServiceKey = process.env.GHOSTDEV_SUPABASE_SERVICE_KEY;
 
@@ -36,6 +37,7 @@ async function main() {
     ticketTitle: ticketTitle!,
     ticketDescription,
     baseBranch,
+    targetWorkspace,
     logger,
   });
 }

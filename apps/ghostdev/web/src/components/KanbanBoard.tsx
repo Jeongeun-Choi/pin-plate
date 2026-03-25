@@ -2,7 +2,7 @@
 
 import * as s from './KanbanBoard.css';
 import { TicketCard } from './TicketCard';
-import type { Ticket, TicketStatus } from '@/types';
+import type { Ticket, TicketStatus, WorkspaceConfig } from '@/types';
 
 const COLUMNS: { status: TicketStatus; label: string }[] = [
   { status: 'TODO', label: 'TODO' },
@@ -13,9 +13,16 @@ const COLUMNS: { status: TicketStatus; label: string }[] = [
 interface KanbanBoardProps {
   tickets: Ticket[];
   projectId: string;
+  workspaceConfig?: WorkspaceConfig | null;
 }
 
-export function KanbanBoard({ tickets, projectId }: KanbanBoardProps) {
+export function KanbanBoard({ tickets, projectId, workspaceConfig }: KanbanBoardProps) {
+  function resolveWorkspaceTag(targetWorkspace: string | null): string | undefined {
+    if (!targetWorkspace || !workspaceConfig) return undefined;
+    const pkg = workspaceConfig.packages.find((p) => p.path === targetWorkspace);
+    return pkg ? pkg.displayName : targetWorkspace;
+  }
+
   return (
     <div className={s.board}>
       {COLUMNS.map(({ status, label }) => {
@@ -36,6 +43,7 @@ export function KanbanBoard({ tickets, projectId }: KanbanBoardProps) {
                     key={ticket.id}
                     ticket={ticket}
                     projectId={projectId}
+                    workspaceTag={resolveWorkspaceTag(ticket.target_workspace)}
                   />
                 ))
               )}

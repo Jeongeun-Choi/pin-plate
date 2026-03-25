@@ -33,6 +33,11 @@ export default async function ProjectsPage() {
               <div className={s.cardRepo}>
                 <span>⎇</span>
                 <span>{project.repo_full_name}</span>
+                {project.workspace_config && (
+                  <span className={s.monorepoBadge}>
+                    // MONOREPO · {project.workspace_config.packages.length} PKG
+                  </span>
+                )}
               </div>
               <div className={s.cardTitle}>{project.name}</div>
               {project.description && (

@@ -34,6 +34,11 @@ on:
         description: 'GhostDev Supabase URL (for log streaming)'
         required: true
         type: string
+      target_workspace:
+        description: 'Target workspace/package path (monorepo)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   ghostdev:
@@ -70,6 +75,7 @@ jobs:
           GHOSTDEV_TICKET_DESCRIPTION: \${{ inputs.ticket_description }}
           GHOSTDEV_BASE_BRANCH: \${{ inputs.base_branch }}
           GHOSTDEV_SUPABASE_URL: \${{ inputs.supabase_url }}
+          GHOSTDEV_TARGET_WORKSPACE: \${{ inputs.target_workspace }}
           # GitHub Actions 기본 제공 토큰 (PR 생성에 사용)
           GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
         run: npx @ghostdev/agent@latest

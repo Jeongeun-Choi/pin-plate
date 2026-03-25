@@ -19,6 +19,7 @@ export async function createProject(data: {
   workflowFile?: string;
   name: string;
   description?: string;
+  workspaceConfig?: unknown;
 }) {
   const res = await fetch('/api/projects', {
     method: 'POST',
@@ -37,5 +38,11 @@ export async function deleteProject(projectId: string) {
 export async function fetchGitHubRepos() {
   const res = await fetch('/api/github/repos');
   if (!res.ok) throw new Error('레포 목록을 불러오지 못했습니다.');
+  return res.json();
+}
+
+export async function fetchMonorepoConfig(owner: string, repo: string) {
+  const res = await fetch(`/api/github/detect-monorepo?owner=${owner}&repo=${repo}`);
+  if (!res.ok) return null;
   return res.json();
 }

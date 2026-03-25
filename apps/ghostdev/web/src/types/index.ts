@@ -1,4 +1,16 @@
 export type TicketStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
+
+export interface WorkspacePackage {
+  name: string;
+  path: string;
+  displayName: string;
+}
+
+export interface WorkspaceConfig {
+  type: 'pnpm-workspaces' | 'npm-workspaces' | 'yarn-workspaces' | 'turbo' | 'lerna';
+  packages: WorkspacePackage[];
+  detectedAt: string;
+}
 export type RunStatus =
   | 'PENDING'
   | 'QUEUED'
@@ -31,7 +43,7 @@ export interface Project {
   repo_node_id: string;
   default_branch: string;
   workflow_file: string;
-  workspace_config: Record<string, unknown> | null;
+  workspace_config: WorkspaceConfig | null;
   name: string;
   description: string | null;
   created_at: string;
@@ -48,6 +60,7 @@ export interface Ticket {
   base_branch: string | null;
   pr_url: string | null;
   pr_number: number | null;
+  target_workspace: string | null;
   created_at: string;
   updated_at: string;
 }

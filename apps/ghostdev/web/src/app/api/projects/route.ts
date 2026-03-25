@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
+import { createOctokit, getGitHubToken } from '@/lib/octokit';
+import { installWorkflowIfMissing } from '@/lib/github-actions/install-workflow';
 
 const createProjectSchema = z.object({
   repoOwner: z.string().min(1),
@@ -36,10 +38,10 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!user) {
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -56,7 +58,7 @@ export async function POST(request: NextRequest) {
   const { data: created } = await supabase
     .from('ghostdev_projects')
     .insert({
-      user_id: user.id,
+      user_id: session.user.id,
       repo_owner: parsed.data.repoOwner,
       repo_name: parsed.data.repoName,
       repo_full_name: parsed.data.repoFullName,
@@ -70,5 +72,25 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
-  return NextResponse.json(created, { status: 201 });
+  // workflow 파일 자동 설치 (실패해도 project 생성은 유지)
+  let workflowInstalled: boolean | null = null;
+  try {
+    const token = await getGitHubToken(supabase, session.provider_token);
+    if (token) {
+      const octokit = createOctokit(token);
+      const result = await installWorkflowIfMissing(
+        octokit,
+        parsed.data.repoOwner,
+        parsed.data.repoName,
+        parsed.data.defaultBranch,
+        parsed.data.workflowFile,
+      );
+      workflowInstalled = result === 'created';
+    }
+  } catch (err) {
+    console.error('workflow 자동 설치 실패:', err);
+    workflowInstalled = false;
+  }
+
+  return NextResponse.json({ ...created, workflowInstalled }, { status: 201 });
 }

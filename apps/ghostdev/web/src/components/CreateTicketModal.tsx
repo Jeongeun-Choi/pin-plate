@@ -2,19 +2,29 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { WorkspaceConfig } from '@/types';
 import * as s from './CreateTicketModal.css';
 
 interface Props {
   projectId: string;
   defaultBranch: string;
   onClose: () => void;
+  workspaceConfig?: WorkspaceConfig | null;
+  defaultWorkspace?: string | null;
 }
 
-export function CreateTicketModal({ projectId, defaultBranch, onClose }: Props) {
+export function CreateTicketModal({
+  projectId,
+  defaultBranch,
+  onClose,
+  workspaceConfig,
+  defaultWorkspace,
+}: Props) {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [baseBranch, setBaseBranch] = useState(defaultBranch);
+  const [targetWorkspace, setTargetWorkspace] = useState<string>(defaultWorkspace ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -26,7 +36,13 @@ export function CreateTicketModal({ projectId, defaultBranch, onClose }: Props) 
       const res = await fetch('/api/tickets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId, title: title.trim(), description: description.trim() || undefined, baseBranch }),
+        body: JSON.stringify({
+          projectId,
+          title: title.trim(),
+          description: description.trim() || undefined,
+          baseBranch,
+          targetWorkspace: targetWorkspace || null,
+        }),
       });
       if (!res.ok) throw new Error('Failed to create ticket');
       router.refresh();
@@ -70,6 +86,24 @@ export function CreateTicketModal({ projectId, defaultBranch, onClose }: Props) 
                 placeholder="Optional task description..."
               />
             </div>
+
+            {workspaceConfig && workspaceConfig.packages.length > 0 && (
+              <div className={s.fieldGroup}>
+                <label className={s.label}>TARGET_WORKSPACE</label>
+                <select
+                  className={s.input}
+                  value={targetWorkspace}
+                  onChange={(e) => setTargetWorkspace(e.target.value)}
+                >
+                  <option value="">ALL (no scope)</option>
+                  {workspaceConfig.packages.map((pkg) => (
+                    <option key={pkg.path} value={pkg.path}>
+                      {pkg.displayName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className={s.fieldGroup}>
               <label className={s.label}>BASE_BRANCH</label>

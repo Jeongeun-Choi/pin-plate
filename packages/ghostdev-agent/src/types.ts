@@ -4,6 +4,7 @@ export interface AgentInput {
   ticketTitle: string;
   ticketDescription: string;
   baseBranch: string;
+  targetWorkspace?: string;
   logger: AgentLogger;
 }
 
