@@ -1,29 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import type { RunStatus } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import type { RunStatus } from "@/types";
 
 function mapGitHubStatus(status: string, conclusion: string | null): RunStatus {
-  if (status === 'queued') return 'QUEUED';
-  if (status === 'in_progress') return 'IN_PROGRESS';
-  if (status === 'completed') {
-    if (conclusion === 'success') return 'SUCCESS';
-    if (conclusion === 'cancelled') return 'CANCELLED';
-    return 'FAILURE';
+  if (status === "queued") return "QUEUED";
+  if (status === "in_progress") return "IN_PROGRESS";
+  if (status === "completed") {
+    if (conclusion === "success") return "SUCCESS";
+    if (conclusion === "cancelled") return "CANCELLED";
+    return "FAILURE";
   }
-  return 'PENDING';
+  return "PENDING";
 }
 
 export async function POST(request: NextRequest) {
-  const signature = request.headers.get('x-hub-signature-256');
+  const signature = request.headers.get("x-hub-signature-256");
   const body = await request.text();
 
   const isValid = await verifySignature(body, signature);
   if (!isValid) {
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  const event = request.headers.get('x-github-event');
-  if (event !== 'workflow_run') {
+  const event = request.headers.get("x-github-event");
+  if (event !== "workflow_run") {
     return NextResponse.json({ ok: true });
   }
 
@@ -35,22 +35,22 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
 
   const { data: run } = await supabase
-    .from('ghostdev_agent_runs')
-    .select('id, started_at')
-    .eq('github_run_id', githubRunId)
+    .from("ghostdev_agent_runs")
+    .select("id, started_at")
+    .eq("github_run_id", githubRunId)
     .single();
 
   if (run) {
     await supabase
-      .from('ghostdev_agent_runs')
+      .from("ghostdev_agent_runs")
       .update({
         status: newStatus,
         started_at: workflowRun.run_started_at ?? run.started_at,
         completed_at:
-          workflowRun.status === 'completed' ? new Date().toISOString() : null,
+          workflowRun.status === "completed" ? new Date().toISOString() : null,
         github_run_url: workflowRun.html_url,
       })
-      .eq('id', run.id);
+      .eq("id", run.id);
   }
 
   return NextResponse.json({ ok: true });
@@ -67,20 +67,20 @@ async function verifySignature(
 
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
-    'raw',
+    "raw",
     encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
+    { name: "HMAC", hash: "SHA-256" },
     false,
-    ['sign'],
+    ["sign"],
   );
 
-  const signed = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
+  const signed = await crypto.subtle.sign("HMAC", key, encoder.encode(body));
 
   const expected =
-    'sha256=' +
+    "sha256=" +
     Array.from(new Uint8Array(signed))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
   if (expected.length !== signature.length) return false;
   let mismatch = 0;

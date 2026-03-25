@@ -1,5 +1,5 @@
-import * as s from './page.css';
-import { GitHubSignInButton } from '@/features/auth/components/GitHubSignInButton';
+import * as s from "./page.css";
+import { GitHubSignInButton } from "@/features/auth/components/GitHubSignInButton";
 
 export default function SignInPage() {
   return (
@@ -11,7 +11,8 @@ export default function SignInPage() {
         </div>
 
         <p className={s.subtitle}>
-          내가 업무에 집중하는 동안,<br />
+          내가 업무에 집중하는 동안,
+          <br />
           AI는 내 사이드 프로젝트를 빌드합니다.
         </p>
 

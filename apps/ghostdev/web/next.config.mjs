@@ -1,20 +1,20 @@
-import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
+import { createVanillaExtractPlugin } from "@vanilla-extract/next-plugin";
 
 const withVanillaExtract = createVanillaExtractPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@pin-plate/ui'],
-  outputFileTracingRoot: new URL('../../../', import.meta.url).pathname,
+  transpilePackages: ["@pin-plate/ui"],
+  outputFileTracingRoot: new URL("../../../", import.meta.url).pathname,
 
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
           {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups',
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
           },
         ],
       },
@@ -24,10 +24,10 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'avatars.githubusercontent.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        port: "",
+        pathname: "/**",
       },
     ],
   },
@@ -41,14 +41,16 @@ const nextConfig = {
         if (
           oneOfRule.test &&
           oneOfRule.test instanceof RegExp &&
-          (oneOfRule.test.test('test.tsx') || oneOfRule.test.test('test.ts'))
+          (oneOfRule.test.test("test.tsx") || oneOfRule.test.test("test.ts"))
         ) {
           const existingExclude = oneOfRule.exclude;
 
           oneOfRule.exclude = (path) => {
             if (/\.css\.ts$/.test(path)) return true;
-            if (typeof existingExclude === 'function') return existingExclude(path);
-            if (existingExclude instanceof RegExp) return existingExclude.test(path);
+            if (typeof existingExclude === "function")
+              return existingExclude(path);
+            if (existingExclude instanceof RegExp)
+              return existingExclude.test(path);
             return false;
           };
         }
@@ -58,8 +60,8 @@ const nextConfig = {
     // 모노레포 내 React 중복 참조 방지
     config.resolve.alias = {
       ...config.resolve.alias,
-      react: 'react',
-      'react-dom': 'react-dom',
+      react: "react",
+      "react-dom": "react-dom",
     };
 
     return config;

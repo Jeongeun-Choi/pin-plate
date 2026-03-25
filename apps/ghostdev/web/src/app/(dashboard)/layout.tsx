@@ -1,8 +1,8 @@
-import type { ReactNode } from 'react';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import { TopNav } from '@/components/TopNav';
-import * as s from './layout.css';
+import type { ReactNode } from "react";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { TopNav } from "@/components/TopNav";
+import * as s from "./layout.css";
 
 export default async function DashboardLayout({
   children,
@@ -15,13 +15,13 @@ export default async function DashboardLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/sign-in');
+    redirect("/sign-in");
   }
 
   const { data: ghostUser } = await supabase
-    .from('ghostdev_users')
-    .select('github_login, avatar_url')
-    .eq('id', user!.id)
+    .from("ghostdev_users")
+    .select("github_login, avatar_url")
+    .eq("id", user!.id)
     .single();
 
   return (

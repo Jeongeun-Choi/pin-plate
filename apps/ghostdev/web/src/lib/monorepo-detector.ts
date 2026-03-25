@@ -1,5 +1,5 @@
-import type { Octokit } from '@octokit/rest';
-import type { WorkspaceConfig, WorkspacePackage } from '@/types';
+import type { Octokit } from "@octokit/rest";
+import type { WorkspaceConfig, WorkspacePackage } from "@/types";
 
 type OctokitInstance = InstanceType<typeof Octokit>;
 
@@ -11,8 +11,8 @@ async function getFileContent(
 ): Promise<string | null> {
   try {
     const { data } = await octokit.repos.getContent({ owner, repo, path });
-    if ('content' in data && data.type === 'file') {
-      return Buffer.from(data.content, 'base64').toString('utf-8');
+    if ("content" in data && data.type === "file") {
+      return Buffer.from(data.content, "base64").toString("utf-8");
     }
     return null;
   } catch {
@@ -29,7 +29,9 @@ async function listDirectory(
   try {
     const { data } = await octokit.repos.getContent({ owner, repo, path });
     if (Array.isArray(data)) {
-      return data.filter((item) => item.type === 'dir').map((item) => item.name);
+      return data
+        .filter((item) => item.type === "dir")
+        .map((item) => item.name);
     }
     return [];
   } catch {
@@ -47,7 +49,7 @@ async function resolveGlobs(
 
   for (const glob of globs) {
     // 간단한 glob: "apps/*", "packages/*" 형태만 처리
-    const wildcardIndex = glob.indexOf('/*');
+    const wildcardIndex = glob.indexOf("/*");
     if (wildcardIndex === -1) continue;
 
     const dirPath = glob.slice(0, wildcardIndex);
@@ -55,7 +57,12 @@ async function resolveGlobs(
 
     for (const subdir of subdirs) {
       const pkgPath = `${dirPath}/${subdir}`;
-      const pkgJsonContent = await getFileContent(octokit, owner, repo, `${pkgPath}/package.json`);
+      const pkgJsonContent = await getFileContent(
+        octokit,
+        owner,
+        repo,
+        `${pkgPath}/package.json`,
+      );
 
       if (pkgJsonContent) {
         let pkgName = pkgPath;
@@ -79,12 +86,12 @@ async function resolveGlobs(
 
 function parsePnpmWorkspaceYaml(content: string): string[] {
   // 간단한 YAML 파싱 (js-yaml 없이): "packages:" 섹션의 배열 항목 추출
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const globs: string[] = [];
   let inPackages = false;
 
   for (const line of lines) {
-    if (line.trim() === 'packages:') {
+    if (line.trim() === "packages:") {
       inPackages = true;
       continue;
     }
@@ -92,7 +99,11 @@ function parsePnpmWorkspaceYaml(content: string): string[] {
       const match = line.match(/^\s+-\s+['"]?([^'"]+)['"]?\s*$/);
       if (match) {
         globs.push(match[1].trim());
-      } else if (line.trim() && !line.startsWith(' ') && !line.startsWith('\t')) {
+      } else if (
+        line.trim() &&
+        !line.startsWith(" ") &&
+        !line.startsWith("\t")
+      ) {
         break;
       }
     }
@@ -107,29 +118,47 @@ export async function detectMonorepo(
   repo: string,
 ): Promise<WorkspaceConfig | null> {
   // 1. pnpm-workspace.yaml
-  const pnpmYaml = await getFileContent(octokit, owner, repo, 'pnpm-workspace.yaml');
+  const pnpmYaml = await getFileContent(
+    octokit,
+    owner,
+    repo,
+    "pnpm-workspace.yaml",
+  );
   if (pnpmYaml) {
     const globs = parsePnpmWorkspaceYaml(pnpmYaml);
     if (globs.length > 0) {
       const packages = await resolveGlobs(octokit, owner, repo, globs);
       if (packages.length > 0) {
-        return { type: 'pnpm-workspaces', packages, detectedAt: new Date().toISOString() };
+        return {
+          type: "pnpm-workspaces",
+          packages,
+          detectedAt: new Date().toISOString(),
+        };
       }
     }
   }
 
   // 2. package.json#workspaces (npm/yarn)
-  const pkgJson = await getFileContent(octokit, owner, repo, 'package.json');
+  const pkgJson = await getFileContent(octokit, owner, repo, "package.json");
   if (pkgJson) {
     try {
-      const parsed = JSON.parse(pkgJson) as { workspaces?: string[] | { packages?: string[] } };
+      const parsed = JSON.parse(pkgJson) as {
+        workspaces?: string[] | { packages?: string[] };
+      };
       const workspaces = parsed.workspaces;
       if (workspaces) {
-        const globs = Array.isArray(workspaces) ? workspaces : (workspaces.packages ?? []);
+        const globs = Array.isArray(workspaces)
+          ? workspaces
+          : (workspaces.packages ?? []);
         if (globs.length > 0) {
           // turbo.json도 있으면 turbo로 표기
-          const hasTurbo = await getFileContent(octokit, owner, repo, 'turbo.json');
-          const type = hasTurbo ? 'turbo' : 'npm-workspaces';
+          const hasTurbo = await getFileContent(
+            octokit,
+            owner,
+            repo,
+            "turbo.json",
+          );
+          const type = hasTurbo ? "turbo" : "npm-workspaces";
           const packages = await resolveGlobs(octokit, owner, repo, globs);
           if (packages.length > 0) {
             return { type, packages, detectedAt: new Date().toISOString() };
@@ -142,14 +171,18 @@ export async function detectMonorepo(
   }
 
   // 3. lerna.json
-  const lernaJson = await getFileContent(octokit, owner, repo, 'lerna.json');
+  const lernaJson = await getFileContent(octokit, owner, repo, "lerna.json");
   if (lernaJson) {
     try {
       const parsed = JSON.parse(lernaJson) as { packages?: string[] };
-      const globs = parsed.packages ?? ['packages/*'];
+      const globs = parsed.packages ?? ["packages/*"];
       const packages = await resolveGlobs(octokit, owner, repo, globs);
       if (packages.length > 0) {
-        return { type: 'lerna', packages, detectedAt: new Date().toISOString() };
+        return {
+          type: "lerna",
+          packages,
+          detectedAt: new Date().toISOString(),
+        };
       }
     } catch {
       // ignore

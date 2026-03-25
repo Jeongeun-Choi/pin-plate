@@ -1,5 +1,5 @@
-import type { Octokit } from '@octokit/rest';
-import { getWorkflowTemplate } from './workflow-template';
+import type { Octokit } from "@octokit/rest";
+import { getWorkflowTemplate } from "./workflow-template";
 
 type OctokitInstance = InstanceType<typeof Octokit>;
 
@@ -13,13 +13,13 @@ export async function installWorkflowIfMissing(
   repo: string,
   branch: string,
   workflowFile: string,
-): Promise<'created' | 'exists'> {
+): Promise<"created" | "exists"> {
   const path = `.github/workflows/${workflowFile}`;
 
   // 파일 존재 여부 확인
   try {
     await octokit.repos.getContent({ owner, repo, path });
-    return 'exists';
+    return "exists";
   } catch (err: unknown) {
     if ((err as { status?: number }).status !== 404) {
       throw err;
@@ -27,15 +27,15 @@ export async function installWorkflowIfMissing(
   }
 
   // 없으면 생성
-  const content = Buffer.from(getWorkflowTemplate()).toString('base64');
+  const content = Buffer.from(getWorkflowTemplate()).toString("base64");
   await octokit.repos.createOrUpdateFileContents({
     owner,
     repo,
     path,
-    message: 'chore: add GhostDev workflow',
+    message: "chore: add GhostDev workflow",
     content,
     branch,
   });
 
-  return 'created';
+  return "created";
 }

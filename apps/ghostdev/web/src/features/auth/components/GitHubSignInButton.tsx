@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { signInWithGitHub } from '../services/auth.service';
+import { useState } from "react";
+import { signInWithGitHub } from "../services/auth.service";
 
 interface Props {
   className?: string;
@@ -15,7 +15,7 @@ export function GitHubSignInButton({ className }: Props) {
     try {
       await signInWithGitHub();
     } catch (error) {
-      console.error('GitHub 로그인 실패:', error);
+      console.error("GitHub 로그인 실패:", error);
       setIsLoading(false);
     }
   }
@@ -23,7 +23,7 @@ export function GitHubSignInButton({ className }: Props) {
   return (
     <button className={className} onClick={handleSignIn} disabled={isLoading}>
       {isLoading ? (
-        'AUTHENTICATING...'
+        "AUTHENTICATING..."
       ) : (
         <>
           <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">

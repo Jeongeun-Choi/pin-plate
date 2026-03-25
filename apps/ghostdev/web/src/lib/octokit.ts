@@ -1,6 +1,6 @@
-import { Octokit } from '@octokit/rest';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { decryptToken } from './token-crypto';
+import { Octokit } from "@octokit/rest";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { decryptToken } from "./token-crypto";
 
 export function createOctokit(accessToken: string) {
   return new Octokit({ auth: accessToken });
@@ -21,9 +21,9 @@ export async function getGitHubToken(
   if (!user) return null;
 
   const { data } = await supabase
-    .from('ghostdev_users')
-    .select('github_access_token')
-    .eq('id', user.id)
+    .from("ghostdev_users")
+    .select("github_access_token")
+    .eq("id", user.id)
     .single();
 
   if (!data?.github_access_token) return null;

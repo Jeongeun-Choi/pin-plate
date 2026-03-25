@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   projectKeys,
   fetchProjects,
   createProject,
   deleteProject,
   fetchGitHubRepos,
-} from './queries';
+} from "./queries";
 
 export function useProjects() {
   return useQuery({
@@ -18,7 +18,7 @@ export function useProjects() {
 
 export function useGitHubRepos() {
   return useQuery({
-    queryKey: ['github', 'repos'],
+    queryKey: ["github", "repos"],
     queryFn: fetchGitHubRepos,
   });
 }

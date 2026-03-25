@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import type { WorkspaceConfig } from '@/types';
-import { CreateTicketModal } from './CreateTicketModal';
-import * as s from './InitTaskButton.css';
+import { useState } from "react";
+import type { WorkspaceConfig } from "@/types";
+import { CreateTicketModal } from "./CreateTicketModal";
+import * as s from "./InitTaskButton.css";
 
 interface Props {
   projectId: string;
@@ -12,7 +12,12 @@ interface Props {
   activeWorkspace?: string | null;
 }
 
-export function InitTaskButton({ projectId, defaultBranch, workspaceConfig, activeWorkspace }: Props) {
+export function InitTaskButton({
+  projectId,
+  defaultBranch,
+  workspaceConfig,
+  activeWorkspace,
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

@@ -1,5 +1,5 @@
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -32,17 +32,17 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isAuthPath =
-    pathname.startsWith('/sign-in') || pathname.startsWith('/auth');
+    pathname.startsWith("/sign-in") || pathname.startsWith("/auth");
 
   if (!user && !isAuthPath) {
     const url = request.nextUrl.clone();
-    url.pathname = '/sign-in';
+    url.pathname = "/sign-in";
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthPath && !pathname.startsWith('/auth')) {
+  if (user && isAuthPath && !pathname.startsWith("/auth")) {
     const url = request.nextUrl.clone();
-    url.pathname = '/projects';
+    url.pathname = "/projects";
     return NextResponse.redirect(url);
   }
 

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import type { Ticket, WorkspaceConfig } from '@/types';
-import { KanbanBoard } from './KanbanBoard';
-import { InitTaskButton } from './InitTaskButton';
-import * as s from './WorkspaceFilteredBoard.css';
+import { useState } from "react";
+import type { Ticket, WorkspaceConfig } from "@/types";
+import { KanbanBoard } from "./KanbanBoard";
+import { InitTaskButton } from "./InitTaskButton";
+import * as s from "./WorkspaceFilteredBoard.css";
 
 interface Props {
   tickets: Ticket[];
@@ -13,16 +13,21 @@ interface Props {
   defaultBranch: string;
 }
 
-export function WorkspaceFilteredBoard({ tickets, projectId, workspaceConfig, defaultBranch }: Props) {
-  const [activeWorkspace, setActiveWorkspace] = useState<string>('ALL');
+export function WorkspaceFilteredBoard({
+  tickets,
+  projectId,
+  workspaceConfig,
+  defaultBranch,
+}: Props) {
+  const [activeWorkspace, setActiveWorkspace] = useState<string>("ALL");
 
   const filteredTickets =
-    activeWorkspace === 'ALL'
+    activeWorkspace === "ALL"
       ? tickets
       : tickets.filter((t) => t.target_workspace === activeWorkspace);
 
   const countFor = (path: string) =>
-    path === 'ALL'
+    path === "ALL"
       ? tickets.length
       : tickets.filter((t) => t.target_workspace === path).length;
 
@@ -35,16 +40,16 @@ export function WorkspaceFilteredBoard({ tickets, projectId, workspaceConfig, de
           <span className={s.tabLabel}>WORKSPACE:</span>
           <div className={s.tabScroller}>
             <button
-              className={`${s.tab} ${activeWorkspace === 'ALL' ? s.tabActive : ''}`}
-              onClick={() => setActiveWorkspace('ALL')}
+              className={`${s.tab} ${activeWorkspace === "ALL" ? s.tabActive : ""}`}
+              onClick={() => setActiveWorkspace("ALL")}
             >
               ALL
-              <span className={s.tabCount}>·{countFor('ALL')}</span>
+              <span className={s.tabCount}>·{countFor("ALL")}</span>
             </button>
             {workspaceConfig.packages.map((pkg) => (
               <button
                 key={pkg.path}
-                className={`${s.tab} ${activeWorkspace === pkg.path ? s.tabActive : ''}`}
+                className={`${s.tab} ${activeWorkspace === pkg.path ? s.tabActive : ""}`}
                 onClick={() => setActiveWorkspace(pkg.path)}
               >
                 {pkg.displayName.toUpperCase()}
@@ -52,12 +57,14 @@ export function WorkspaceFilteredBoard({ tickets, projectId, workspaceConfig, de
               </button>
             ))}
           </div>
-          <div style={{ paddingBottom: '1px' }}>
+          <div style={{ paddingBottom: "1px" }}>
             <InitTaskButton
               projectId={projectId}
               defaultBranch={defaultBranch}
               workspaceConfig={workspaceConfig}
-              activeWorkspace={activeWorkspace === 'ALL' ? null : activeWorkspace}
+              activeWorkspace={
+                activeWorkspace === "ALL" ? null : activeWorkspace
+              }
             />
           </div>
         </div>

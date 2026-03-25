@@ -1,4 +1,4 @@
-export type TicketStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
+export type TicketStatus = "TODO" | "IN_PROGRESS" | "DONE";
 
 export interface WorkspacePackage {
   name: string;
@@ -7,23 +7,28 @@ export interface WorkspacePackage {
 }
 
 export interface WorkspaceConfig {
-  type: 'pnpm-workspaces' | 'npm-workspaces' | 'yarn-workspaces' | 'turbo' | 'lerna';
+  type:
+    | "pnpm-workspaces"
+    | "npm-workspaces"
+    | "yarn-workspaces"
+    | "turbo"
+    | "lerna";
   packages: WorkspacePackage[];
   detectedAt: string;
 }
 export type RunStatus =
-  | 'PENDING'
-  | 'QUEUED'
-  | 'IN_PROGRESS'
-  | 'SUCCESS'
-  | 'FAILURE'
-  | 'CANCELLED';
+  | "PENDING"
+  | "QUEUED"
+  | "IN_PROGRESS"
+  | "SUCCESS"
+  | "FAILURE"
+  | "CANCELLED";
 export type LogLevel =
-  | 'INFO'
-  | 'TOOL_CALL'
-  | 'TOOL_RESULT'
-  | 'ERROR'
-  | 'SUCCESS';
+  | "INFO"
+  | "TOOL_CALL"
+  | "TOOL_RESULT"
+  | "ERROR"
+  | "SUCCESS";
 
 export interface GhostdevUser {
   id: string;

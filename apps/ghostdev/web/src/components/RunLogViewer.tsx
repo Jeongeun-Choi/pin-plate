@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { useRunLogs } from '@/features/runs/hooks';
-import type { LogLevel } from '@/types';
-import * as s from './RunLogViewer.css';
+import { useEffect, useRef } from "react";
+import { useRunLogs } from "@/features/runs/hooks";
+import type { LogLevel } from "@/types";
+import * as s from "./RunLogViewer.css";
 
 interface Props {
   runId: string;
@@ -22,7 +22,7 @@ export function RunLogViewer({ runId }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
   return (
@@ -35,13 +35,18 @@ export function RunLogViewer({ runId }: Props) {
       <div className={s.logList}>
         {logs.length === 0 ? (
           <div className={s.emptyState}>
-            AWAITING_DATA...<span className={s.cursor} />
+            AWAITING_DATA...
+            <span className={s.cursor} />
           </div>
         ) : (
           logs.map((log) => (
             <div key={log.id} className={s.logLine}>
-              <span className={s.logSeq}>{String(log.sequence).padStart(4, '0')}</span>
-              <span className={`${s.logLevel} ${levelStyles[log.level]}`}>[{log.level}]</span>
+              <span className={s.logSeq}>
+                {String(log.sequence).padStart(4, "0")}
+              </span>
+              <span className={`${s.logLevel} ${levelStyles[log.level]}`}>
+                [{log.level}]
+              </span>
               <span className={s.logMessage}>{log.message}</span>
             </div>
           ))

@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
-import type { RunLog } from '@/types';
+import { useState, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createClient } from "@/lib/supabase/client";
+import type { RunLog } from "@/types";
 
 export const runKeys = {
-  logs: (runId: string) => ['runs', 'logs', runId] as const,
+  logs: (runId: string) => ["runs", "logs", runId] as const,
 };
 
 // workflow_dispatch를 트리거하고 runId를 반환
@@ -15,14 +15,14 @@ export function useTriggerRun(projectId: string) {
   return useMutation({
     mutationFn: async (ticketId: string) => {
       const res = await fetch(`/api/tickets/${ticketId}/run`, {
-        method: 'POST',
+        method: "POST",
       });
-      if (!res.ok) throw new Error('실행에 실패했습니다.');
+      if (!res.ok) throw new Error("실행에 실패했습니다.");
       return res.json() as Promise<{ runId: string }>;
     },
     onSuccess: () => {
       // 프로젝트 페이지의 run 목록 갱신
-      queryClient.invalidateQueries({ queryKey: ['runs', projectId] });
+      queryClient.invalidateQueries({ queryKey: ["runs", projectId] });
     },
   });
 }
@@ -36,10 +36,10 @@ export function useRunLogs(runId: string) {
 
     // 초기 로그 조회
     supabase
-      .from('ghostdev_run_logs')
-      .select('*')
-      .eq('run_id', runId)
-      .order('sequence', { ascending: true })
+      .from("ghostdev_run_logs")
+      .select("*")
+      .eq("run_id", runId)
+      .order("sequence", { ascending: true })
       .then(({ data }) => {
         if (data) setLogs(data as RunLog[]);
       });
@@ -48,11 +48,11 @@ export function useRunLogs(runId: string) {
     const channel = supabase
       .channel(`run-logs:${runId}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'ghostdev_run_logs',
+          event: "INSERT",
+          schema: "public",
+          table: "ghostdev_run_logs",
           filter: `run_id=eq.${runId}`,
         },
         (payload) => {

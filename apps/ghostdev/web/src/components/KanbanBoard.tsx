@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import * as s from './KanbanBoard.css';
-import { TicketCard } from './TicketCard';
-import type { Ticket, TicketStatus, WorkspaceConfig } from '@/types';
+import * as s from "./KanbanBoard.css";
+import { TicketCard } from "./TicketCard";
+import type { Ticket, TicketStatus, WorkspaceConfig } from "@/types";
 
 const COLUMNS: { status: TicketStatus; label: string }[] = [
-  { status: 'TODO', label: 'TODO' },
-  { status: 'IN_PROGRESS', label: 'IN_PROGRESS' },
-  { status: 'DONE', label: 'DONE' },
+  { status: "TODO", label: "TODO" },
+  { status: "IN_PROGRESS", label: "IN_PROGRESS" },
+  { status: "DONE", label: "DONE" },
 ];
 
 interface KanbanBoardProps {
@@ -16,10 +16,18 @@ interface KanbanBoardProps {
   workspaceConfig?: WorkspaceConfig | null;
 }
 
-export function KanbanBoard({ tickets, projectId, workspaceConfig }: KanbanBoardProps) {
-  function resolveWorkspaceTag(targetWorkspace: string | null): string | undefined {
+export function KanbanBoard({
+  tickets,
+  projectId,
+  workspaceConfig,
+}: KanbanBoardProps) {
+  function resolveWorkspaceTag(
+    targetWorkspace: string | null,
+  ): string | undefined {
     if (!targetWorkspace || !workspaceConfig) return undefined;
-    const pkg = workspaceConfig.packages.find((p) => p.path === targetWorkspace);
+    const pkg = workspaceConfig.packages.find(
+      (p) => p.path === targetWorkspace,
+    );
     return pkg ? pkg.displayName : targetWorkspace;
   }
 
@@ -30,7 +38,9 @@ export function KanbanBoard({ tickets, projectId, workspaceConfig }: KanbanBoard
         return (
           <div key={status} className={s.column}>
             <div className={s.columnHeader}>
-              <div className={`${s.indicator} ${s.indicatorVariants[status]}`} />
+              <div
+                className={`${s.indicator} ${s.indicatorVariants[status]}`}
+              />
               <span className={s.columnTitle}>{label}</span>
               <span className={s.count}>CNT: {columnTickets.length}</span>
             </div>

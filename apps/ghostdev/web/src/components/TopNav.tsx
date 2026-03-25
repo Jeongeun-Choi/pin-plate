@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import * as s from './TopNav.css';
-import { RepoDropdown } from './RepoDropdown';
-import { SignOutButton } from './SignOutButton';
-import { useCreateProject } from '@/features/projects/hooks';
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import * as s from "./TopNav.css";
+import { RepoDropdown } from "./RepoDropdown";
+import { SignOutButton } from "./SignOutButton";
+import { useCreateProject } from "@/features/projects/hooks";
 
 interface TopNavProps {
   userLogin?: string;
@@ -56,7 +56,7 @@ export function TopNav({ userLogin, userAvatar }: TopNavProps) {
       {/* 유저 정보 */}
       <div className={s.userSection}>
         <div className={s.userInfo}>
-          <span className={s.userName}>{userLogin ?? 'GHOST_OPERATOR'}</span>
+          <span className={s.userName}>{userLogin ?? "GHOST_OPERATOR"}</span>
           <div className={s.secureLink}>
             <span className={s.secureDot} />
             SECURE_LINK
@@ -66,7 +66,7 @@ export function TopNav({ userLogin, userAvatar }: TopNavProps) {
           {userAvatar ? (
             <Image src={userAvatar} alt="avatar" width={36} height={36} />
           ) : (
-            <div style={{ width: 36, height: 36, background: '#1a3040' }} />
+            <div style={{ width: 36, height: 36, background: "#1a3040" }} />
           )}
         </div>
         <SignOutButton />

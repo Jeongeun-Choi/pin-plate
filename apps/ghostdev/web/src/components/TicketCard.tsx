@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import * as s from './TicketCard.css';
-import { useTriggerRun } from '@/features/runs/hooks';
-import type { Ticket } from '@/types';
+import { useRouter } from "next/navigation";
+import * as s from "./TicketCard.css";
+import { useTriggerRun } from "@/features/runs/hooks";
+import type { Ticket } from "@/types";
 
-type Priority = 'CRITICAL' | 'HIGH' | 'NORMAL';
+type Priority = "CRITICAL" | "HIGH" | "NORMAL";
 
 function getPriority(priority: number): Priority {
-  if (priority >= 10) return 'CRITICAL';
-  if (priority >= 5) return 'HIGH';
-  return 'NORMAL';
+  if (priority >= 10) return "CRITICAL";
+  if (priority >= 5) return "HIGH";
+  return "NORMAL";
 }
 
 function getTicketDisplayId(id: string) {
@@ -23,7 +23,11 @@ interface TicketCardProps {
   workspaceTag?: string;
 }
 
-export function TicketCard({ ticket, projectId, workspaceTag }: TicketCardProps) {
+export function TicketCard({
+  ticket,
+  projectId,
+  workspaceTag,
+}: TicketCardProps) {
   const router = useRouter();
   const triggerRun = useTriggerRun(projectId);
   const priority = getPriority(ticket.priority);
@@ -51,14 +55,14 @@ export function TicketCard({ ticket, projectId, workspaceTag }: TicketCardProps)
           {priority}
         </span>
 
-        {ticket.status === 'TODO' && (
+        {ticket.status === "TODO" && (
           <button
             className={s.playButton}
             onClick={handleRun}
             disabled={triggerRun.isPending}
             title="AI 에이전트 실행"
           >
-            {triggerRun.isPending ? '⟳' : '▶'}
+            {triggerRun.isPending ? "⟳" : "▶"}
           </button>
         )}
       </div>
