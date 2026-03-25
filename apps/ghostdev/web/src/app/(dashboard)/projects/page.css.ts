@@ -109,6 +109,14 @@ export const openButton = style({
   },
 });
 
+export const monorepoBadge = style({
+  fontSize: '10px',
+  color: vars.color.cyan,
+  letterSpacing: '0.08em',
+  opacity: 0.7,
+  marginLeft: 'auto',
+});
+
 export const emptyState = style({
   display: 'flex',
   alignItems: 'center',

@@ -1,24 +1,34 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import type { WorkspaceConfig } from '@/types';
 import * as s from './RepoDropdown.css';
 
 interface GitHubRepo {
   id: string;
-  fullName: string;
+  owner: string;
   name: string;
+  fullName: string;
+  defaultBranch: string;
   private: boolean;
+  description: string | null;
+}
+
+interface SelectedRepo extends GitHubRepo {
+  workspaceConfig: WorkspaceConfig | null;
 }
 
 interface Props {
   initialRepo?: string;
+  onRepoSelect?: (repo: SelectedRepo) => void;
 }
 
-export function RepoDropdown({ initialRepo }: Props) {
+export function RepoDropdown({ initialRepo, onRepoSelect }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(initialRepo);
   const [repos, setRepos] = useState<GitHubRepo[]>([]);
   const [loading, setLoading] = useState(false);
+  const [detecting, setDetecting] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,11 +53,33 @@ export function RepoDropdown({ initialRepo }: Props) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const displayName = selected
-    ? selected.length > 20
-      ? selected.slice(0, 20) + '…'
-      : selected
-    : 'SELECT_REPO';
+  async function handleRepoSelect(repo: GitHubRepo) {
+    setSelected(repo.fullName);
+    setIsOpen(false);
+
+    if (!onRepoSelect) return;
+
+    setDetecting(true);
+    try {
+      const res = await fetch(
+        `/api/github/detect-monorepo?owner=${repo.owner}&repo=${repo.name}`,
+      );
+      const workspaceConfig: WorkspaceConfig | null = res.ok ? await res.json() : null;
+      onRepoSelect({ ...repo, workspaceConfig });
+    } catch {
+      onRepoSelect({ ...repo, workspaceConfig: null });
+    } finally {
+      setDetecting(false);
+    }
+  }
+
+  const displayName = detecting
+    ? 'DETECTING...'
+    : selected
+      ? selected.length > 20
+        ? selected.slice(0, 20) + '…'
+        : selected
+      : 'SELECT_REPO';
 
   return (
     <div ref={wrapperRef} className={s.wrapper}>
@@ -55,6 +87,7 @@ export function RepoDropdown({ initialRepo }: Props) {
         className={`${s.trigger} ${isOpen ? s.triggerOpen : ''}`}
         onClick={() => setIsOpen((v) => !v)}
         type="button"
+        disabled={detecting}
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
@@ -72,10 +105,7 @@ export function RepoDropdown({ initialRepo }: Props) {
               <div
                 key={repo.id}
                 className={s.repoItem}
-                onClick={() => {
-                  setSelected(repo.fullName);
-                  setIsOpen(false);
-                }}
+                onClick={() => handleRepoSelect(repo)}
               >
                 {repo.fullName}
               </div>

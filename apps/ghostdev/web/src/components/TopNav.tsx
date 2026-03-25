@@ -1,16 +1,44 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import * as s from './TopNav.css';
 import { RepoDropdown } from './RepoDropdown';
 import { SignOutButton } from './SignOutButton';
-import type { Project } from '@/types';
+import { useCreateProject } from '@/features/projects/hooks';
 
 interface TopNavProps {
-  project?: Project;
   userLogin?: string;
   userAvatar?: string;
 }
 
-export function TopNav({ project, userLogin, userAvatar }: TopNavProps) {
+export function TopNav({ userLogin, userAvatar }: TopNavProps) {
+  const router = useRouter();
+  const createProject = useCreateProject();
+
+  async function handleRepoSelect(repo: {
+    owner: string;
+    name: string;
+    fullName: string;
+    id: string;
+    defaultBranch: string;
+    private: boolean;
+    description: string | null;
+    workspaceConfig: unknown;
+  }) {
+    const result = await createProject.mutateAsync({
+      repoOwner: repo.owner,
+      repoName: repo.name,
+      repoFullName: repo.fullName,
+      repoNodeId: repo.id,
+      defaultBranch: repo.defaultBranch,
+      name: repo.name,
+      description: repo.description ?? undefined,
+      workspaceConfig: repo.workspaceConfig ?? undefined,
+    });
+    router.push(`/projects/${result.id}`);
+  }
+
   return (
     <nav className={s.nav}>
       {/* 로고 */}
@@ -23,7 +51,7 @@ export function TopNav({ project, userLogin, userAvatar }: TopNavProps) {
       </div>
 
       {/* 레포 선택기 */}
-      <RepoDropdown initialRepo={project?.repo_full_name} />
+      <RepoDropdown onRepoSelect={handleRepoSelect} />
 
       {/* 유저 정보 */}
       <div className={s.userSection}>

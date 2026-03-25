@@ -9,6 +9,7 @@ export async function runAgent({
   ticketTitle,
   ticketDescription,
   baseBranch,
+  targetWorkspace,
   logger,
 }: AgentInput) {
   await logger.info(`티켓 구현 시작: ${ticketTitle}`);
@@ -17,7 +18,7 @@ export async function runAgent({
 
   const result = await generateText({
     model: anthropic('claude-sonnet-4-6'),
-    system: buildSystemPrompt({ repoPath: process.cwd() }),
+    system: buildSystemPrompt({ repoPath: process.cwd(), targetWorkspace }),
     prompt: buildTicketPrompt({
       title: ticketTitle,
       description: ticketDescription,

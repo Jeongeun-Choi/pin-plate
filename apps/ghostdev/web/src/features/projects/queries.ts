@@ -19,6 +19,7 @@ export async function createProject(data: {
   workflowFile?: string;
   name: string;
   description?: string;
+  workspaceConfig?: unknown;
 }) {
   const res = await fetch('/api/projects', {
     method: 'POST',
