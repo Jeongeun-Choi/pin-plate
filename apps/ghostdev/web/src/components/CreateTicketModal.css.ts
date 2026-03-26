@@ -134,3 +134,41 @@ export const submitButton = style({
 export const submitInner = style({
   transform: 'skewX(8deg)',
 });
+
+export const branchPrefixGroup = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: vars.space.xs,
+});
+
+export const prefixButton = style({
+  background: 'none',
+  border: `1px solid ${vars.color.cardBorder}`,
+  color: vars.color.textDim,
+  fontSize: '11px',
+  fontFamily: vars.font.mono,
+  fontWeight: 700,
+  letterSpacing: '0.05em',
+  padding: `${vars.space.xs} ${vars.space.sm}`,
+  cursor: 'pointer',
+  transition: 'border-color 0.1s, color 0.1s',
+  ':hover': {
+    borderColor: vars.color.cyan,
+    color: vars.color.text,
+  },
+});
+
+export const prefixButtonActive = style({
+  borderColor: vars.color.cyan,
+  color: vars.color.cyan,
+  backgroundColor: 'rgba(0, 255, 255, 0.06)',
+});
+
+export const branchPreview = style({
+  fontSize: '11px',
+  fontFamily: vars.font.mono,
+  color: vars.color.cyan,
+  opacity: 0.7,
+  marginTop: vars.space.xs,
+  letterSpacing: '0.03em',
+});

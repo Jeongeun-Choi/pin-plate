@@ -1,9 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { WorkspaceConfig } from '@/types';
 import * as s from './CreateTicketModal.css';
+
+const BRANCH_PREFIXES = ['feature', 'bugfix', 'chore', 'refactor'] as const;
+
+const fallbackSlug = (title: string) =>
+  title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
 interface Props {
   projectId: string;
@@ -26,8 +31,11 @@ export function CreateTicketModal({
   const [baseBranch, setBaseBranch] = useState(defaultBranch);
   const [targetWorkspace, setTargetWorkspace] = useState<string>(defaultWorkspace ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [branchPrefix, setBranchPrefix] = useState<string>('feature');
+  const [generatedSlug, setGeneratedSlug] = useState('');
+  const [isGeneratingSlug, setIsGeneratingSlug] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
@@ -41,6 +49,7 @@ export function CreateTicketModal({
           title: title.trim(),
           description: description.trim() || undefined,
           baseBranch,
+          branchPrefix,
           targetWorkspace: targetWorkspace || null,
         }),
       });
@@ -52,7 +61,38 @@ export function CreateTicketModal({
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    if (!title.trim()) {
+      setGeneratedSlug('');
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsGeneratingSlug(true);
+      try {
+        const res = await fetch('/api/generate-branch-name', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: title.trim() }),
+        });
+        if (!res.ok) throw new Error('Failed');
+        const { slug } = await res.json();
+        setGeneratedSlug(slug);
+      } catch {
+        setGeneratedSlug(fallbackSlug(title.trim()));
+      } finally {
+        setIsGeneratingSlug(false);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [title]);
+
+  const branchPreview = generatedSlug
+    ? `${branchPrefix}/${generatedSlug}`
+    : null;
 
   return (
     <div className={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -75,6 +115,23 @@ export function CreateTicketModal({
                 autoFocus
                 required
               />
+              <div className={s.branchPrefixGroup}>
+                {BRANCH_PREFIXES.map((prefix) => (
+                  <button
+                    key={prefix}
+                    type="button"
+                    className={`${s.prefixButton}${branchPrefix === prefix ? ` ${s.prefixButtonActive}` : ''}`}
+                    onClick={() => setBranchPrefix(prefix)}
+                  >
+                    {prefix}/
+                  </button>
+                ))}
+              </div>
+              {(isGeneratingSlug || branchPreview) && (
+                <span className={s.branchPreview}>
+                  {isGeneratingSlug ? `${branchPrefix}/...` : branchPreview}
+                </span>
+              )}
             </div>
 
             <div className={s.fieldGroup}>

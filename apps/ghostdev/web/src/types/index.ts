@@ -57,6 +57,7 @@ export interface Ticket {
   description: string | null;
   status: TicketStatus;
   priority: number;
+  branch_prefix: string | null;
   base_branch: string | null;
   pr_url: string | null;
   pr_number: number | null;
