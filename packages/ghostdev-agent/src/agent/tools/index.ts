@@ -66,7 +66,7 @@ export function createTools(logger: AgentLogger) {
           return { success: true, output };
         } catch (error) {
           const err = error as { message?: string; stdout?: string; stderr?: string };
-          await logger.error(`명령어 실패: ${command}`, err.stderr);
+          await logger.error(`명령어 실패: ${command}${err.stderr ? ` — ${err.stderr}` : ''}`);
           return {
             success: false,
             error: err.message,

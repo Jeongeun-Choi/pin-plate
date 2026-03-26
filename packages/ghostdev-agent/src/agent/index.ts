@@ -3,15 +3,16 @@ import { anthropic } from '@ai-sdk/anthropic';
 import { createTools } from './tools/index.js';
 import { buildSystemPrompt } from './prompts/system.js';
 import { buildTicketPrompt } from './prompts/ticket.js';
-import type { AgentInput } from '../types.js';
+import type { AgentInput, AgentResult } from '../types.js';
 
 export async function runAgent({
   ticketTitle,
   ticketDescription,
   baseBranch,
+  branchPrefix,
   targetWorkspace,
   logger,
-}: AgentInput) {
+}: AgentInput): Promise<AgentResult> {
   await logger.info(`티켓 구현 시작: ${ticketTitle}`);
 
   const tools = createTools(logger);
@@ -23,13 +24,10 @@ export async function runAgent({
       title: ticketTitle,
       description: ticketDescription,
       baseBranch,
+      branchPrefix,
     }),
     tools,
     maxSteps: 50,
-    onStepStart: async (step) => {
-      if (step.stepType === 'tool-result') return;
-      await logger.info(`Step: ${step.stepType}`);
-    },
     onStepFinish: async (step) => {
       for (const toolCall of step.toolCalls ?? []) {
         await logger.toolCall(toolCall.toolName, toolCall.args);
@@ -37,9 +35,15 @@ export async function runAgent({
     },
   });
 
+  const tokenUsage = {
+    promptTokens: result.usage.promptTokens,
+    completionTokens: result.usage.completionTokens,
+    totalTokens: result.usage.totalTokens,
+  };
+
   await logger.success(
-    `완료. 총 ${result.usage.totalTokens} 토큰 사용.`,
+    `완료. 총 ${tokenUsage.totalTokens} 토큰 사용. (입력: ${tokenUsage.promptTokens}, 출력: ${tokenUsage.completionTokens})`,
   );
 
-  return result;
+  return { tokenUsage };
 }

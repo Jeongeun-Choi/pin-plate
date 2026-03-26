@@ -32,14 +32,14 @@ export function TicketCard({
   const triggerRun = useTriggerRun(projectId);
   const priority = getPriority(ticket.priority);
 
-  function handleRun(e: React.MouseEvent) {
+  const handleRun = (e: React.MouseEvent) => {
     e.stopPropagation();
     triggerRun.mutate(ticket.id, {
       onSuccess: ({ runId }) => {
         router.push(`/projects/${projectId}/runs/${runId}`);
       },
     });
-  }
+  };
 
   return (
     <div className={s.card}>

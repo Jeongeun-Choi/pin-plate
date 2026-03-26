@@ -25,8 +25,17 @@ on:
         required: false
         type: string
         default: 'main'
-      supabase_url:
-        description: 'GhostDev Supabase URL (for log streaming)'
+      branch_prefix:
+        description: 'Branch prefix (feature, bugfix, chore, refactor)'
+        required: false
+        type: string
+        default: 'feature'
+      callback_url:
+        description: 'GhostDev callback URL (for reporting token usage)'
+        required: true
+        type: string
+      callback_token:
+        description: 'One-time callback auth token'
         required: true
         type: string
       target_workspace:
@@ -62,17 +71,17 @@ jobs:
 
       - name: Run GhostDev Agent
         env:
-          # 유저 본인의 API 키 — GhostDev 서버는 절대 알 수 없음
+          # 유저 본인의 API 키 — GhostDev가 프로젝트 연결 시 자동 등록
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # GhostDev가 제공하는 로그 스트리밍용 service key
-          GHOSTDEV_SUPABASE_SERVICE_KEY: ${{ secrets.GHOSTDEV_SUPABASE_SERVICE_KEY }}
           # workflow_dispatch inputs → 에이전트 환경변수
           GHOSTDEV_RUN_ID: ${{ inputs.run_id }}
           GHOSTDEV_TICKET_ID: ${{ inputs.ticket_id }}
           GHOSTDEV_TICKET_TITLE: ${{ inputs.ticket_title }}
           GHOSTDEV_TICKET_DESCRIPTION: ${{ inputs.ticket_description }}
           GHOSTDEV_BASE_BRANCH: ${{ inputs.base_branch }}
-          GHOSTDEV_SUPABASE_URL: ${{ inputs.supabase_url }}
+          GHOSTDEV_BRANCH_PREFIX: ${{ inputs.branch_prefix }}
+          GHOSTDEV_CALLBACK_URL: ${{ inputs.callback_url }}
+          GHOSTDEV_CALLBACK_TOKEN: ${{ inputs.callback_token }}
           GHOSTDEV_TARGET_WORKSPACE: ${{ inputs.target_workspace }}
           # GitHub Actions 기본 제공 토큰 (PR 생성에 사용)
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

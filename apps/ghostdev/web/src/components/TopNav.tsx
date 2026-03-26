@@ -36,6 +36,14 @@ export function TopNav({ userLogin, userAvatar }: TopNavProps) {
       description: repo.description ?? undefined,
       workspaceConfig: repo.workspaceConfig ?? undefined,
     });
+
+    if (result.secretsInstalled === false) {
+      alert(
+        "레포 시크릿 자동 등록에 실패했습니다.\n" +
+          "GitHub Settings > Secrets에서 ANTHROPIC_API_KEY를 직접 등록해주세요.",
+      );
+    }
+
     router.push(`/projects/${result.id}`);
   }
 

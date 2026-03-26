@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createOctokit, getGitHubToken } from "@/lib/octokit";
 import { installWorkflowIfMissing } from "@/lib/github-actions/install-workflow";
+import { installRepoSecrets } from "@/lib/github-actions/install-secrets";
 
 const createProjectSchema = z.object({
   repoOwner: z.string().min(1),
@@ -72,8 +73,9 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
-  // workflow 파일 자동 설치 (실패해도 project 생성은 유지)
+  // workflow 파일 + 시크릿 자동 설치 (실패해도 project 생성은 유지)
   let workflowInstalled: boolean | null = null;
+  let secretsInstalled: boolean | null = null;
   try {
     const token = await getGitHubToken(supabase, session.provider_token);
     if (token) {
@@ -86,11 +88,30 @@ export async function POST(request: NextRequest) {
         parsed.data.workflowFile,
       );
       workflowInstalled = result === "created";
+
+      // 에이전트 실행에 필요한 시크릿 자동 등록
+      const secrets = [
+        { name: "ANTHROPIC_API_KEY", value: process.env.ANTHROPIC_API_KEY! },
+      ].filter((s) => s.value);
+
+      if (secrets.length > 0) {
+        const secretResult = await installRepoSecrets(
+          octokit,
+          parsed.data.repoOwner,
+          parsed.data.repoName,
+          secrets,
+        );
+        secretsInstalled = secretResult.failed.length === 0;
+      }
     }
   } catch (err) {
-    console.error("workflow 자동 설치 실패:", err);
-    workflowInstalled = false;
+    console.error("workflow/시크릿 자동 설치 실패:", err);
+    workflowInstalled = workflowInstalled ?? false;
+    secretsInstalled = secretsInstalled ?? false;
   }
 
-  return NextResponse.json({ ...created, workflowInstalled }, { status: 201 });
+  return NextResponse.json(
+    { ...created, workflowInstalled, secretsInstalled },
+    { status: 201 },
+  );
 }

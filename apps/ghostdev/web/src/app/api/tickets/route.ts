@@ -7,6 +7,7 @@ const createTicketSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   baseBranch: z.string().optional(),
+  branchPrefix: z.string().optional(),
   targetWorkspace: z.string().nullable().optional(),
   priority: z.number().int().min(1).max(3).optional().default(2),
 });
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       project_id: parsed.data.projectId,
       title: parsed.data.title,
       description: parsed.data.description ?? null,
+      branch_prefix: parsed.data.branchPrefix ?? null,
       base_branch: parsed.data.baseBranch ?? null,
       target_workspace: parsed.data.targetWorkspace ?? null,
       priority: parsed.data.priority,

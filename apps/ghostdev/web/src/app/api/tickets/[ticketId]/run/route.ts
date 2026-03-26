@@ -18,7 +18,9 @@ interface DispatchInputs {
   ticket_title: string;
   ticket_description: string;
   base_branch: string;
-  supabase_url: string;
+  branch_prefix: string;
+  callback_url: string;
+  callback_token: string;
   target_workspace: string;
 }
 
@@ -40,6 +42,19 @@ export async function POST(_request: NextRequest, { params }: Params) {
 
   const user = session.user;
 
+  // 일일 토큰 한도 체크 (50만 토큰)
+  const DAILY_TOKEN_LIMIT = 500_000;
+  const { data: todayUsage } = await supabase.rpc("get_today_token_usage", {
+    p_user_id: user.id,
+  });
+
+  if (todayUsage !== null && todayUsage >= DAILY_TOKEN_LIMIT) {
+    return NextResponse.json(
+      { error: "일일 토큰 한도(50만)를 초과했습니다. 내일 다시 시도해주세요." },
+      { status: 429 },
+    );
+  }
+
   // 티켓 + 프로젝트 정보 조회 (소유권 확인 포함)
   const { data: ticket } = await supabase
     .from("ghostdev_tickets")
@@ -54,13 +69,15 @@ export async function POST(_request: NextRequest, { params }: Params) {
 
   const project = ticket.ghostdev_projects;
 
-  // 1. agent_runs 레코드 생성 — runId가 에이전트와의 correlation key
+  // 1. agent_runs 레코드 생성 — runId + callbackToken이 에이전트와의 correlation key
+  const callbackToken = crypto.randomUUID();
   const { data: run } = await supabase
     .from("ghostdev_agent_runs")
     .insert({
       ticket_id: ticket.id,
       triggered_by: user.id,
       status: "PENDING",
+      callback_token: callbackToken,
     })
     .select()
     .single<AgentRun>();
@@ -78,7 +95,9 @@ export async function POST(_request: NextRequest, { params }: Params) {
     ticket_title: ticket.title,
     ticket_description: ticket.description ?? "",
     base_branch: ticket.base_branch ?? project.default_branch,
-    supabase_url: process.env.SUPABASE_URL!,
+    branch_prefix: ticket.branch_prefix ?? "feature",
+    callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/runs/${run.id}/callback`,
+    callback_token: callbackToken,
     target_workspace: ticket.target_workspace ?? "",
   };
 
@@ -101,6 +120,12 @@ export async function POST(_request: NextRequest, { params }: Params) {
         dispatch_inputs: JSON.stringify(dispatchInputs),
       })
       .eq("id", run.id);
+
+    // 4. 티켓 상태를 IN_PROGRESS로 업데이트
+    await supabase
+      .from("ghostdev_tickets")
+      .update({ status: "IN_PROGRESS" })
+      .eq("id", ticket.id);
 
     return NextResponse.json({ runId: run.id }, { status: 201 });
   } catch (error) {

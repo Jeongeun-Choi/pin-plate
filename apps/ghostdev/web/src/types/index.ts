@@ -62,6 +62,7 @@ export interface Ticket {
   description: string | null;
   status: TicketStatus;
   priority: number;
+  branch_prefix: string | null;
   base_branch: string | null;
   pr_url: string | null;
   pr_number: number | null;
@@ -78,6 +79,9 @@ export interface AgentRun {
   github_run_url: string | null;
   status: RunStatus;
   dispatch_inputs: string | null;
+  prompt_tokens: number | null;
+  completion_tokens: number | null;
+  total_tokens: number | null;
   started_at: string | null;
   completed_at: string | null;
   created_at: string;
