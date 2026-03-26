@@ -6,6 +6,7 @@ import * as s from "./TopNav.css";
 import { RepoDropdown } from "./RepoDropdown";
 import { SignOutButton } from "./SignOutButton";
 import { useProjects, useCreateProject } from "@/features/projects/hooks";
+import type { Project } from "@/types";
 
 interface TopNavProps {
   userLogin?: string;
@@ -27,7 +28,9 @@ export function TopNav({ userLogin, userAvatar }: TopNavProps) {
     description: string | null;
     workspaceConfig: unknown;
   }) => {
-    const existingProject = projects.find((p) => p.repo_node_id === repo.id);
+    const existingProject = projects.find(
+      (p: Project) => p.repo_node_id === repo.id,
+    );
     if (existingProject) {
       router.push(`/projects/${existingProject.id}`);
       return;

@@ -30,12 +30,12 @@ export function WorkspaceFilteredBoard({
   const filteredTickets =
     activeWorkspace === "ALL"
       ? tickets
-      : tickets.filter((t) => t.target_workspace === activeWorkspace);
+      : tickets.filter((t: Ticket) => t.target_workspace === activeWorkspace);
 
   const countFor = (path: string) =>
     path === "ALL"
       ? tickets.length
-      : tickets.filter((t) => t.target_workspace === path).length;
+      : tickets.filter((t: Ticket) => t.target_workspace === path).length;
 
   const isMonorepo = workspaceConfig && workspaceConfig.packages.length > 0;
 

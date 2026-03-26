@@ -36,6 +36,7 @@ export const indicatorVariants = styleVariants({
   TODO: { backgroundColor: vars.color.cyan },
   IN_PROGRESS: { backgroundColor: vars.color.yellow },
   DONE: { backgroundColor: vars.color.green },
+  FAILED: { backgroundColor: vars.color.red },
 });
 
 export const columnTitle = style({

@@ -96,7 +96,7 @@ export async function POST(_request: NextRequest, { params }: Params) {
     ticket_description: ticket.description ?? "",
     base_branch: ticket.base_branch ?? project.default_branch,
     branch_prefix: ticket.branch_prefix ?? "feature",
-    callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/runs/${run.id}/callback`,
+    callback_url: `${process.env.NEXT_PUBLIC_APP_URL || _request.nextUrl.origin}/api/runs/${run.id}/callback`,
     callback_token: callbackToken,
     target_workspace: ticket.target_workspace ?? "",
   };
