@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { type ReactNode, Suspense } from "react";
+import { type ReactNode } from "react";
 import { Space_Mono } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import "@/styles/global.css";
@@ -20,9 +20,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko" className={spaceMono.variable}>
       <body>
-        <Providers>
-          <Suspense fallback={null}>{children}</Suspense>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

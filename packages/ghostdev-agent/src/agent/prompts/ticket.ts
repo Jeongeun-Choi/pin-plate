@@ -6,11 +6,14 @@ interface Ticket {
 }
 
 export function buildTicketPrompt(ticket: Ticket): string {
-  const prefix = ticket.branchPrefix ?? 'feature';
-  const branchName = `${prefix}/${ticket.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+  const prefix = ticket.branchPrefix ?? "feature";
+  const branchName = `${prefix}/${ticket.title
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")}`;
   return `## Ticket: ${ticket.title}
 
-${ticket.description || '(No additional description provided)'}
+${ticket.description || "(No additional description provided)"}
 
 ## Instructions
 - Base branch: \`${ticket.baseBranch}\`

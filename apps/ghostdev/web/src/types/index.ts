@@ -1,4 +1,4 @@
-export type TicketStatus = "TODO" | "IN_PROGRESS" | "DONE";
+export type TicketStatus = "TODO" | "IN_PROGRESS" | "DONE" | "FAILED";
 
 export interface WorkspacePackage {
   name: string;
@@ -82,6 +82,7 @@ export interface AgentRun {
   prompt_tokens: number | null;
   completion_tokens: number | null;
   total_tokens: number | null;
+  retry_count: number;
   started_at: string | null;
   completed_at: string | null;
   created_at: string;

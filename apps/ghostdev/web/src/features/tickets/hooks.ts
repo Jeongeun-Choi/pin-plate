@@ -8,12 +8,13 @@ import {
   updateTicket,
   deleteTicket,
 } from "./queries";
-import type { TicketStatus } from "@/types";
+import type { Ticket, TicketStatus } from "@/types";
 
-export function useTickets(projectId: string) {
+export function useTickets(projectId: string, initialData?: Ticket[]) {
   return useQuery({
     queryKey: ticketKeys.lists(projectId),
     queryFn: () => fetchTickets(projectId),
+    initialData,
   });
 }
 

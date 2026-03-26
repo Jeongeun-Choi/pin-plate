@@ -1,3 +1,3 @@
-import nextConfig from '@pin-plate/eslint-config/next';
+import nextConfig from "@pin-plate/eslint-config/next";
 
 export default nextConfig;

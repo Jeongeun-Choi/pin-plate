@@ -5,7 +5,7 @@ import Image from "next/image";
 import * as s from "./TopNav.css";
 import { RepoDropdown } from "./RepoDropdown";
 import { SignOutButton } from "./SignOutButton";
-import { useCreateProject } from "@/features/projects/hooks";
+import { useProjects, useCreateProject } from "@/features/projects/hooks";
 
 interface TopNavProps {
   userLogin?: string;
@@ -14,9 +14,10 @@ interface TopNavProps {
 
 export function TopNav({ userLogin, userAvatar }: TopNavProps) {
   const router = useRouter();
+  const { data: projects = [] } = useProjects();
   const createProject = useCreateProject();
 
-  async function handleRepoSelect(repo: {
+  const handleRepoSelect = async (repo: {
     owner: string;
     name: string;
     fullName: string;
@@ -25,7 +26,13 @@ export function TopNav({ userLogin, userAvatar }: TopNavProps) {
     private: boolean;
     description: string | null;
     workspaceConfig: unknown;
-  }) {
+  }) => {
+    const existingProject = projects.find((p) => p.repo_node_id === repo.id);
+    if (existingProject) {
+      router.push(`/projects/${existingProject.id}`);
+      return;
+    }
+
     const result = await createProject.mutateAsync({
       repoOwner: repo.owner,
       repoName: repo.name,
@@ -45,7 +52,7 @@ export function TopNav({ userLogin, userAvatar }: TopNavProps) {
     }
 
     router.push(`/projects/${result.id}`);
-  }
+  };
 
   return (
     <nav className={s.nav}>

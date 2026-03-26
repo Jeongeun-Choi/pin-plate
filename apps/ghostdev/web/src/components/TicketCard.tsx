@@ -55,14 +55,23 @@ export function TicketCard({
           {priority}
         </span>
 
-        {ticket.status === "TODO" && (
+        {(ticket.status === "TODO" || ticket.status === "FAILED") && (
           <button
             className={s.playButton}
             onClick={handleRun}
             disabled={triggerRun.isPending}
-            title="AI 에이전트 실행"
+            title={
+              ticket.status === "FAILED" ? "수동 재시도" : "AI 에이전트 실행"
+            }
+            style={
+              ticket.status === "FAILED" ? { color: "#EF4444" } : undefined
+            }
           >
-            {triggerRun.isPending ? "⟳" : "▶"}
+            {triggerRun.isPending
+              ? "⟳"
+              : ticket.status === "FAILED"
+                ? "⟳"
+                : "▶"}
           </button>
         )}
       </div>

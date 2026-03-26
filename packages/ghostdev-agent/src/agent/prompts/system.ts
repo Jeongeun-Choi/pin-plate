@@ -7,7 +7,7 @@ export function buildSystemPrompt({
 }): string {
   const workspaceSection = targetWorkspace
     ? `\nThis repository is a monorepo. Your task is scoped to the \`${targetWorkspace}\` workspace/package. Focus your exploration and changes within that directory unless the change requires touching shared code.\n`
-    : '';
+    : "";
 
   return `You are GhostDev, an expert software engineer AI agent.
 You are running inside a GitHub Actions runner with a checked-out repository at: ${repoPath}

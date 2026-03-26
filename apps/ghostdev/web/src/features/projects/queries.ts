@@ -6,6 +6,7 @@ export const projectKeys = {
 
 export async function fetchProjects() {
   const res = await fetch("/api/projects");
+  console.log("fetchProjects response", res);
   if (!res.ok) throw new Error("프로젝트 목록을 불러오지 못했습니다.");
   return res.json();
 }

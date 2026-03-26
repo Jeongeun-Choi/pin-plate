@@ -57,7 +57,7 @@ export default async function ProjectPage({ params }: Props) {
       </div>
 
       <WorkspaceFilteredBoard
-        tickets={(projectTickets ?? []) as Ticket[]}
+        initialTickets={(projectTickets ?? []) as Ticket[]}
         projectId={projectId}
         workspaceConfig={project.workspace_config}
         defaultBranch={project.default_branch}

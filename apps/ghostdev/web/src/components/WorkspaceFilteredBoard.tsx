@@ -2,24 +2,30 @@
 
 import { useState } from "react";
 import type { Ticket, WorkspaceConfig } from "@/types";
+import { useTickets } from "@/features/tickets/hooks";
 import { KanbanBoard } from "./KanbanBoard";
 import { InitTaskButton } from "./InitTaskButton";
 import * as s from "./WorkspaceFilteredBoard.css";
 
 interface Props {
-  tickets: Ticket[];
+  initialTickets: Ticket[];
   projectId: string;
   workspaceConfig: WorkspaceConfig | null;
   defaultBranch: string;
 }
 
 export function WorkspaceFilteredBoard({
-  tickets,
+  initialTickets,
   projectId,
   workspaceConfig,
   defaultBranch,
 }: Props) {
   const [activeWorkspace, setActiveWorkspace] = useState<string>("ALL");
+
+  const { data: tickets = initialTickets } = useTickets(
+    projectId,
+    initialTickets,
+  );
 
   const filteredTickets =
     activeWorkspace === "ALL"

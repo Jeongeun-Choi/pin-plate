@@ -1,35 +1,11 @@
 import type { ReactNode } from "react";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { TopNav } from "@/components/TopNav";
+import { TopNavLoader } from "@/components/TopNavLoader";
 import * as s from "./layout.css";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  const { data: ghostUser } = await supabase
-    .from("ghostdev_users")
-    .select("github_login, avatar_url")
-    .eq("id", user!.id)
-    .single();
-
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className={s.wrapper}>
-      <TopNav
-        userLogin={ghostUser?.github_login}
-        userAvatar={ghostUser?.avatar_url ?? undefined}
-      />
+      <TopNavLoader />
       <main className={s.main}>{children}</main>
     </div>
   );

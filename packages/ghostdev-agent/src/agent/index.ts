@@ -1,9 +1,9 @@
-import { generateText } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
-import { createTools } from './tools/index.js';
-import { buildSystemPrompt } from './prompts/system.js';
-import { buildTicketPrompt } from './prompts/ticket.js';
-import type { AgentInput, AgentResult } from '../types.js';
+import { generateText } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+import { createTools } from "./tools/index.js";
+import { buildSystemPrompt } from "./prompts/system.js";
+import { buildTicketPrompt } from "./prompts/ticket.js";
+import type { AgentInput, AgentResult } from "../types.js";
 
 export async function runAgent({
   ticketTitle,
@@ -18,7 +18,7 @@ export async function runAgent({
   const tools = createTools(logger);
 
   const result = await generateText({
-    model: anthropic('claude-sonnet-4-6'),
+    model: anthropic("claude-sonnet-4-6"),
     system: buildSystemPrompt({ repoPath: process.cwd(), targetWorkspace }),
     prompt: buildTicketPrompt({
       title: ticketTitle,
