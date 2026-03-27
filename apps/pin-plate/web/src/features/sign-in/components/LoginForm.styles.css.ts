@@ -98,30 +98,6 @@ export const googleButton = style([
   },
 ]);
 
-export const kakaoButton = style([
-  ssoButton,
-  {
-    backgroundColor: '#fee500',
-    border: '1px solid #fee500',
-    color: '#000000',
-    ':hover': {
-      backgroundColor: '#fddc00',
-    },
-  },
-]);
-
-export const appleButton = style([
-  ssoButton,
-  {
-    backgroundColor: '#000000',
-    border: '1px solid #000000',
-    color: '#ffffff',
-    ':hover': {
-      backgroundColor: '#333333',
-    },
-  },
-]);
-
 export const buttonIcon = style({
   position: 'absolute',
   left: '20px',
