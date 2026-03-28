@@ -6,9 +6,11 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  // Next.js 미들웨어는 Edge Runtime에서 실행되므로
+  // NEXT_PUBLIC_ 접두사가 붙은 환경 변수만 접근 가능합니다.
   const supabase = createServerClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_API_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_API_KEY!,
     {
       cookies: {
         getAll() {

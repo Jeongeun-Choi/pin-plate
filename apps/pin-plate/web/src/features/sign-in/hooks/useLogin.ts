@@ -35,8 +35,8 @@ export const useGoogleLogin = () => {
         data: { session },
       } = await supabase.auth.getSession();
 
+      // 세션이 없는 경우(인증 미완료)에는 리다이렉트하지 않고 로그인 페이지에 머뭄
       if (!session) {
-        router.push('/');
         return;
       }
 
