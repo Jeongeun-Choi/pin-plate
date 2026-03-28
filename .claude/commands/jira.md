@@ -1,5 +1,5 @@
 ---
-description: Jira 티켓을 자동 생성합니다. ghostdev/GhostDev 관련이면 GAD 프로젝트, pin-plate/지도/마커 관련이면 KAN 프로젝트에 생성됩니다. 기본 이슈 타입은 Task입니다.
+description: Jira 티켓을 자동 생성합니다. pin-plate/지도/마커 관련이면 KAN 프로젝트에 생성됩니다. 기본 이슈 타입은 Task입니다.
 argument-hint: 티켓 내용을 간략히 설명해주세요 (예: 로그인 API 500 에러 수정)
 ---
 
@@ -10,10 +10,6 @@ argument-hint: 티켓 내용을 간략히 설명해주세요 (예: 로그인 API
 ## 프로젝트 판별 규칙
 
 다음 기준으로 Jira 프로젝트 키를 결정합니다:
-
-**GAD 프로젝트** (ghostdev 관련):
-- 키워드: `ghostdev`, `ghost`, `ghost-dev`, `agent`, `github action`, `ticket run`, `agent run`, `claude agent`, `workflow dispatch`
-- 파일 경로에 `apps/ghostdev` 또는 `packages/ghostdev-agent` 포함
 
 **KAN 프로젝트** (pin-plate 관련):
 - 키워드: `pin-plate`, `pinplate`, `지도`, `map`, `marker`, `마커`, `kakao`, `naver`, `위치`, `핀`
@@ -78,7 +74,6 @@ argument-hint: 티켓 내용을 간략히 설명해주세요 (예: 로그인 API
 
    **브랜치명 생성 규칙:**
    - KAN 프로젝트 → `feature/#{번호}-{슬러그}` (base: `pin-plate`)
-   - GAD 프로젝트 → `feature/#{번호}-{슬러그}` (base: `ghost-dev`)
    - 슬러그: Summary에서 핵심 단어 2~4개 추출, 영어 소문자, 단어 구분은 `-`
      - 예) "마커 클릭 이벤트 중복 등록 수정" → `fix-marker-click-duplicate`
      - 예) "워크스페이스 보드 필터 개선" → `improve-workspace-board-filter`

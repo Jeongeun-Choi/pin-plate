@@ -36,11 +36,9 @@ argument-hint: (선택) 커밋에 대한 추가 힌트나 맥락 (예: 로그인
 
 | 변경 경로 | 스코프 |
 |---|---|
-| `apps/ghostdev/` | `ghostdev` |
 | `apps/pin-plate/` | `pin-plate` |
 | `apps/web/` | `web` |
 | `packages/ui/` | `ui` |
-| `packages/ghostdev-agent/` | `ghostdev-agent` |
 | `.claude/`, `CLAUDE.md` | `claude` |
 | `.github/` | `ci` |
 | 루트 설정 파일 (`package.json`, `tsconfig.json` 등) | `config` |
@@ -52,7 +50,6 @@ argument-hint: (선택) 커밋에 대한 추가 힌트나 맥락 (예: 로그인
 - **형식**: `타입(스코프): 제목`
 - **제목**: 한국어, 명령형(동사 원형), 50자 이내, 마침표 없음
 - **예시**:
-  - `feat(ghostdev): 프로젝트 전환 시 skeleton 로딩 UI 추가`
   - `fix(pin-plate): 마커 클릭 이벤트 중복 등록 수정`
   - `refactor(ui): Card 컴포넌트 스타일 토큰 적용`
   - `chore(config): pnpm 워크스페이스 설정 업데이트`
