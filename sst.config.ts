@@ -8,7 +8,8 @@ export default $config({
       protect: input?.stage === "production",
       home: "aws",
       providers: {
-        aws: { region: "ap-northeast-2" },
+        aws: { region: "ap-northeast-2", version: "7.20.0" },
+        cloudflare: { version: "6.13.0" },
       },
     };
   },
@@ -60,12 +61,11 @@ export default $config({
         memory: "1024 MB",
       },
 
-      // 커스텀 도메인 추가 시 아래 주석 해제 후 pnpm sst:deploy 재실행
-      // Prerequisites: Route 53 Hosted Zone 생성 필요
-      // domain: {
-      //   name: "your-domain.com",
-      //   redirects: ["www.your-domain.com"],
-      // },
+      domain: {
+        name: "pinonplate.com",
+        redirects: ["www.pinonplate.com"],
+        dns: sst.cloudflare.dns(),
+      },
     });
 
     return { url: web.url };
