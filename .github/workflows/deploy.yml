@@ -43,6 +43,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Cache SST platform (Pulumi binaries)
+        uses: actions/cache@v3
+        with:
+          path: .sst/platform
+          key: ${{ runner.os }}-sst-platform-${{ hashFiles('sst.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-sst-platform-
+
       - name: Install dependencies
         run: pnpm install
 
@@ -58,4 +66,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ap-northeast-2
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: pnpm sst:deploy
+        run: |
+          for attempt in 1 2 3; do
+            pnpm sst:deploy && break
+            echo "Attempt $attempt failed. Retrying in 30s..."
+            sleep 30
+          done
