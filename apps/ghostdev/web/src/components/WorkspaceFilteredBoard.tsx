@@ -2,40 +2,34 @@
 
 import { useState } from "react";
 import type { Ticket, WorkspaceConfig } from "@/types";
-import { useTickets } from "@/features/tickets/hooks";
 import { KanbanBoard } from "./KanbanBoard";
 import { InitTaskButton } from "./InitTaskButton";
 import * as s from "./WorkspaceFilteredBoard.css";
 
 interface Props {
-  initialTickets: Ticket[];
+  tickets: Ticket[];
   projectId: string;
   workspaceConfig: WorkspaceConfig | null;
   defaultBranch: string;
 }
 
 export function WorkspaceFilteredBoard({
-  initialTickets,
+  tickets,
   projectId,
   workspaceConfig,
   defaultBranch,
 }: Props) {
   const [activeWorkspace, setActiveWorkspace] = useState<string>("ALL");
 
-  const { data: tickets = initialTickets } = useTickets(
-    projectId,
-    initialTickets,
-  );
-
   const filteredTickets =
     activeWorkspace === "ALL"
       ? tickets
-      : tickets.filter((t: Ticket) => t.target_workspace === activeWorkspace);
+      : tickets.filter((t) => t.target_workspace === activeWorkspace);
 
   const countFor = (path: string) =>
     path === "ALL"
       ? tickets.length
-      : tickets.filter((t: Ticket) => t.target_workspace === path).length;
+      : tickets.filter((t) => t.target_workspace === path).length;
 
   const isMonorepo = workspaceConfig && workspaceConfig.packages.length > 0;
 

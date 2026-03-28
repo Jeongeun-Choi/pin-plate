@@ -42,9 +42,7 @@ export default async function ProjectPage({ params }: Props) {
           <div className={s.breadcrumb}>
             <span>⎇</span>
             <span>NODE: {project.repo_full_name}</span>
-            {isMonorepo && (
-              <span className={s.monorepoBadge}>{"// MONOREPO"}</span>
-            )}
+            {isMonorepo && <span className={s.monorepoBadge}>// MONOREPO</span>}
           </div>
           <h1 className={s.pageTitle}>{project.name}</h1>
         </div>
@@ -57,7 +55,7 @@ export default async function ProjectPage({ params }: Props) {
       </div>
 
       <WorkspaceFilteredBoard
-        initialTickets={(projectTickets ?? []) as Ticket[]}
+        tickets={(projectTickets ?? []) as Ticket[]}
         projectId={projectId}
         workspaceConfig={project.workspace_config}
         defaultBranch={project.default_branch}

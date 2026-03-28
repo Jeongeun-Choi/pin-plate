@@ -32,14 +32,14 @@ export function TicketCard({
   const triggerRun = useTriggerRun(projectId);
   const priority = getPriority(ticket.priority);
 
-  const handleRun = (e: React.MouseEvent) => {
+  function handleRun(e: React.MouseEvent) {
     e.stopPropagation();
     triggerRun.mutate(ticket.id, {
       onSuccess: ({ runId }) => {
         router.push(`/projects/${projectId}/runs/${runId}`);
       },
     });
-  };
+  }
 
   return (
     <div className={s.card}>
@@ -55,23 +55,14 @@ export function TicketCard({
           {priority}
         </span>
 
-        {(ticket.status === "TODO" || ticket.status === "FAILED") && (
+        {ticket.status === "TODO" && (
           <button
             className={s.playButton}
             onClick={handleRun}
             disabled={triggerRun.isPending}
-            title={
-              ticket.status === "FAILED" ? "수동 재시도" : "AI 에이전트 실행"
-            }
-            style={
-              ticket.status === "FAILED" ? { color: "#EF4444" } : undefined
-            }
+            title="AI 에이전트 실행"
           >
-            {triggerRun.isPending
-              ? "⟳"
-              : ticket.status === "FAILED"
-                ? "⟳"
-                : "▶"}
+            {triggerRun.isPending ? "⟳" : "▶"}
           </button>
         )}
       </div>

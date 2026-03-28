@@ -1,5 +1,4 @@
 import { style } from "@vanilla-extract/css";
-import { vars } from "@/styles/tokens.css";
 
 export const wrapper = style({
   display: "flex",
@@ -13,10 +12,4 @@ export const main = style({
   overflow: "hidden",
   display: "flex",
   flexDirection: "column",
-});
-
-export const navPlaceholder = style({
-  height: "56px",
-  borderBottom: `1px solid ${vars.color.navBorder}`,
-  backgroundColor: vars.color.navBg,
 });

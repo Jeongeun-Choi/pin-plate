@@ -7,7 +7,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint '**/*.{ts,tsx}'",
-    "prettier": "prettier .",
+    "prettier": "prettier '**/*.{ts,tsx}'",
     "test": "vitest"
   },
   "dependencies": {

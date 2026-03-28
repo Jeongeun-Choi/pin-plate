@@ -9,8 +9,7 @@ const shimmer = keyframes({
 export const pageWrapper = style({
   display: "flex",
   flexDirection: "column",
-  flex: 1,
-  overflow: "hidden",
+  height: "100%",
 });
 
 export const pageHeader = style({

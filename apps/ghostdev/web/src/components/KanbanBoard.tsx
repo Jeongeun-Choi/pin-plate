@@ -8,7 +8,6 @@ const COLUMNS: { status: TicketStatus; label: string }[] = [
   { status: "TODO", label: "TODO" },
   { status: "IN_PROGRESS", label: "IN_PROGRESS" },
   { status: "DONE", label: "DONE" },
-  { status: "FAILED", label: "FAILED" },
 ];
 
 interface KanbanBoardProps {

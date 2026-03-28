@@ -5,8 +5,7 @@ import Image from "next/image";
 import * as s from "./TopNav.css";
 import { RepoDropdown } from "./RepoDropdown";
 import { SignOutButton } from "./SignOutButton";
-import { useProjects, useCreateProject } from "@/features/projects/hooks";
-import type { Project } from "@/types";
+import { useCreateProject } from "@/features/projects/hooks";
 
 interface TopNavProps {
   userLogin?: string;
@@ -15,10 +14,9 @@ interface TopNavProps {
 
 export function TopNav({ userLogin, userAvatar }: TopNavProps) {
   const router = useRouter();
-  const { data: projects = [] } = useProjects();
   const createProject = useCreateProject();
 
-  const handleRepoSelect = async (repo: {
+  async function handleRepoSelect(repo: {
     owner: string;
     name: string;
     fullName: string;
@@ -27,15 +25,7 @@ export function TopNav({ userLogin, userAvatar }: TopNavProps) {
     private: boolean;
     description: string | null;
     workspaceConfig: unknown;
-  }) => {
-    const existingProject = projects.find(
-      (p: Project) => p.repo_node_id === repo.id,
-    );
-    if (existingProject) {
-      router.push(`/projects/${existingProject.id}`);
-      return;
-    }
-
+  }) {
     const result = await createProject.mutateAsync({
       repoOwner: repo.owner,
       repoName: repo.name,
@@ -46,16 +36,8 @@ export function TopNav({ userLogin, userAvatar }: TopNavProps) {
       description: repo.description ?? undefined,
       workspaceConfig: repo.workspaceConfig ?? undefined,
     });
-
-    if (result.secretsInstalled === false) {
-      alert(
-        "레포 시크릿 자동 등록에 실패했습니다.\n" +
-          "GitHub Settings > Secrets에서 ANTHROPIC_API_KEY를 직접 등록해주세요.",
-      );
-    }
-
     router.push(`/projects/${result.id}`);
-  };
+  }
 
   return (
     <nav className={s.nav}>

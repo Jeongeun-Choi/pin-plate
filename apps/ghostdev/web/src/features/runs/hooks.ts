@@ -21,8 +21,8 @@ export function useTriggerRun(projectId: string) {
       return res.json() as Promise<{ runId: string }>;
     },
     onSuccess: () => {
+      // 프로젝트 페이지의 run 목록 갱신
       queryClient.invalidateQueries({ queryKey: ["runs", projectId] });
-      queryClient.invalidateQueries({ queryKey: ["tickets"] });
     },
   });
 }
