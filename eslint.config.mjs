@@ -1,3 +1,3 @@
-import baseConfig from '@pin-plate/eslint-config';
+import baseConfig from './packages/eslint-config/base.mjs';
 
 export default baseConfig;
