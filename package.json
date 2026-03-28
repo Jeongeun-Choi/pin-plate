@@ -15,7 +15,7 @@
     "icons": "pnpm --filter @pin-plate/ui run icons",
     "prettier:fix": "pnpm --filter web prettier --write",
     "prettier:check": "pnpm --filter web prettier --check",
-    "sst:deploy": "sst deploy --stage production",
+    "sst:deploy": "dotenv -e apps/pin-plate/web/.env.local -- sst deploy --stage production",
     "sst:remove": "sst remove --stage production",
     "sst:secret": "sst secret"
   },
@@ -24,6 +24,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.21.0",
   "devDependencies": {
+    "dotenv-cli": "^11.0.0",
     "eslint-config-next": "15.1.0",
     "sst": "latest"
   },

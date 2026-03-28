@@ -11,12 +11,15 @@ importers:
 
   .:
     devDependencies:
+      dotenv-cli:
+        specifier: ^11.0.0
+        version: 11.0.0
       eslint-config-next:
         specifier: 15.1.0
         version: 15.1.0(eslint@9.39.2)(typescript@5.9.3)
       sst:
         specifier: latest
-        version: 4.5.11
+        version: 4.5.12
 
   apps/ghostdev/web:
     dependencies:
@@ -3820,12 +3823,24 @@ packages:
   dom-accessibility-api@0.6.3:
     resolution: {integrity: sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w==}
 
+  dotenv-cli@11.0.0:
+    resolution: {integrity: sha512-r5pA8idbk7GFWuHEU7trSTflWcdBpQEK+Aw17UrSHjS6CReuhrrPcyC3zcQBPQvhArRHnBo/h6eLH1fkCvNlww==}
+    hasBin: true
+
   dotenv-expand@11.0.7:
     resolution: {integrity: sha512-zIHwmZPRshsCdpMDyVsqGmgyP0yT8GAgXUnkdAoJisxvf33k7yO6OuoKmcTGuXPWSsm8Oh88nZicRLA9Y0rUeA==}
     engines: {node: '>=12'}
 
+  dotenv-expand@12.0.3:
+    resolution: {integrity: sha512-uc47g4b+4k/M/SeaW1y4OApx+mtLWl92l5LMPP0GNXctZqELk+YGgOPIIC5elYmUH4OuoK3JLhuRUYegeySiFA==}
+    engines: {node: '>=12'}
+
   dotenv@16.4.7:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
+    engines: {node: '>=12'}
+
+  dotenv@17.3.1:
+    resolution: {integrity: sha512-IO8C/dzEb6O3F9/twg6ZLXz164a2fhTnEWb95H23Dm4OuN+92NmEAlTrupP9VW6Jm3sO26tQlqyvyi4CsnY9GA==}
     engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
@@ -5853,48 +5868,48 @@ packages:
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
 
-  sst-darwin-arm64@4.5.11:
-    resolution: {integrity: sha512-kXZ2X4+CwIMUtb/FIAl5FkNhk5S7bHX+lN6yjLQWSsgZKqzx/9/TwSyhxWz00S2JTZeO73rrAjVMtkiZQNIp+w==}
+  sst-darwin-arm64@4.5.12:
+    resolution: {integrity: sha512-/irP0q3/2r3N84Qwfty7rBHlg7jSDry35CsS04oGdo3hdwD0kMTrQqkwQddB3QYXb6HBsmNpIUHTlwKjcjBeyg==}
     cpu: [arm64]
     os: [darwin]
 
-  sst-darwin-x64@4.5.11:
-    resolution: {integrity: sha512-OgoLnuSdsEqoPVP51nHIKBBFNxDkv/CNw7Gy5z3J24+9kCRYi72AU1A1JOdPvIRoJMnDjg+v3mgs6h2wxrlPnQ==}
+  sst-darwin-x64@4.5.12:
+    resolution: {integrity: sha512-fWFanEBWqjxuIo+pX7J7DFTxUqCtrYKgv/OVAKnSZ07DndtmhI8+VpiQks17gS4C59i5JkC1NPgjw2Swdl5prA==}
     cpu: [x64]
     os: [darwin]
 
-  sst-linux-arm64@4.5.11:
-    resolution: {integrity: sha512-Ba8CeriK9vRr4au2EzqVoj2yxhtvm2/qkHTDSk/FzB2Pa3uQopCPgulNpyAwAmFiNKuYb+b48SRg09b9G2fwbg==}
+  sst-linux-arm64@4.5.12:
+    resolution: {integrity: sha512-jea1peKaqMgyFJhitOP2vuMaECL6hwBwFyLSVgjFyLN2aF7VSBz7vdrL84e13skofvc2ZM9dt4LjTDbQ/4YWGw==}
     cpu: [arm64]
     os: [linux]
 
-  sst-linux-x64@4.5.11:
-    resolution: {integrity: sha512-SbDpEe2yS1AT5XLp9V/SnFURkOHJqpEvpdsJx8r7cj1WMLUyNM4au6vN1XHw1fvS/4zrLRs4u68oFbkLtTqpFQ==}
+  sst-linux-x64@4.5.12:
+    resolution: {integrity: sha512-fLeYJhUAmv0ZgxQkhaoHHR7qekOKZYyQMqJElefgoGpy8o6vGaX+kuMZSNsd0xSNgnx/VA9bcx8H6Pjk7a03Aw==}
     cpu: [x64]
     os: [linux]
 
-  sst-linux-x86@4.5.11:
-    resolution: {integrity: sha512-YH8CmFtltxL9H1QOdv8gfLsXt/bL3xxhPb2nEaoocwcH0/i592UdXNEUZeAvAK228zXOJb47wvquoTxR3kF0ZA==}
+  sst-linux-x86@4.5.12:
+    resolution: {integrity: sha512-C4sIDFboYGD0Q5K88taD2/296EGy8EcqpeJdDLclcHQy/wNZ6D7PaZjZoqJg3MD7CQaqdL8SSt2/YW34rjrXrw==}
     cpu: [x86]
     os: [linux]
 
-  sst-win32-arm64@4.5.11:
-    resolution: {integrity: sha512-a/u5bzU9b+Bm/AVAZ/nYAsXMi6tMJN5xYTIa7eAPCcy+N8syDMR3gh9FzTDMOZ2j//7Xj4KJKWsClAY4V6rmuA==}
+  sst-win32-arm64@4.5.12:
+    resolution: {integrity: sha512-LksvtO5rphSDKjW+Xe1hroohy41a2Gk0JJNHaBZOM6qYN9gcHTrIFAd4Tk+ZG+netycxHi0QUKgA3tNuLQUpIw==}
     cpu: [arm64]
     os: [win32]
 
-  sst-win32-x64@4.5.11:
-    resolution: {integrity: sha512-mddNFY01bTobdP/j+9aazIdw+0Oy9a1WbxxwOtNX5+SbhhqanhzNTggjAVU1ZYHuSpalGWNOO0LV50dOLJuG9g==}
+  sst-win32-x64@4.5.12:
+    resolution: {integrity: sha512-qdoergfWiyZovTabneB50uca6GZIZlcRaGHjJf7Zef+yvluFvjgR+zu5ma6TVtdemKtiQWD3TC+uaHdPrJLN0w==}
     cpu: [x64]
     os: [win32]
 
-  sst-win32-x86@4.5.11:
-    resolution: {integrity: sha512-ka4+WicxGawYv+BpVTYJIjNyu0EvYiO5Frolqv7Z+E5t2XBEOQBY81Stx+nCj6HtCn7ZlDVktyuZbs+4T2wEOg==}
+  sst-win32-x86@4.5.12:
+    resolution: {integrity: sha512-6O4ZBNTNSG/poYbRNbM5F9Ldj4pGxs5jZSDYZ+cMem0rKrQSAIH3yWXaXsqGadyJ1qetcAxkt8pxuN2GCbWS+w==}
     cpu: [x86]
     os: [win32]
 
-  sst@4.5.11:
-    resolution: {integrity: sha512-hirPmYIAe7QX/xN7chhOP/nzJJbvHbVGNv0SA8Wk2iROwEMzg9bKKf6t/pqUwJEr7K0NbWlYFBPDnj8cTI3RoA==}
+  sst@4.5.12:
+    resolution: {integrity: sha512-gZX6riWnbmgDGl+K3sLWP6JrQJPAf+GKNycqmIH9/3rS14zAK+PJhnwtr52XaTaAOOfUFuJNN72TZNjfq5Vzyw==}
     hasBin: true
 
   stable-hash@0.0.5:
@@ -11263,11 +11278,24 @@ snapshots:
 
   dom-accessibility-api@0.6.3: {}
 
+  dotenv-cli@11.0.0:
+    dependencies:
+      cross-spawn: 7.0.6
+      dotenv: 17.3.1
+      dotenv-expand: 12.0.3
+      minimist: 1.2.8
+
   dotenv-expand@11.0.7:
     dependencies:
       dotenv: 16.4.7
 
+  dotenv-expand@12.0.3:
+    dependencies:
+      dotenv: 16.4.7
+
   dotenv@16.4.7: {}
+
+  dotenv@17.3.1: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -13745,44 +13773,44 @@ snapshots:
 
   sprintf-js@1.0.3: {}
 
-  sst-darwin-arm64@4.5.11:
+  sst-darwin-arm64@4.5.12:
     optional: true
 
-  sst-darwin-x64@4.5.11:
+  sst-darwin-x64@4.5.12:
     optional: true
 
-  sst-linux-arm64@4.5.11:
+  sst-linux-arm64@4.5.12:
     optional: true
 
-  sst-linux-x64@4.5.11:
+  sst-linux-x64@4.5.12:
     optional: true
 
-  sst-linux-x86@4.5.11:
+  sst-linux-x86@4.5.12:
     optional: true
 
-  sst-win32-arm64@4.5.11:
+  sst-win32-arm64@4.5.12:
     optional: true
 
-  sst-win32-x64@4.5.11:
+  sst-win32-x64@4.5.12:
     optional: true
 
-  sst-win32-x86@4.5.11:
+  sst-win32-x86@4.5.12:
     optional: true
 
-  sst@4.5.11:
+  sst@4.5.12:
     dependencies:
       aws4fetch: 1.0.18
       jose: 5.2.3
       openid-client: 5.6.4
     optionalDependencies:
-      sst-darwin-arm64: 4.5.11
-      sst-darwin-x64: 4.5.11
-      sst-linux-arm64: 4.5.11
-      sst-linux-x64: 4.5.11
-      sst-linux-x86: 4.5.11
-      sst-win32-arm64: 4.5.11
-      sst-win32-x64: 4.5.11
-      sst-win32-x86: 4.5.11
+      sst-darwin-arm64: 4.5.12
+      sst-darwin-x64: 4.5.12
+      sst-linux-arm64: 4.5.12
+      sst-linux-x64: 4.5.12
+      sst-linux-x86: 4.5.12
+      sst-win32-arm64: 4.5.12
+      sst-win32-x64: 4.5.12
+      sst-win32-x86: 4.5.12
 
   stable-hash@0.0.5: {}
 
