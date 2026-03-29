@@ -18,3 +18,4 @@ export * from './IcSort';
 export * from './IcTrash';
 export * from './IcUser';
 export * from './IcVerticalmore';
+export * from './IcPicture';

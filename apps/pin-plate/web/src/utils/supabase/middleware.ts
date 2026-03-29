@@ -64,6 +64,15 @@ export async function updateSession(request: NextRequest) {
 
     // 2. 프로필 설정 페이지(`/sign-up/profile`) 접근 제어
     if (user && request.nextUrl.pathname.startsWith('/sign-up/profile')) {
+      const isInRegistrationFlow =
+        request.cookies.get('is_in_registration_flow')?.value === 'true';
+
+      if (!isInRegistrationFlow) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/';
+        return NextResponse.redirect(url);
+      }
+
       try {
         const { data: profile } = await supabase
           .from('profiles')

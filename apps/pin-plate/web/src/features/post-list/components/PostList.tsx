@@ -9,6 +9,7 @@ import { getPosts } from '../../post/api/getPosts';
 import { Post } from '../../post/types/post';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { postKeys } from '../../post/postKeys';
+import { createClient } from '@/utils/supabase/client';
 
 type SortType = 'latest' | 'rating' | 'distance';
 
@@ -37,11 +38,23 @@ export const PostList = () => {
   const [sortBy, setSortBy] = useState<SortType>('latest');
   const { location: currentLocation, fetchLocation } = useCurrentLocation();
   const router = useRouter();
+  const supabase = createClient();
+
+  // 현재 로그인한 사용자 정보를 가져옴
+  const { data: user } = useSuspenseQuery({
+    queryKey: ['auth', 'user'],
+    queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return user;
+    },
+  });
 
   // Fetch real data using TanStack Query
   const { data: posts } = useSuspenseQuery<Post[]>({
-    queryKey: postKeys.lists(),
-    queryFn: getPosts,
+    queryKey: postKeys.lists(user?.id),
+    queryFn: () => getPosts(user!.id),
   });
 
   const sortedPosts = [...posts].sort((a, b) => {

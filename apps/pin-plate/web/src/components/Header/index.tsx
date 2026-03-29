@@ -45,7 +45,7 @@ export const Header = () => {
       {/* Left: Logo & Search */}
       <div className={styles.leftSection}>
         <div className={styles.logoContainer} onClick={() => router.push('/')}>
-          <h1 className={styles.logoText}>Pin-Plate</h1>
+          <span className={styles.logoText}>Pin-plate</span>
         </div>
 
         <div className={styles.searchContainer}>
