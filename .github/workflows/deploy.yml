@@ -58,6 +58,14 @@ jobs:
       - name: Type check
         run: pnpm --filter web exec tsc --noEmit
 
+      - name: Set SST secrets
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-northeast-2
+        run: |
+          pnpm sst secret set CloudflareZoneId ${{ secrets.CLOUDFLARE_ZONE_ID }} --stage production
+
       - name: Deploy via SST
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
