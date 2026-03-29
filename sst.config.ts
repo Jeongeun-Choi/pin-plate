@@ -65,7 +65,7 @@ export default $config({
       domain: {
         name: "pinonplate.com",
         redirects: ["www.pinonplate.com"],
-        dns: sst.cloudflare.dns(),
+        dns: sst.cloudflare.dns({ proxy: true }),
       },
     });
 
