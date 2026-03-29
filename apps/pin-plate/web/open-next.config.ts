@@ -3,6 +3,11 @@
 const config = {
   default: {},
   buildCommand: 'pnpm build',
+  middleware: {
+    // Supabase auth.getUser()는 외부 HTTP 요청이 필요하므로
+    // CloudFront Functions 대신 Lambda@Edge에서 실행해야 함
+    external: true,
+  },
 };
 
 export default config;
