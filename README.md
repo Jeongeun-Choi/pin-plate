@@ -6,83 +6,193 @@
 
 지도 위에 나만의 장소를 핀으로 기록하고 공유하는 서비스입니다.
 
-🔗 **서비스 바로가기**: [https://d3w5ds74y6zrqz.cloudfront.net](https://d3w5ds74y6zrqz.cloudfront.net)
+🔗 **서비스 바로가기**: [https://www.pinonplate.com](https://www.pinonplate.com)
 
 ---
 
-## 주요 기능
+## 목차
 
-- [x] **지도 서비스** — 네이버 지도 V3 연동, 사용자 위치 기반 지도 중심 이동
-- [x] **하이브리드 위치** — Web(Geolocation API) & 모바일 앱(Bridge via WebView) 동시 지원
-- [x] **게시글 관리** — 장소 기록 작성 / 수정 / 삭제 (Modal UI)
-- [x] **장소 검색** — 카카오 로컬 API 기반 장소 검색
-- [x] **이미지 업로드** — AWS S3 Pre-signed URL 방식
-- [x] **별점 평가** — 1~5점 평점 UI
-- [ ] **커뮤니티** — 사용자 프로필, 팔로우 기능 (예정)
-
----
-
-## 기술 스택
-
-**모노레포**
-- 패키지 매니저: pnpm (Workspaces)
-
-**웹 앱** (`apps/pin-plate/web`)
-- 프레임워크: Next.js 16 (App Router)
-- 언어: TypeScript
-- 스타일링: Vanilla Extract
-- 상태관리: Jotai, TanStack Query
-- 지도: Naver Maps API V3
-
-**모바일 앱** (`apps/pin-plate/mobile`)
-- 프레임워크: React Native 0.81, Expo 54
-- 방식: react-native-webview 하이브리드 앱
-- 기능: Expo Location, WebView 브릿지 통신
-
-**공유 패키지**
-- `packages/ui` — 공유 React 컴포넌트
-- `packages/eslint-config`, `packages/prettier-config` — 공유 코드 스타일 설정
-
-**인프라**
-- DB / Auth: Supabase (PostgreSQL)
-- 스토리지: AWS S3
-- 배포: SST v2 + AWS Lambda (ap-northeast-2)
+1. [서비스 개요](#서비스-개요)
+2. [프로젝트 흐름](#프로젝트-흐름)
+3. [기술 스택 및 선택 이유](#기술-스택-및-선택-이유)
+4. [주요 기능 상세](#주요-기능-상세)
+5. [프로젝트 구조](#프로젝트-구조)
+6. [향후 개선 사항](#향후-개선-사항)
 
 ---
 
-## 시작하기
+## 서비스 개요
 
-### 사전 요구사항
+Pin Plate는 **내가 다녀온 장소, 가보고 싶은 장소를 지도 위에 핀으로 기록하고 별점과 메모를 남기는 개인 장소 아카이빙 서비스**입니다.
 
-- Node.js 20+
-- pnpm 10+
+카카오 장소 검색으로 정확한 위치를 찾고, 이미지와 함께 기록을 남기면 지도에 핀이 꽂힙니다. 핀 색상은 별점에 따라 달라져 한눈에 어떤 장소인지 파악할 수 있습니다. 웹과 모바일 앱을 모두 지원하며, 앱에서는 현재 위치를 네이티브 GPS로 정확하게 받아옵니다.
 
-### 설치
+---
 
-```bash
-pnpm install
+## 프로젝트 흐름
+
+```
+[사용자 진입]
+    │
+    ├─ 비로그인 → 로그인/회원가입 페이지 (Supabase Auth)
+    │               └─ 회원가입 시 닉네임 설정 (온보딩) 필수
+    │
+    └─ 로그인 완료 → 홈 화면 (지도 뷰 / 리스트 뷰 토글)
+                        │
+                        ├─ [지도 뷰]
+                        │   ├─ 네이버 지도 위에 내 장소들이 핀으로 표시
+                        │   ├─ 핀 색상 = 별점에 따라 구분 (회색~주황~노랑)
+                        │   ├─ 현재 위치 버튼 → GPS로 지도 중심 이동
+                        │   └─ 핀 클릭 → 장소 상세 모달 오픈
+                        │
+                        ├─ [리스트 뷰]
+                        │   └─ 내가 기록한 장소들을 카드 형태로 나열
+                        │
+                        └─ [장소 기록 추가]
+                            ├─ 카카오 API로 장소 검색 (키워드 입력)
+                            ├─ 장소 선택 → 주소, 좌표 자동 입력
+                            ├─ 별점 선택 (1~5점)
+                            ├─ 메모 작성
+                            ├─ 이미지 업로드 (S3 Pre-signed URL)
+                            └─ 저장 → 지도에 핀 추가
 ```
 
-### 개발 서버 실행
+**인증 흐름:**
 
-```bash
-pnpm dev:pin-plate:web     # 웹 앱 (http://localhost:3000)
-pnpm dev:pin-plate:mobile  # 모바일 앱 (Expo)
+미들웨어(`middleware.ts`)가 모든 요청을 가로채 Supabase 세션을 검사합니다. 비로그인 상태면 `/sign-in`으로, 닉네임 미설정 상태면 `/sign-up/profile`로 리다이렉트합니다.
+
+**모바일 앱 브릿지 흐름:**
+
+```
+[React Native WebView]
+    │
+    ├─ 웹에서 위치 요청 메시지 발송 (REQ_LOCATION)
+    │
+    ├─ 네이티브에서 Expo Location으로 GPS 좌표 수신
+    │
+    └─ 웹으로 좌표 메시지 전달 (LOCATION) → 지도 중심 이동
 ```
 
 ---
 
-## 주요 스크립트
+## 기술 스택 및 선택 이유
 
-| 명령어 | 설명 |
-|--------|------|
-| `pnpm dev:pin-plate:web` | 웹 개발 서버 실행 |
-| `pnpm dev:pin-plate:mobile` | Expo 개발 서버 실행 |
-| `pnpm build:pin-plate:web` | 웹 프로덕션 빌드 |
-| `pnpm build:pin-plate:mobile` | 모바일 EAS 빌드 |
-| `pnpm lint:fix` | ESLint 자동 수정 |
-| `pnpm prettier:fix` | 코드 포맷팅 |
-| `pnpm sst:deploy` | AWS 배포 (프로덕션) |
+### 모노레포
+
+| 기술                | 선택 이유                                                                                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **pnpm Workspaces** | 웹/모바일/공유 패키지를 단일 저장소에서 관리. `packages/ui`를 양쪽 앱에서 공유하기 위해 모노레포 구조를 선택. npm 대비 디스크 공간 절약과 빠른 설치 속도가 장점. |
+
+---
+
+### 웹 앱
+
+| 기술                        | 선택 이유                                                                                                                                                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Next.js 16 (App Router)** | React 19 Server Components를 네이티브로 지원. 서버/클라이언트 컴포넌트 분리로 클라이언트 번들을 최소화. Supabase SSR, 이미지 최적화, API Routes까지 한 프레임워크에서 처리 가능.                                                     |
+| **TypeScript**              | 런타임 오류를 컴파일 타임에 잡기 위해 도입. Supabase 스키마와 API 응답 타입을 명시적으로 관리해 유지보수성 향상.                                                                                                                     |
+| **Vanilla Extract**         | Zero-runtime CSS-in-TypeScript. Tailwind처럼 유틸리티 클래스를 쓰지 않고 컴포넌트 단위로 타입 안전한 스타일을 작성. 디자인 토큰(`vars.css.ts`)으로 색상/스페이싱을 일관되게 관리. 빌드 결과물이 순수 CSS이므로 런타임 오버헤드 없음. |
+| **TanStack React Query v5** | 서버 상태(장소 목록, 게시글 상세)의 캐싱, 리페칭, 낙관적 업데이트를 선언적으로 처리. `useEffect`로 데이터를 직접 패칭하는 패턴을 완전히 제거. `useSuspenseQuery`로 Suspense와 자연스럽게 통합.                                       |
+| **Jotai**                   | 전역 UI 상태(뷰 모드, 모달 오픈 여부)만 관리. Redux 대비 보일러플레이트가 없고, 필요한 컴포넌트에서만 atom을 구독해 불필요한 리렌더링 방지.                                                                                          |
+| **Naver Maps API V3**       | 국내 서비스 특성상 한국 지도 데이터 정확도가 높음. 커스텀 마커 오버레이 지원이 풍부하고 한국어 주소 처리에 유리.                                                                                                                     |
+| **Kakao Local API**         | 국내 최다 POI(관심 지점) DB 보유. 키워드로 장소를 검색하고 위도/경도를 함께 반환해 지도 연동이 간편.                                                                                                                                 |
+| **Supabase**                | PostgreSQL 기반의 BaaS(Backend as a Service). Row Level Security(RLS)로 사용자별 데이터 접근 제어. SSR 환경에서 쿠키 기반 세션 관리(`@supabase/ssr`)를 기본 지원. 별도 백엔드 서버 없이 Auth + DB를 동시에 처리.                     |
+| **AWS S3**                  | 이미지 저장소로 선택. Pre-signed URL 방식으로 클라이언트가 서버를 경유하지 않고 직접 S3에 업로드해 서버 트래픽 절감.                                                                                                                 |
+
+---
+
+### 모바일 앱
+
+| 기술                                  | 선택 이유                                                                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **React Native + Expo**               | 웹 앱과 동일한 JavaScript/TypeScript 생태계에서 iOS/Android를 동시 지원. Expo SDK로 네이티브 기능(위치, 카메라 등) 접근이 간편. |
+| **React Native WebView (하이브리드)** | 웹 앱을 그대로 재사용해 개발 리소스 최소화. 네이티브로만 가능한 기능(정밀 GPS)만 브릿지로 주입하는 방식으로 유지보수 비용 절감. |
+| **Expo Location**                     | iOS/Android 양쪽에서 통일된 API로 GPS 좌표를 받아오는 Expo의 공식 위치 모듈. 브라우저 Geolocation API보다 정확하고 빠름.        |
+
+---
+
+### 인프라
+
+| 기술                          | 선택 이유                                                                                                                                                                                |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SST v2 (Serverless Stack)** | Next.js를 AWS Lambda 위에 배포하기 위한 IaC(Infrastructure as Code) 프레임워크. `open-next`와 조합해 App Router를 Lambda에 최적화. 인프라를 TypeScript 코드로 관리하므로 버전 관리 가능. |
+| **AWS Lambda + CloudFront**   | 트래픽에 따라 자동 스케일링되는 서버리스 구조로 고정 서버 비용 없음. CloudFront CDN으로 정적 에셋을 전 세계에 빠르게 제공.                                                               |
+| **Cloudflare (DNS)**          | `pinonplate.com` 도메인 DNS를 Cloudflare로 관리. DDoS 보호와 글로벌 CDN 레이어 추가.                                                                                                     |
+
+---
+
+## 주요 기능 상세
+
+### 1. 지도 서비스 (Naver Maps V3)
+
+네이버 지도 SDK 스크립트를 동적으로 로드해 지도를 초기화합니다. 사용자의 장소 기록은 모두 지도 위에 커스텀 마커로 표시됩니다.
+
+- **마커 색상 체계**: 별점에 따라 핀 색이 달라져 장소의 만족도를 시각적으로 구분
+  - 0점(미방문/위시리스트): 회색
+  - 1~2점: 연한 주황
+  - 3~4점: 진한 주황
+  - 5점: 노랑 (최고 만족)
+- **현재 위치 이동**: 버튼 클릭 시 GPS 기반으로 지도 중심을 이동
+- **마커 클릭**: 해당 장소의 상세 모달을 열어 기록 내용 확인
+
+### 2. 하이브리드 위치 (Web + Native)
+
+웹과 모바일 앱에서 모두 동작하는 이중 위치 수신 구조입니다.
+
+- **웹 환경**: 브라우저 `navigator.geolocation` API 사용
+- **모바일 앱 환경**: React Native 앱에서 `Expo Location`으로 네이티브 GPS 좌표를 수신한 뒤, WebView 브릿지를 통해 웹 앱으로 전달. 브라우저 Geolocation보다 정확하고 응답 속도가 빠름
+- **Fallback**: 앱 환경 감지 실패 시 브라우저 Geolocation으로 자동 전환
+
+### 3. 장소 기록 관리 (CRUD)
+
+장소를 기록하는 핵심 기능입니다. Modal 또는 전용 페이지에서 작성할 수 있습니다.
+
+**작성 시 입력 항목:**
+
+- 장소명, 주소, 좌표 (카카오 검색으로 자동 입력)
+- 별점 (1~5점 Star Rating UI)
+- 메모 (자유 텍스트)
+- 이미지 (다중 업로드 가능)
+
+**CRUD:**
+
+- **생성**: 장소 검색 → 정보 입력 → 저장 → React Query 캐시 업데이트 → 지도 마커 추가
+- **조회**: 목록(리스트 뷰/지도 마커), 상세(모달/페이지) — Parallel Routes로 URL 유지하며 모달 오픈 가능
+- **수정**: 기존 데이터 불러와 수정 후 저장
+- **삭제**: 삭제 후 낙관적으로 목록에서 즉시 제거
+
+### 4. 장소 검색 (Kakao Local API 프록시)
+
+서버사이드 API 라우트(`/api/search`)를 통해 Kakao Local API를 프록시합니다. API 키를 클라이언트에 노출하지 않으면서 키워드 기반 장소 검색을 제공합니다.
+
+- 키워드 입력 시 실시간 검색 결과 표시
+- 검색 결과에서 장소 선택 시 장소명/주소/좌표 자동 입력
+- 현재 지도 중심 좌표를 기준으로 주변 장소 우선 정렬 가능 (`x`, `y` 파라미터 전달)
+
+### 5. 이미지 업로드 (AWS S3 Pre-signed URL)
+
+서버가 파일 데이터를 중계하지 않는 효율적인 업로드 방식입니다.
+
+1. 클라이언트가 `/api/image`에 파일명/타입 배열 전송
+2. 서버가 AWS SDK로 S3 Pre-signed URL 생성 (유효시간 60초)
+3. 클라이언트가 Pre-signed URL로 S3에 직접 PUT 업로드
+4. 업로드 완료된 S3 URL을 게시글에 저장
+
+### 6. 인증 및 온보딩 (Supabase Auth)
+
+- 이메일/패스워드 및 OAuth 로그인 지원
+- Next.js 미들웨어에서 모든 요청의 Supabase 세션 갱신
+- 보호 경로: 미로그인 시 `/sign-in`으로 리다이렉트
+- 온보딩 강제: 닉네임 미설정 사용자는 `/sign-up/profile`로 강제 이동
+- 이미 로그인된 사용자가 `/sign-in`, `/sign-up` 재방문 시 홈으로 리다이렉트
+
+### 7. 뷰 모드 전환 (지도 / 리스트)
+
+Jotai의 `viewModeAtom`으로 전역에서 관리하는 간단한 상태입니다.
+
+- **지도 뷰**: 네이버 지도 + 마커 오버레이
+- **리스트 뷰**: 기록한 장소들을 카드 목록으로 표시
+- 두 뷰는 동일한 React Query 캐시 데이터를 공유해 불필요한 재요청 없음
 
 ---
 
@@ -92,27 +202,64 @@ pnpm dev:pin-plate:mobile  # 모바일 앱 (Expo)
 pin-plate/
 ├── apps/
 │   └── pin-plate/
-│       ├── web/          # Next.js 웹 앱
-│       └── mobile/       # React Native + Expo 앱
+│       ├── web/                        # Next.js 웹 앱
+│       │   ├── src/
+│       │   │   ├── app/                # Next.js App Router
+│       │   │   │   ├── api/            # API 라우트 (image, search, webhooks)
+│       │   │   │   ├── @modal/         # Parallel Routes (장소 상세 모달)
+│       │   │   │   ├── post/[id]/      # 장소 상세 페이지
+│       │   │   │   ├── sign-in/        # 로그인 페이지
+│       │   │   │   ├── sign-up/        # 회원가입 + 온보딩
+│       │   │   │   └── my-page/        # 마이페이지
+│       │   │   ├── features/           # 기능별 모듈
+│       │   │   │   ├── map/            # 지도 컴포넌트, 마커 유틸
+│       │   │   │   ├── post/           # 게시글 CRUD (hooks, api, components)
+│       │   │   │   ├── post-list/      # 리스트 뷰
+│       │   │   │   ├── sign-in/        # 로그인 폼
+│       │   │   │   ├── sign-up/        # 회원가입 폼
+│       │   │   │   └── my-page/        # 마이페이지
+│       │   │   ├── components/         # 공통 컴포넌트 (Header, Navigation 등)
+│       │   │   ├── providers/          # QueryProvider
+│       │   │   ├── utils/supabase/     # Supabase 클라이언트 (browser/server/middleware)
+│       │   │   └── middleware.ts       # 인증 미들웨어
+│       │   └── next.config.mjs
+│       └── mobile/                     # React Native + Expo 앱
+│           └── App.tsx                 # WebView 래퍼 + 위치 브릿지
 ├── packages/
-│   ├── ui/               # 공유 UI 컴포넌트 라이브러리
-│   ├── eslint-config/    # 공유 ESLint 설정
-│   └── prettier-config/  # 공유 Prettier 설정
-├── sst.config.ts         # AWS 인프라 설정 (IaC)
+│   ├── ui/                             # 공유 UI 컴포넌트 (Card, Input, Rate, Spinner 등)
+│   │   └── src/styles/vars.css.ts      # 디자인 토큰 (색상, 타이포, 스페이싱)
+│   ├── eslint-config/                  # 공유 ESLint 설정
+│   └── prettier-config/               # 공유 Prettier 설정
+├── sst.config.ts                       # AWS 인프라 IaC (Lambda, CloudFront, Secrets)
+├── CLAUDE.md                           # 코딩 컨벤션 문서
 └── pnpm-workspace.yaml
 ```
 
 ---
 
-## 모바일 앱 아키텍처
+## 향후 개선 사항
 
-React Native WebView로 웹 앱을 감싸는 **하이브리드 구조**입니다.
-네이티브 위치 정보(Expo Location)를 WebView 브릿지를 통해 웹으로 주입합니다.
+### 기능 추가
 
-```
-[React Native (Expo)]
-    └── WebView
-          └── [Next.js Web App]
-                 ↑
-         Location Bridge (네이티브 → 웹)
-```
+- **위시리스트 모드**: 아직 방문하지 않은 장소를 별도로 관리 (현재 핀 색상 중 회색이 예정 자리)
+- **장소 태그/카테고리**: 카페, 맛집, 명소 등으로 분류해 지도 필터링 지원
+- **지도 클러스터링**: 줌 아웃 시 근접 마커들을 클러스터로 묶어 가독성 향상
+- **공유 링크**: 내 장소 기록을 URL로 공유하는 기능
+
+### 성능 개선
+
+- **이미지 최적화**: S3 업로드 시 클라이언트 사이드 리사이징 또는 Lambda@Edge 이미지 변환 추가
+- **무한 스크롤**: 리스트 뷰에서 페이지네이션 대신 무한 스크롤 도입 (`useInfiniteQuery`)
+- **지도 마커 가상화**: 마커 수가 많아질 때 viewport 내 마커만 렌더링하는 최적화
+
+### 코드 품질
+
+- **E2E 테스트**: Playwright로 주요 사용자 시나리오(로그인 → 장소 추가 → 확인) 테스트 자동화
+- **Zod 스키마 강화**: API 경계 외에도 Supabase 응답 타입을 Zod로 런타임 검증
+- **Storybook 도입**: `packages/ui` 공유 컴포넌트 문서화 및 시각적 테스트
+
+### 인프라
+
+- **데이터베이스 마이그레이션 관리**: Drizzle ORM 또는 Supabase Migrations로 스키마 변경 이력 관리
+- **모니터링**: Sentry 에러 트래킹 및 Vercel Analytics(또는 AWS CloudWatch) 성능 모니터링 도입
+- **CI/CD 개선**: GitHub Actions에서 E2E 테스트 자동 실행 후 배포하는 파이프라인 구성

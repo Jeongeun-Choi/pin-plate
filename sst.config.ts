@@ -26,6 +26,7 @@ export default $config({
     const githubToken = new sst.Secret("GithubToken");
     const githubOwner = new sst.Secret("GithubOwner");
     const githubRepo = new sst.Secret("GithubRepo");
+    const cloudflareZoneId = new sst.Secret("CloudflareZoneId");
 
     // 클라이언트 사이드 Secrets (빌드 시 JS 번들에 포함)
     const kakaoAppKey = new sst.Secret("KakaoAppKey");
@@ -65,7 +66,7 @@ export default $config({
       domain: {
         name: "pinonplate.com",
         redirects: ["www.pinonplate.com"],
-        dns: sst.cloudflare.dns({ proxy: true }),
+        dns: sst.cloudflare.dns({ proxy: true, zone: cloudflareZoneId.value }),
       },
     });
 
