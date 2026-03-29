@@ -69,14 +69,20 @@ export const logoContainer = style({
   display: 'flex',
   alignItems: 'center',
   flexShrink: 0,
+  gap: 8,
 });
 
 export const logoText = style({
   fontSize: 20,
-  fontWeight: 900,
+  fontWeight: vars.fontWeight.bold,
   color: vars.colors.common.white,
-  margin: 0,
-  letterSpacing: '-0.05em',
+  letterSpacing: '-0.02em',
+  display: 'none',
+  '@media': {
+    '(min-width: 640px)': {
+      display: 'block',
+    },
+  },
 });
 
 export const searchContainer = style({

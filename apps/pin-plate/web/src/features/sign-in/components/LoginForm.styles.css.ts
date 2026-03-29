@@ -32,14 +32,15 @@ export const topSection = style({
 });
 
 export const topIconWrap = style({
-  width: 64,
-  height: 64,
+  width: 96,
+  height: 96,
   borderRadius: vars.borderRadius.full,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  backgroundColor: vars.colors.common.white,
+  border: `2px solid ${vars.colors.secondary.border}`,
   boxShadow: '0px 10px 15px rgba(0,0,0,0.1), 0px 4px 6px rgba(0,0,0,0.1)',
-  backgroundImage: `linear-gradient(135deg, ${vars.colors.primary.default} 0%, ${vars.colors.status.error} 100%)`,
 });
 
 export const title = style({

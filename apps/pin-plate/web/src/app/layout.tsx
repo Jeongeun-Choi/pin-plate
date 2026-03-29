@@ -7,6 +7,9 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Pin Plate',
   description: 'Record your favorite places',
+  icons: {
+    icon: '/logo.svg',
+  },
 };
 
 export default function RootLayout({
