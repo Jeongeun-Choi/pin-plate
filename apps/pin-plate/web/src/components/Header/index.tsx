@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useSetAtom, useAtom } from 'jotai';
 import { IcSearch, IcMap, IcPlus, IcUser, IcList } from '@pin-plate/ui/icons';
@@ -46,7 +45,6 @@ export const Header = () => {
       {/* Left: Logo & Search */}
       <div className={styles.leftSection}>
         <div className={styles.logoContainer} onClick={() => router.push('/')}>
-          <Image src="/logo.svg" alt="Pin-Plate" width={32} height={32} />
           <span className={styles.logoText}>Pin-plate</span>
         </div>
 
