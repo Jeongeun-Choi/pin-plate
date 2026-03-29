@@ -60,6 +60,9 @@ const checkUserProfileAndRedirect = async (
     .single();
 
   if (!profile?.nickname) {
+    // Set a temporary cookie to allow access to the profile setup page
+    document.cookie =
+      'is_in_registration_flow=true; path=/sign-up/profile; max-age=300; SameSite=Lax';
     router.push('/sign-up/profile');
   } else {
     router.push('/');

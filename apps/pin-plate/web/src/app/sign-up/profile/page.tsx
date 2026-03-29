@@ -49,6 +49,10 @@ export default function ProfileSetupPage() {
         throw updateError;
       }
 
+      // Clear the registration flow cookie
+      document.cookie =
+        'is_in_registration_flow=; path=/sign-up/profile; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
       router.push('/');
     } catch (err: any) {
       console.error('Profile update failed:', err);
