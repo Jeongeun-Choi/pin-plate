@@ -4,9 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import * as useLoginHook from '../hooks/useLogin';
 
-// Mock styles (if needed, but vanilla-extract might handle it via plugin)
-// If classNames are obfuscated, we might need to rely on roles/labels.
-
 vi.mock('../hooks/useLogin');
 
 const createTestQueryClient = () =>
@@ -20,14 +17,12 @@ const createTestQueryClient = () =>
 
 describe('LoginForm', () => {
   let queryClient: QueryClient;
-  const mockLogin = vi.fn();
+  const mockLoginWithGoogle = vi.fn();
 
   beforeEach(() => {
     queryClient = createTestQueryClient();
-    (useLoginHook.useLogin as any).mockReturnValue({
-      mutate: mockLogin,
-      isPending: false,
-      error: null,
+    (useLoginHook.useGoogleLogin as any).mockReturnValue({
+      mutate: mockLoginWithGoogle,
     });
     vi.clearAllMocks();
   });
@@ -39,78 +34,32 @@ describe('LoginForm', () => {
       </QueryClientProvider>,
     );
 
-  it('renders login form correctly', () => {
+  it('Google 로그인 버튼을 렌더링한다', () => {
     renderComponent();
-    expect(screen.getByLabelText('이메일')).toBeInTheDocument();
-    expect(screen.getByLabelText('비밀번호')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '로그인' })).toBeInTheDocument();
-  });
-
-  it('shows validation error for empty fields', () => {
-    renderComponent();
-    const submitButton = screen.getByRole('button', { name: '로그인' });
-
-    fireEvent.click(submitButton);
-
-    expect(screen.getByText('이메일을 입력해주세요.')).toBeInTheDocument();
-  });
-
-  it('shows validation error for invalid email', () => {
-    renderComponent();
-    const emailInput = screen.getByLabelText('이메일');
-    const submitButton = screen.getByRole('button', { name: '로그인' });
-
-    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
-    fireEvent.click(submitButton);
-
     expect(
-      screen.getByText('올바른 이메일 형식이 아닙니다.'),
+      screen.getByRole('button', { name: /Google로 계속하기/ }),
     ).toBeInTheDocument();
   });
 
-  it('shows validation error for short password', () => {
+  it('서비스 약관 안내 텍스트를 표시한다', () => {
     renderComponent();
-    const emailInput = screen.getByLabelText('이메일');
-    const passwordInput = screen.getByLabelText('비밀번호');
-    const submitButton = screen.getByRole('button', { name: '로그인' });
-
-    fireEvent.change(emailInput, { target: { value: 'test@test.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'short' } });
-    fireEvent.click(submitButton);
-
     expect(
-      screen.getByText('비밀번호는 최소 8자 이상이어야 합니다.'),
+      screen.getByText(/서비스 약관 및/),
     ).toBeInTheDocument();
   });
 
-  it('calls login mutation when form is valid', () => {
-    renderComponent();
-    const emailInput = screen.getByLabelText('이메일');
-    const passwordInput = screen.getByLabelText('비밀번호');
-    const submitButton = screen.getByRole('button', { name: '로그인' });
-
-    fireEvent.change(emailInput, { target: { value: 'test@test.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.click(submitButton);
-
-    expect(mockLogin).toHaveBeenCalledWith({
-      email: 'test@test.com',
-      password: 'password123',
-    });
-  });
-
-  it('displays server error message', () => {
-    (useLoginHook.useLogin as any).mockReturnValue({
-      mutate: mockLogin,
-      isPending: false,
-      error: new Error('Invalid login credentials'),
+  it('Google 버튼 클릭 시 loginWithGoogle을 호출한다', () => {
+    (useLoginHook.useGoogleLogin as any).mockReturnValue({
+      mutate: mockLoginWithGoogle,
     });
 
     renderComponent();
+    const googleButton = screen.getByRole('button', {
+      name: /Google로 계속하기/,
+    });
 
-    // The component uses getAuthErrorMessage to translate
-    expect(
-      screen.getByText('이메일 또는 비밀번호가 일치하지 않습니다.'),
-    ).toBeInTheDocument();
+    fireEvent.click(googleButton);
+
+    expect(mockLoginWithGoogle).toHaveBeenCalled();
   });
 });

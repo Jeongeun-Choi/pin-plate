@@ -11,7 +11,7 @@ export default defineConfig({
     globals: true,
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@pin-plate/ui': path.resolve(__dirname, '../../packages/ui/src'),
+      '@pin-plate/ui': path.resolve(__dirname, '../../../packages/ui/src'),
     },
   },
 });
