@@ -3,6 +3,7 @@
 import Script from 'next/script';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
+import { useRouter } from 'next/navigation';
 import * as styles from './Map.styles.css';
 import { usePosts } from '@/features/post/hooks/usePosts';
 import {
@@ -14,10 +15,11 @@ import { searchQueryAtom } from '@/app/atoms';
 import { clickedMapInfoAtom } from '../atoms';
 
 export const Map = () => {
-  const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<naver.maps.Map | null>(null);
 
+  const mapRef = useRef<HTMLDivElement>(null);
   const currentLocationMarkerRef = useRef<naver.maps.Marker | null>(null);
+  const router = useRouter();
   const setClickedMapInfo = useSetAtom(clickedMapInfoAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
 
@@ -195,13 +197,8 @@ export const Map = () => {
           },
         });
 
-        marker.addListener('click', (e: { domEvent: MouseEvent }) => {
-          setClickedMapInfo({
-            lat: post.lat,
-            lng: post.lng,
-            clientX: e.domEvent.clientX,
-            clientY: e.domEvent.clientY,
-          });
+        marker.addListener('click', () => {
+          router.push(`/post/${post.id}`);
         });
 
         markersRef.current.push(marker);

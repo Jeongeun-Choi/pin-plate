@@ -12,17 +12,33 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await fetch(
-      `https://dapi.kakao.com/v2/local/search/category.json?category_group_code=FD6&x=${x}&y=${y}&radius=${radius}&sort=distance&size=5`,
-      {
-        headers: {
-          Authorization: `KakaoAK ${process.env.KAKAO_SEARCH_CLIENT_ID || ''}`,
-        },
-      },
-    );
+    const baseUrl = `https://dapi.kakao.com/v2/local/search/category.json`;
+    const headers = {
+      Authorization: `KakaoAK ${process.env.KAKAO_SEARCH_CLIENT_ID || ''}`,
+    };
 
-    const data = await result.json();
-    return new Response(JSON.stringify(data), {
+    const [restaurantRes, cafeRes] = await Promise.all([
+      fetch(
+        `${baseUrl}?category_group_code=FD6&x=${x}&y=${y}&radius=${radius}&sort=distance&size=5`,
+        { headers },
+      ),
+      fetch(
+        `${baseUrl}?category_group_code=CE7&x=${x}&y=${y}&radius=${radius}&sort=distance&size=5`,
+        { headers },
+      ),
+    ]);
+
+    const [restaurantData, cafeData] = await Promise.all([
+      restaurantRes.json(),
+      cafeRes.json(),
+    ]);
+
+    const documents = [
+      ...(restaurantData.documents ?? []),
+      ...(cafeData.documents ?? []),
+    ].sort((a, b) => Number(a.distance) - Number(b.distance));
+
+    return new Response(JSON.stringify({ documents }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
