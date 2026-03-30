@@ -4,11 +4,16 @@ import { KakaoPlace } from '../types/search';
 import { createClient } from '@/utils/supabase/client';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 
-export const usePostForm = (onSuccess?: () => void) => {
+export const usePostForm = (
+  onSuccess?: () => void,
+  initialPlace?: KakaoPlace | null,
+) => {
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(0);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(
+    initialPlace ?? null,
+  );
 
   const { location: currentLocation, fetchLocation: fetchCurrentLocation } =
     useCurrentLocation();

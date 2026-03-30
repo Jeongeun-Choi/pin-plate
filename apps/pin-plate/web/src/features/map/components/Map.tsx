@@ -2,18 +2,23 @@
 
 import Script from 'next/script';
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import * as styles from './Map.styles.css';
 import { usePosts } from '@/features/post/hooks/usePosts';
-import { getPinColor, getPinIcon } from '../utils/marker';
+import {
+  getPinColor,
+  getPinIcon,
+  getCurrentLocationIcon,
+} from '../utils/marker';
 import { searchQueryAtom } from '@/app/atoms';
+import { clickedMapInfoAtom } from '../atoms';
 
 export const Map = () => {
-  const router = useRouter();
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<naver.maps.Map | null>(null);
 
+  const currentLocationMarkerRef = useRef<naver.maps.Marker | null>(null);
+  const setClickedMapInfo = useSetAtom(clickedMapInfoAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
 
   const { data: posts } = usePosts();
@@ -48,13 +53,39 @@ export const Map = () => {
       const mapInstance = new window.naver.maps.Map(mapRef.current, mapOptions);
       setMap(mapInstance);
 
-      const updateCenter = (lat: number, lng: number) => {
-        const currentPosition = new window.naver.maps.LatLng(lat, lng);
-        mapInstance.setCenter(currentPosition);
+      mapInstance.addListener(
+        'click',
+        (e: { coord: naver.maps.LatLng; domEvent: MouseEvent }) => {
+          setClickedMapInfo({
+            lat: e.coord.y,
+            lng: e.coord.x,
+            clientX: e.domEvent.clientX,
+            clientY: e.domEvent.clientY,
+          });
+        },
+      );
+
+      const updateCurrentLocation = (lat: number, lng: number) => {
+        const position = new window.naver.maps.LatLng(lat, lng);
+        mapInstance.setCenter(position);
+
+        if (currentLocationMarkerRef.current) {
+          currentLocationMarkerRef.current.setPosition(position);
+        } else {
+          currentLocationMarkerRef.current = new window.naver.maps.Marker({
+            position,
+            map: mapInstance,
+            icon: {
+              content: getCurrentLocationIcon(),
+              anchor: new window.naver.maps.Point(12, 12),
+            },
+            zIndex: 200,
+          });
+        }
       };
 
       if (window.nativeLocation) {
-        updateCenter(
+        updateCurrentLocation(
           window.nativeLocation.coords.latitude,
           window.nativeLocation.coords.longitude,
         );
@@ -66,7 +97,10 @@ export const Map = () => {
         );
       } else if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
-          updateCenter(position.coords.latitude, position.coords.longitude);
+          updateCurrentLocation(
+            position.coords.latitude,
+            position.coords.longitude,
+          );
         });
       }
     } else {
@@ -86,11 +120,23 @@ export const Map = () => {
           typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
         if (data?.type === 'LOCATION') {
           window.nativeLocation = data.payload;
-          const currentPosition = new window.naver.maps.LatLng(
-            data.payload.coords.latitude,
-            data.payload.coords.longitude,
-          );
-          map.setCenter(currentPosition);
+          const { latitude, longitude } = data.payload.coords;
+          const position = new window.naver.maps.LatLng(latitude, longitude);
+          map.setCenter(position);
+
+          if (currentLocationMarkerRef.current) {
+            currentLocationMarkerRef.current.setPosition(position);
+          } else {
+            currentLocationMarkerRef.current = new window.naver.maps.Marker({
+              position,
+              map,
+              icon: {
+                content: getCurrentLocationIcon(),
+                anchor: new window.naver.maps.Point(12, 12),
+              },
+              zIndex: 200,
+            });
+          }
         }
       } catch (e) {
         console.error(e);
@@ -149,14 +195,19 @@ export const Map = () => {
           },
         });
 
-        marker.addListener('click', () => {
-          router.push(`/post/${post.id}`);
+        marker.addListener('click', (e: { domEvent: MouseEvent }) => {
+          setClickedMapInfo({
+            lat: post.lat,
+            lng: post.lng,
+            clientX: e.domEvent.clientX,
+            clientY: e.domEvent.clientY,
+          });
         });
 
         markersRef.current.push(marker);
       });
     }
-  }, [map, filteredPosts, router]);
+  }, [map, filteredPosts, setClickedMapInfo]);
 
   return (
     <>

@@ -9,6 +9,7 @@ import { Navigation } from '@/components/Navigation';
 import { GlobalPostModal } from '@/components/GlobalPostModal';
 import { Header } from '@/components/Header';
 import { PostList } from '@/features/post-list/components/PostList';
+import { PlaceDetailSheet } from '@/features/map/components/PlaceDetailSheet';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Suspense } from 'react';
 import { Spinner } from '@pin-plate/ui';
@@ -41,6 +42,7 @@ export default function Home() {
           </Suspense>
         </ErrorBoundary>
       )}
+      <PlaceDetailSheet />
       <Navigation />
       <GlobalPostModal />
     </main>

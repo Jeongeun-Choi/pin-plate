@@ -32,6 +32,38 @@ export const getPinIcon = (
   `;
 };
 
+export const getCurrentLocationIcon = () => {
+  return `
+    <div style="width: 24px; height: 24px; position: relative;">
+      <span style="
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: rgba(66, 133, 244, 0.2);
+        animation: currentLocationPulse 2s ease-out infinite;
+      "></span>
+      <span style="
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #4285F4;
+        border: 2.5px solid #FFFFFF;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      "></span>
+      <style>
+        @keyframes currentLocationPulse {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(2.5); opacity: 0; }
+        }
+      </style>
+    </div>
+  `;
+};
+
 export const getPinColor = (rating: number) => {
   switch (true) {
     case rating <= 1:
