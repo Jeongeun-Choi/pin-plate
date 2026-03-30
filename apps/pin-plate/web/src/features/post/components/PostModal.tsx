@@ -4,15 +4,17 @@ import { useEffect } from 'react';
 import { Button, Modal } from '@pin-plate/ui';
 import PostForm from './PostForm';
 import { usePostForm } from '../hooks/usePostForm';
+import { KakaoPlace } from '../types/search';
 import * as styles from './styles/PostModal.styles.css';
 
 interface PostModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialPlace?: KakaoPlace | null;
 }
 
-export const PostModal = ({ isOpen, onClose }: PostModalProps) => {
-  const { formState, handlers, submit } = usePostForm(onClose);
+export const PostModal = ({ isOpen, onClose, initialPlace }: PostModalProps) => {
+  const { formState, handlers, submit } = usePostForm(onClose, initialPlace);
 
   useEffect(() => {
     if (!isOpen) {

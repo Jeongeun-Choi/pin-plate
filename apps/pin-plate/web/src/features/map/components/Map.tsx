@@ -2,18 +2,18 @@
 
 import Script from 'next/script';
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import * as styles from './Map.styles.css';
 import { usePosts } from '@/features/post/hooks/usePosts';
 import { getPinColor, getPinIcon } from '../utils/marker';
 import { searchQueryAtom } from '@/app/atoms';
+import { clickedMapInfoAtom } from '../atoms';
 
 export const Map = () => {
-  const router = useRouter();
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<naver.maps.Map | null>(null);
 
+  const setClickedMapInfo = useSetAtom(clickedMapInfoAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
 
   const { data: posts } = usePosts();
@@ -47,6 +47,18 @@ export const Map = () => {
       };
       const mapInstance = new window.naver.maps.Map(mapRef.current, mapOptions);
       setMap(mapInstance);
+
+      mapInstance.addListener(
+        'click',
+        (e: { coord: naver.maps.LatLng; domEvent: MouseEvent }) => {
+          setClickedMapInfo({
+            lat: e.coord.y,
+            lng: e.coord.x,
+            clientX: e.domEvent.clientX,
+            clientY: e.domEvent.clientY,
+          });
+        },
+      );
 
       const updateCenter = (lat: number, lng: number) => {
         const currentPosition = new window.naver.maps.LatLng(lat, lng);
@@ -149,14 +161,19 @@ export const Map = () => {
           },
         });
 
-        marker.addListener('click', () => {
-          router.push(`/post/${post.id}`);
+        marker.addListener('click', (e: { domEvent: MouseEvent }) => {
+          setClickedMapInfo({
+            lat: post.lat,
+            lng: post.lng,
+            clientX: e.domEvent.clientX,
+            clientY: e.domEvent.clientY,
+          });
         });
 
         markersRef.current.push(marker);
       });
     }
-  }, [map, filteredPosts, router]);
+  }, [map, filteredPosts, setClickedMapInfo]);
 
   return (
     <>
