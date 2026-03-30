@@ -1,17 +1,31 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAtomValue } from 'jotai';
 import * as styles from './Map.styles.css';
 import { usePosts } from '@/features/post/hooks/usePosts';
 import { getPinColor, getPinIcon } from '../utils/marker';
+import { searchQueryAtom } from '@/app/atoms';
 
 export const Map = () => {
   const router = useRouter();
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<naver.maps.Map | null>(null);
+
+  const searchQuery = useAtomValue(searchQueryAtom);
+
   const { data: posts } = usePosts();
+
+  const filteredPosts = useMemo(() => {
+    if (!posts) return [];
+    if (!searchQuery.trim()) return posts;
+    const query = searchQuery.trim().toLowerCase();
+    return posts.filter((post) =>
+      post.place_name?.toLowerCase().includes(query),
+    );
+  }, [posts, searchQuery]);
 
   const initializeMap = () => {
     if (window.naver && mapRef.current) {
@@ -108,13 +122,13 @@ export const Map = () => {
   const markersRef = useRef<naver.maps.Marker[]>([]);
 
   useEffect(() => {
-    if (map && posts && window.naver && window.naver.maps) {
+    if (map && filteredPosts && window.naver && window.naver.maps) {
       // Clear existing markers
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
 
       // Add new markers
-      posts.forEach((post) => {
+      filteredPosts.forEach((post) => {
         const ratingColor = getPinColor(post.rating);
         const pinWidth = 40;
         const pinHeight = pinWidth * 2;
@@ -142,7 +156,7 @@ export const Map = () => {
         markersRef.current.push(marker);
       });
     }
-  }, [map, posts, router]);
+  }, [map, filteredPosts, router]);
 
   return (
     <>
