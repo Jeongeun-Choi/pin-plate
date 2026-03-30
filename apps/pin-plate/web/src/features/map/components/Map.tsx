@@ -5,7 +5,11 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import * as styles from './Map.styles.css';
 import { usePosts } from '@/features/post/hooks/usePosts';
-import { getPinColor, getPinIcon, getCurrentLocationIcon } from '../utils/marker';
+import {
+  getPinColor,
+  getPinIcon,
+  getCurrentLocationIcon,
+} from '../utils/marker';
 import { searchQueryAtom } from '@/app/atoms';
 import { clickedMapInfoAtom } from '../atoms';
 

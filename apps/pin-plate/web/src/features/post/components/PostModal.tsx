@@ -13,7 +13,11 @@ interface PostModalProps {
   initialPlace?: KakaoPlace | null;
 }
 
-export const PostModal = ({ isOpen, onClose, initialPlace }: PostModalProps) => {
+export const PostModal = ({
+  isOpen,
+  onClose,
+  initialPlace,
+}: PostModalProps) => {
   const { formState, handlers, submit } = usePostForm(onClose, initialPlace);
 
   useEffect(() => {
