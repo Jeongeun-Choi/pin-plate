@@ -96,7 +96,7 @@ export const searchInput = style({
   width: '100%',
   backgroundColor: vars.colors.common.white,
   borderRadius: 9999,
-  padding: '10px 16px 10px 44px',
+  padding: '10px 40px 10px 44px',
   fontSize: 14,
   border: 'none',
   outline: 'none',
@@ -114,6 +114,27 @@ export const searchIcon = style({
   transform: 'translateY(-50%)',
   color: '#9CA3AF',
   pointerEvents: 'none',
+});
+
+export const clearButton = style({
+  position: 'absolute',
+  right: 12,
+  top: '50%',
+  transform: 'translateY(-50%)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 20,
+  height: 20,
+  padding: 0,
+  border: 'none',
+  borderRadius: '50%',
+  backgroundColor: '#9CA3AF',
+  color: vars.colors.common.white,
+  cursor: 'pointer',
+  ':hover': {
+    backgroundColor: '#6B7280',
+  },
 });
 
 export const rightSection = style({

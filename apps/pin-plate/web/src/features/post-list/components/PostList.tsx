@@ -1,8 +1,9 @@
 'use client';
 
 import * as styles from './PostList.css';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAtomValue } from 'jotai';
 import { Card, IcClock, IcNavigation, IcOutlinestar } from '@pin-plate/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { getPosts } from '../../post/api/getPosts';
@@ -10,6 +11,7 @@ import { Post } from '../../post/types/post';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { postKeys } from '../../post/postKeys';
 import { createClient } from '@/utils/supabase/client';
+import { searchQueryAtom } from '@/app/atoms';
 
 type SortType = 'latest' | 'rating' | 'distance';
 
@@ -36,6 +38,9 @@ const getDistance = (
 
 export const PostList = () => {
   const [sortBy, setSortBy] = useState<SortType>('latest');
+
+  const searchQuery = useAtomValue(searchQueryAtom);
+
   const { location: currentLocation, fetchLocation } = useCurrentLocation();
   const router = useRouter();
   const supabase = createClient();
@@ -57,7 +62,15 @@ export const PostList = () => {
     queryFn: () => getPosts(user!.id),
   });
 
-  const sortedPosts = [...posts].sort((a, b) => {
+  const filteredPosts = useMemo(() => {
+    if (!searchQuery.trim()) return posts;
+    const query = searchQuery.trim().toLowerCase();
+    return posts.filter((post) =>
+      post.place_name?.toLowerCase().includes(query),
+    );
+  }, [posts, searchQuery]);
+
+  const sortedPosts = [...filteredPosts].sort((a, b) => {
     if (sortBy === 'latest') {
       return (
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -121,7 +134,9 @@ export const PostList = () => {
           </button>
         </div>
 
-        <div className={styles.reviewCount}>총 {posts.length}개의 리뷰</div>
+        <div className={styles.reviewCount}>
+          총 {filteredPosts.length}개의 리뷰
+        </div>
       </div>
 
       {/* Main Grid */}

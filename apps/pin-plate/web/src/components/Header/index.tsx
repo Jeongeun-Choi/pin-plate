@@ -1,8 +1,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSetAtom, useAtom } from 'jotai';
-import { IcSearch, IcMap, IcPlus, IcUser, IcList } from '@pin-plate/ui/icons';
-import { viewModeAtom } from '@/app/atoms';
+import {
+  IcSearch,
+  IcMap,
+  IcPlus,
+  IcUser,
+  IcList,
+  IcDismiss,
+} from '@pin-plate/ui/icons';
+import { viewModeAtom, searchQueryAtom } from '@/app/atoms';
 import * as styles from './Header.css';
 import { isPostModalOpenAtom } from '@/features/post/atoms';
 import { AccountPopover } from './AccountPopover';
@@ -11,11 +18,24 @@ import { MY_PAGE_KEYS, getMyProfile } from '@/features/my-page';
 
 export const Header = () => {
   const [viewMode, setViewMode] = useAtom(viewModeAtom);
+  const setSearchQuery = useSetAtom(searchQueryAtom);
+  const [searchInputValue, setSearchInputValue] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const router = useRouter();
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
   const queryClient = useQueryClient();
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setSearchQuery(searchInputValue.trim());
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchInputValue('');
+    setSearchQuery('');
+  };
 
   const handleProfileHover = () => {
     queryClient.prefetchQuery({
@@ -53,8 +73,21 @@ export const Header = () => {
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="장소명, 지역, 태그 검색..."
+            placeholder="음식점 이름으로 검색..."
+            value={searchInputValue}
+            onChange={(e) => setSearchInputValue(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
           />
+          {searchInputValue && (
+            <button
+              type="button"
+              className={styles.clearButton}
+              onClick={handleClearSearch}
+              aria-label="검색어 초기화"
+            >
+              <IcDismiss width={14} height={14} />
+            </button>
+          )}
         </div>
       </div>
 
