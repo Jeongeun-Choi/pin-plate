@@ -93,7 +93,6 @@ export const contentWrapper = style({
   flex: 1,
   padding: '16px',
   display: 'flex',
-  justifyContent: 'center',
   '@media': {
     '(min-width: 768px)': {
       padding: '24px',
@@ -106,7 +105,6 @@ export const grid = style({
   gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
   gap: '24px',
   width: '100%',
-  maxWidth: '1200px',
   alignContent: 'start',
 });
 
