@@ -58,6 +58,9 @@ jobs:
       - name: Type check
         run: pnpm --filter web exec tsc --noEmit
 
+      - name: Test
+        run: pnpm --filter web test --run
+
       - name: Set SST secrets
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

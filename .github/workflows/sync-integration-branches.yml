@@ -16,7 +16,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        branch: [pin-plate, ghost-dev]
+        branch: [pin-plate]
       fail-fast: false
     steps:
       - name: Checkout
