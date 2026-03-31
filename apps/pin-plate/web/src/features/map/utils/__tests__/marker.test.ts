@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { getPinColor, getMarkerIcon, getPinIcon, getCurrentLocationIcon } from '../marker';
+import {
+  getPinColor,
+  getMarkerIcon,
+  getPinIcon,
+  getCurrentLocationIcon,
+} from '../marker';
 
 describe('getPinColor', () => {
   it('rating에 따라 서로 다른 색상을 반환한다', () => {

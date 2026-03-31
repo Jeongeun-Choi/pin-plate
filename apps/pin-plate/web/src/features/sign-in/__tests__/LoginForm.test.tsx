@@ -43,9 +43,7 @@ describe('LoginForm', () => {
 
   it('서비스 약관 안내 텍스트를 표시한다', () => {
     renderComponent();
-    expect(
-      screen.getByText(/서비스 약관 및/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/서비스 약관 및/)).toBeInTheDocument();
   });
 
   it('Google 버튼 클릭 시 loginWithGoogle을 호출한다', () => {
