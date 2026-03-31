@@ -55,7 +55,7 @@ describe('useLogin', () => {
     });
 
     expect(localStorage.getItem('accessToken')).toBe('test-token');
-    expect(mockPush).toHaveBeenCalledWith('/home');
+    expect(mockPush).toHaveBeenCalledWith('/');
   });
 
   it('should handle errors correctly', async () => {
