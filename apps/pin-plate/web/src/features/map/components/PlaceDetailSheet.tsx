@@ -2,27 +2,34 @@
 
 import { useAtom, useSetAtom } from 'jotai';
 import { Button, Spinner, IcMarker, IcDismiss } from '@pin-plate/ui';
-import { clickedMapInfoAtom } from '../atoms';
+import { clickedMapInfoAtom, selectedSearchPlaceAtom } from '../atoms';
 import { useNearbyRestaurants } from '../hooks/useNearbyRestaurants';
 import { isPostModalOpenAtom, prefillPlaceAtom } from '@/features/post/atoms';
 import * as s from './PlaceDetailSheet.css';
 
 export const PlaceDetailSheet = () => {
   const [clickedInfo, setClickedInfo] = useAtom(clickedMapInfoAtom);
+  const [selectedSearchPlace, setSelectedSearchPlace] = useAtom(
+    selectedSearchPlaceAtom,
+  );
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
   const setPrefillPlace = useSetAtom(prefillPlaceAtom);
 
-  const coords = clickedInfo
-    ? { lat: clickedInfo.lat, lng: clickedInfo.lng }
-    : null;
+  const isDirectPlace = !!selectedSearchPlace;
+
+  const coords =
+    !isDirectPlace && clickedInfo
+      ? { lat: clickedInfo.lat, lng: clickedInfo.lng }
+      : null;
 
   const { data: nearbyRestaurants, isLoading: isNearbyRestaurantsLoading } =
     useNearbyRestaurants(coords);
 
-  const closestPlace = nearbyRestaurants?.[0] ?? null;
+  const closestPlace = selectedSearchPlace ?? nearbyRestaurants?.[0] ?? null;
 
   const handleClose = () => {
     setClickedInfo(null);
+    setSelectedSearchPlace(null);
   };
 
   const handleWritePost = () => {
@@ -63,7 +70,7 @@ export const PlaceDetailSheet = () => {
           <IcDismiss width={18} height={18} />
         </button>
         <div className={s.content}>
-          {isNearbyRestaurantsLoading ? (
+          {!isDirectPlace && isNearbyRestaurantsLoading ? (
             <div className={s.loadingContainer}>
               <Spinner />
               <span className={s.loadingText}>주변 음식점을 찾는 중...</span>

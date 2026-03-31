@@ -3,6 +3,7 @@ import {
   getPinColor,
   getMarkerIcon,
   getPinIcon,
+  getSearchPinIcon,
   getCurrentLocationIcon,
 } from '../marker';
 
@@ -70,6 +71,30 @@ describe('getPinIcon', () => {
 
   it('rating이 없으면 text 요소가 포함되지 않는다', () => {
     const result = getPinIcon('#FF6B00', 16, 80);
+    expect(result).not.toContain('<text');
+  });
+});
+
+describe('getSearchPinIcon', () => {
+  it('SVG를 포함한 HTML 문자열을 반환한다', () => {
+    const result = getSearchPinIcon();
+    expect(result).toContain('<svg');
+    expect(result).toContain('</svg>');
+  });
+
+  it('width와 height가 컨테이너에 적용된다', () => {
+    const result = getSearchPinIcon(24, 48);
+    expect(result).toContain('width: 24px');
+    expect(result).toContain('height: 48px');
+  });
+
+  it('회색(#9E9E9E) 색상을 사용한다', () => {
+    const result = getSearchPinIcon();
+    expect(result).toContain('#9E9E9E');
+  });
+
+  it('rating text 요소가 포함되지 않는다', () => {
+    const result = getSearchPinIcon();
     expect(result).not.toContain('<text');
   });
 });

@@ -9,10 +9,15 @@ import { usePosts } from '@/features/post/hooks/usePosts';
 import {
   getPinColor,
   getPinIcon,
+  getSearchPinIcon,
   getCurrentLocationIcon,
 } from '../utils/marker';
 import { searchQueryAtom } from '@/app/atoms';
-import { clickedMapInfoAtom } from '../atoms';
+import {
+  clickedMapInfoAtom,
+  searchPlacesAtom,
+  selectedSearchPlaceAtom,
+} from '../atoms';
 
 export const Map = () => {
   const [map, setMap] = useState<naver.maps.Map | null>(null);
@@ -21,7 +26,9 @@ export const Map = () => {
   const currentLocationMarkerRef = useRef<naver.maps.Marker | null>(null);
   const router = useRouter();
   const setClickedMapInfo = useSetAtom(clickedMapInfoAtom);
+  const setSelectedSearchPlace = useSetAtom(selectedSearchPlaceAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
+  const searchPlaces = useAtomValue(searchPlacesAtom);
 
   const { data: posts } = usePosts();
 
@@ -168,6 +175,7 @@ export const Map = () => {
   }, []);
 
   const markersRef = useRef<naver.maps.Marker[]>([]);
+  const searchMarkersRef = useRef<naver.maps.Marker[]>([]);
 
   useEffect(() => {
     if (map && filteredPosts && window.naver && window.naver.maps) {
@@ -205,6 +213,56 @@ export const Map = () => {
       });
     }
   }, [map, filteredPosts, setClickedMapInfo]);
+
+  useEffect(() => {
+    if (!map || !window.naver?.maps) return;
+
+    searchMarkersRef.current.forEach((marker) => marker.setMap(null));
+    searchMarkersRef.current = [];
+
+    if (searchPlaces.length === 0) return;
+
+    const pinWidth = 32;
+    const pinHeight = pinWidth * 2;
+    const bounds = new window.naver.maps.LatLngBounds(
+      new window.naver.maps.LatLng(90, 180),
+      new window.naver.maps.LatLng(-90, -180),
+    );
+
+    searchPlaces.forEach((place) => {
+      const lat = parseFloat(place.y);
+      const lng = parseFloat(place.x);
+      const position = new window.naver.maps.LatLng(lat, lng);
+      bounds.extend(position);
+
+      const marker = new window.naver.maps.Marker({
+        position,
+        map,
+        icon: {
+          content: getSearchPinIcon(pinWidth, pinHeight),
+          anchor: new window.naver.maps.Point(pinWidth / 2, pinHeight),
+        },
+        zIndex: 50,
+      });
+
+      marker.addListener(
+        'click',
+        (e: { domEvent: MouseEvent }) => {
+          setSelectedSearchPlace(place);
+          setClickedMapInfo({
+            lat,
+            lng,
+            clientX: e.domEvent.clientX,
+            clientY: e.domEvent.clientY,
+          });
+        },
+      );
+
+      searchMarkersRef.current.push(marker);
+    });
+
+    map.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
+  }, [map, searchPlaces, setSelectedSearchPlace, setClickedMapInfo]);
 
   return (
     <>

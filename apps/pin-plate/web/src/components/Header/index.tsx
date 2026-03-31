@@ -15,6 +15,7 @@ import { isPostModalOpenAtom } from '@/features/post/atoms';
 import { AccountPopover } from './AccountPopover';
 import { useQueryClient } from '@tanstack/react-query';
 import { MY_PAGE_KEYS, getMyProfile } from '@/features/my-page';
+import { useSearchPlaces } from '@/features/map/hooks/useSearchPlaces';
 
 export const Header = () => {
   const [viewMode, setViewMode] = useAtom(viewModeAtom);
@@ -25,16 +26,20 @@ export const Header = () => {
   const router = useRouter();
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
   const queryClient = useQueryClient();
+  const { searchPlaces, clearSearchPlaces } = useSearchPlaces();
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      setSearchQuery(searchInputValue.trim());
+      const query = searchInputValue.trim();
+      setSearchQuery(query);
+      searchPlaces(query);
     }
   };
 
   const handleClearSearch = () => {
     setSearchInputValue('');
     setSearchQuery('');
+    clearSearchPlaces();
   };
 
   const handleProfileHover = () => {
