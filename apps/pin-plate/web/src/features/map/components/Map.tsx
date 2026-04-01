@@ -245,18 +245,15 @@ export const Map = () => {
         zIndex: 50,
       });
 
-      marker.addListener(
-        'click',
-        (e: { domEvent: MouseEvent }) => {
-          setSelectedSearchPlace(place);
-          setClickedMapInfo({
-            lat,
-            lng,
-            clientX: e.domEvent.clientX,
-            clientY: e.domEvent.clientY,
-          });
-        },
-      );
+      marker.addListener('click', (e: { domEvent: MouseEvent }) => {
+        setSelectedSearchPlace(place);
+        setClickedMapInfo({
+          lat,
+          lng,
+          clientX: e.domEvent.clientX,
+          clientY: e.domEvent.clientY,
+        });
+      });
 
       searchMarkersRef.current.push(marker);
     });

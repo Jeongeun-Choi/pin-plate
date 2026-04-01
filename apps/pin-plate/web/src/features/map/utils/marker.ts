@@ -64,10 +64,7 @@ export const getCurrentLocationIcon = () => {
   `;
 };
 
-export const getSearchPinIcon = (
-  width: number = 32,
-  height: number = 64,
-) => {
+export const getSearchPinIcon = (width: number = 32, height: number = 64) => {
   const color = '#9E9E9E';
   return `
     <div style="width: ${width}px; height: ${height}px; position: relative;">
