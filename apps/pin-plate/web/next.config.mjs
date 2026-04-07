@@ -6,12 +6,6 @@ const withVanillaExtract = createVanillaExtractPlugin();
 const nextConfig = {
   serverExternalPackages: ['sharp'],
 
-  experimental: {
-    outputFileTracingIncludes: {
-      '/api/image': ['./node_modules/sharp/**/*', './node_modules/@img/**/*'],
-    },
-  },
-
   // 모노레포 패키지 트랜스파일 설정
   transpilePackages: ['@pin-plate/ui'],
 
@@ -42,7 +36,6 @@ const nextConfig = {
   },
 
   images: {
-    unoptimized: true,
     minimumCacheTTL: 86400,
     remotePatterns: [
       {
