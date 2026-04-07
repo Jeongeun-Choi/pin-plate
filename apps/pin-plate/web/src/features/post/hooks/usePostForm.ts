@@ -3,6 +3,7 @@ import { useCreatePost } from './useCreatePost';
 import { KakaoPlace } from '../types/search';
 import { createClient } from '@/utils/supabase/client';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
+import { useUploadImages } from './useUploadImages';
 
 export const usePostForm = (
   onSuccess?: () => void,
@@ -20,6 +21,8 @@ export const usePostForm = (
 
   const { mutateAsync: createPost } = useCreatePost();
 
+  const { handleUploadAndSetImages } = useUploadImages(photos, setPhotos);
+
   const handlePlaceSelect = (place: KakaoPlace | null) => {
     setSelectedPlace(place);
   };
@@ -29,75 +32,6 @@ export const usePostForm = (
     setRating(0);
     setPhotos([]);
     setSelectedPlace(null);
-  };
-
-  // Fixing the bug: The original code had a separate logic inside handleFileChange.
-  // It calculated tempUrls and S3 URLs.
-  // Actually, I should fix the uploading state logic.
-  // Let's rewrite uploadImages to return the S3 URLs or update the state correctly.
-
-  const handleUploadAndSetImages = async (fileList: File[]) => {
-    const remainingSlots = 5 - photos.length;
-    if (fileList.length > remainingSlots) {
-      alert(`최대 ${remainingSlots}장까지만 더 추가할 수 있습니다.`);
-      return;
-    }
-
-    // 1. Presigned URL Request
-    let presignedRes;
-    try {
-      presignedRes = await fetch('/api/image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          files: fileList.map((f) => ({ filename: f.name, type: f.type })),
-        }),
-      });
-    } catch (err) {
-      console.error('Presigned URL Network Error:', err);
-      alert(`서버 연결 실패: /api/image 에 접근할 수 없습니다.\n${err}`);
-      return;
-    }
-
-    if (!presignedRes.ok) {
-      const errorText = await presignedRes.text();
-      console.error('Presigned URL Server Error:', errorText);
-      alert(
-        `서버 에러 (${presignedRes.status}): 이미지 URL을 받아오지 못했습니다.`,
-      );
-      return;
-    }
-
-    const { urls } = await presignedRes.json();
-
-    // 2. Upload to S3
-    const uploadPromises = urls.map(
-      async (
-        item: { originalName: string; fileName: string; url: string },
-        index: number,
-      ) => {
-        const file = fileList[index];
-        try {
-          const s3Res = await fetch(item.url, {
-            method: 'PUT',
-            body: file,
-            headers: { 'Content-Type': file.type },
-          });
-          if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
-          return item.url.split('?')[0];
-        } catch (err) {
-          console.error('S3 Upload Error:', err);
-          throw new Error('S3 CORS or Network Error');
-        }
-      },
-    );
-
-    try {
-      const s3Urls = await Promise.all(uploadPromises);
-      setPhotos((prev) => [...prev, ...s3Urls]);
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   const handleSubmit = async () => {
