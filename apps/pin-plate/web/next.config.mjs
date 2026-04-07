@@ -4,6 +4,8 @@ const withVanillaExtract = createVanillaExtractPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ['sharp'],
+
   // 모노레포 패키지 트랜스파일 설정
   transpilePackages: ['@pin-plate/ui'],
 
