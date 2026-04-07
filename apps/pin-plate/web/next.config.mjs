@@ -34,6 +34,7 @@ const nextConfig = {
   },
 
   images: {
+    unoptimized: true,
     minimumCacheTTL: 86400,
     remotePatterns: [
       {
