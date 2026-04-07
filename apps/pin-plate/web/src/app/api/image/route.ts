@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import sharp from 'sharp';
 
 const client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -39,25 +38,16 @@ export async function POST(request: NextRequest) {
         const imageData = await file.arrayBuffer();
         const buffer = Buffer.from(imageData);
 
-        const compressed = await sharp(buffer)
-          .resize({
-            width: 1280,
-            height: 1280,
-            fit: 'inside',
-            withoutEnlargement: true,
-          })
-          .webp({ quality: 80 })
-          .toBuffer();
-
+        const ext = file.name.split('.').pop() ?? 'jpg';
         const baseName = file.name.replace(/\.[^.]+$/, '');
-        const fileName = `${Date.now()}_${baseName}.webp`;
+        const fileName = `${Date.now()}_${baseName}.${ext}`;
 
         await client.send(
           new PutObjectCommand({
             Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME,
             Key: fileName,
-            Body: compressed,
-            ContentType: 'image/webp',
+            Body: buffer,
+            ContentType: file.type || 'image/jpeg',
           }),
         );
 
