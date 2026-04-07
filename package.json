@@ -31,6 +31,10 @@
   "pnpm": {
     "overrides": {
       "eslint-config-next": "15.1.0"
+    },
+    "supportedArchitectures": {
+      "os": ["linux", "current"],
+      "cpu": ["x64", "arm64", "current"]
     }
   }
 }
