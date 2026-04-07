@@ -61,7 +61,6 @@ export default $config({
 
       server: {
         memory: "1024 MB",
-        install: ["sharp"],
       },
 
       domain: {
