@@ -101,6 +101,15 @@ const nextConfig = {
 
     return config;
   },
+
+  // sharp 모듈이 런타임 추적(NFT)에 포함되지 않도록 명시적으로 제외
+  outputFileTracingExcludes: {
+    '*': [
+      '**/node_modules/sharp/**',
+      '**/node_modules/@img/sharp-linux-x64/**',
+      '**/node_modules/@img/sharp-libvips-linux-x64/**',
+    ],
+  },
 };
 
 export default withVanillaExtract(nextConfig);
