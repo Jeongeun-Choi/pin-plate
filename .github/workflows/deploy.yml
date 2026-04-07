@@ -37,17 +37,17 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-v2-
 
       - name: Cache SST platform (Pulumi binaries)
         uses: actions/cache@v3
         with:
           path: .sst/platform
-          key: ${{ runner.os }}-sst-platform-${{ hashFiles('sst.config.ts') }}
+          key: ${{ runner.os }}-sst-platform-v2-${{ hashFiles('sst.config.ts') }}
           restore-keys: |
-            ${{ runner.os }}-sst-platform-
+            ${{ runner.os }}-sst-platform-v2-
 
       - name: Install dependencies
         run: pnpm install
