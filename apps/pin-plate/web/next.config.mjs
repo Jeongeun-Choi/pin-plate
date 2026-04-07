@@ -6,8 +6,13 @@ const withVanillaExtract = createVanillaExtractPlugin();
 const nextConfig = {
   serverExternalPackages: ['sharp'],
 
-  outputFileTracingExcludes: {
-    '*': ['./node_modules/sharp/**', './node_modules/@img/**'],
+  // Lambda는 Linux 환경이라 Mac 빌드 시 darwin 바이너리만 트레이싱됨.
+  // linux x64/arm64 바이너리를 명시적으로 포함해 Lambda에서 sharp를 찾을 수 있게 함.
+  outputFileTracingIncludes: {
+    '/api/image': [
+      '../../../node_modules/.pnpm/@img+sharp-linux-x64@0.34.5/node_modules/@img/sharp-linux-x64/**',
+      '../../../node_modules/.pnpm/@img+sharp-libvips-linux-x64@1.2.4/node_modules/@img/sharp-libvips-linux-x64/**',
+    ],
   },
 
   // 모노레포 패키지 트랜스파일 설정
