@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Image from 'next/image';
 import * as styles from './styles.css';
 import { IcFilledstar, IcFork, IcMarker } from '../../icons';
 
@@ -30,7 +29,12 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div ref={ref} className={`${styles.card} ${className || ''}`} {...props}>
         <div className={styles.cardImageWrapper}>
           {imageUrl ? (
-            <Image src={imageUrl} alt={title} className={styles.cardImage} />
+            <img
+              src={imageUrl}
+              alt={title}
+              loading="lazy"
+              className={styles.cardImage}
+            />
           ) : (
             <div className={styles.imagePlaceholder}>
               <IcFork size={52} color="#ffa07a" />
