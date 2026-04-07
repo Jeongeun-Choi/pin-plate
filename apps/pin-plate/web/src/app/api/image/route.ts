@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     !process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME
   ) {
     return NextResponse.json(
-      { error: 'Server misconfigured' },
+      { error: '서버 설정 오류 (AWS 설정 확인 필요)' },
       { status: 500 },
     );
   }
@@ -28,7 +28,10 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll('files') as File[];
 
     if (!files || files.length === 0) {
-      return NextResponse.json({ error: 'No files provided' }, { status: 400 });
+      return NextResponse.json(
+        { error: '업로드할 파일이 없습니다.' },
+        { status: 400 },
+      );
     }
 
     const uploadedUrls = await Promise.all(
@@ -64,6 +67,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ urls: uploadedUrls });
   } catch (error) {
     console.error('Image upload error:', error);
-    return NextResponse.json({ error: 'Image upload failed' }, { status: 500 });
+    return NextResponse.json(
+      { error: '이미지 업로드 중 서버 오류가 발생했습니다.' },
+      { status: 500 },
+    );
   }
 }

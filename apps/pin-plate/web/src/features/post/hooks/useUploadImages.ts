@@ -17,12 +17,25 @@ export const useUploadImages = (
 
     try {
       const res = await fetch('/api/image', { method: 'POST', body: formData });
-      if (!res.ok) throw new Error(`서버 에러 (${res.status})`);
+      if (!res.ok) {
+        let errorMessage = `서버 에러 (${res.status})`;
+        try {
+          const errorData = await res.json();
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch {
+          // JSON 파싱 실패 시 기본 메시지 유지
+        }
+        throw new Error(errorMessage);
+      }
       const { urls } = await res.json();
       setPhotos((prev) => [...prev, ...urls]);
     } catch (err) {
       console.error('Upload Error:', err);
-      alert('이미지 업로드에 실패했습니다.');
+      const message =
+        err instanceof Error ? err.message : '이미지 업로드에 실패했습니다.';
+      alert(`이미지 업로드 실패: ${message}`);
     }
   };
 
