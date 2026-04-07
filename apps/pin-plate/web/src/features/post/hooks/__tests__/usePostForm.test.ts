@@ -136,27 +136,16 @@ describe('usePostForm', () => {
   });
 
   it('handleRemovePhoto로 특정 사진을 제거할 수 있다', async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            urls: [
-              {
-                originalName: 'a.jpg',
-                fileName: 'a.jpg',
-                url: 'https://s3.example.com/a.jpg?token=x',
-              },
-              {
-                originalName: 'b.jpg',
-                fileName: 'b.jpg',
-                url: 'https://s3.example.com/b.jpg?token=x',
-              },
-            ],
-          }),
-      })
-      .mockResolvedValueOnce({ ok: true })
-      .mockResolvedValueOnce({ ok: true });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          urls: [
+            'https://s3.example.com/a.jpg?token=x',
+            'https://s3.example.com/b.jpg?token=x',
+          ],
+        }),
+    });
 
     const { result } = renderHook(() => usePostForm(), {
       wrapper: createWrapper(),
@@ -188,21 +177,13 @@ describe('usePostForm', () => {
 
     // Simulate 5 photos already uploaded
     for (let i = 0; i < 5; i++) {
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              urls: [
-                {
-                  originalName: `${i}.jpg`,
-                  fileName: `${i}.jpg`,
-                  url: `https://s3.example.com/${i}.jpg?token=x`,
-                },
-              ],
-            }),
-        })
-        .mockResolvedValueOnce({ ok: true });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            urls: [`https://s3.example.com/${i}.jpg?token=x`],
+          }),
+      });
 
       await act(async () => {
         await result.current.handlers.handleUploadAndSetImages([
