@@ -1,7 +1,6 @@
-// app/api/presigned/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import sharp from 'sharp';
 
 const client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -25,43 +24,46 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // 프론트에서 { files: [{ filename: "a.jpg", type: "image/jpeg" }, ...] } 형태로 보낸다고 가정
-    const { files } = await request.json();
+    const formData = await request.formData();
+    const files = formData.getAll('files') as File[];
 
-    if (!files || !Array.isArray(files)) {
+    if (!files || files.length === 0) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 });
     }
 
-    // Promise.all을 사용해 여러 개의 URL을 동시에 생성합니다 (속도 향상)
-    const presignedUrls = await Promise.all(
-      files.map(async (file: { filename: string; type: string }) => {
-        const uniqueFileName = `${Date.now()}_${file.filename}`;
+    const uploadedUrls = await Promise.all(
+      files.map(async (file) => {
+        const buffer = Buffer.from(await file.arrayBuffer());
 
-        const command = new PutObjectCommand({
-          Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME,
-          Key: uniqueFileName,
-          ContentType: file.type,
-        });
+        const compressed = await sharp(buffer)
+          .resize({
+            width: 1280,
+            height: 1280,
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 80 })
+          .toBuffer();
 
-        const url = await getSignedUrl(client, command, { expiresIn: 60 });
+        const baseName = file.name.replace(/\.[^.]+$/, '');
+        const fileName = `${Date.now()}_${baseName}.webp`;
 
-        return {
-          originalName: file.filename,
-          fileName: uniqueFileName, // 실제 저장된 이름
-          url, // 업로드용 URL
-        };
+        await client.send(
+          new PutObjectCommand({
+            Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME,
+            Key: fileName,
+            Body: compressed,
+            ContentType: 'image/webp',
+          }),
+        );
+
+        return `https://${process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${fileName}`;
       }),
     );
 
-    return NextResponse.json({ urls: presignedUrls });
-  } catch (error: any) {
-    console.error('S3 Presigned URL Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Error creating urls',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({ urls: uploadedUrls });
+  } catch (error) {
+    console.error('Image upload error:', error);
+    return NextResponse.json({ error: 'Image upload failed' }, { status: 500 });
   }
 }

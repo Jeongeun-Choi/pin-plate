@@ -28,6 +28,7 @@ export default function PostDetailContent({ post }: IPostDetailContentProps) {
             src={post.image_urls[0]}
             alt={post.place_name}
             fill
+            sizes="(min-width: 768px) 450px, 100vw"
             className={styles.postImage}
             priority
           />
