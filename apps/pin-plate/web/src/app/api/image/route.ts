@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
 
     const uploadedUrls = await Promise.all(
       files.map(async (file) => {
-        const buffer = Buffer.from(await file.arrayBuffer());
+        const imageData = await file.arrayBuffer();
+        const buffer = Buffer.from(imageData);
 
         const compressed = await sharp(buffer)
           .resize({
