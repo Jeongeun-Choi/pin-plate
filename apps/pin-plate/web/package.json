@@ -10,6 +10,10 @@
     "prettier": "prettier '**/*.{ts,tsx}'",
     "test": "vitest"
   },
+  "optionalDependencies": {
+    "@img/sharp-linux-x64": "^0.34.5",
+    "@img/sharp-linux-arm64": "^0.34.5"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.965.0",
     "@aws-sdk/s3-request-presigner": "^3.965.0",
