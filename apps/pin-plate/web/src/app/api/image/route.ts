@@ -1,13 +1,7 @@
+// app/api/presigned/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-
-const ALLOWED_MIME_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-];
 
 const client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -17,11 +11,6 @@ const client = new S3Client({
   },
 });
 
-interface FileMetadata {
-  name: string;
-  type: string;
-}
-
 export async function POST(request: NextRequest) {
   if (
     !process.env.NEXT_PUBLIC_AWS_REGION ||
@@ -30,51 +19,49 @@ export async function POST(request: NextRequest) {
     !process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME
   ) {
     return NextResponse.json(
-      { error: '서버 설정 오류 (AWS 설정 확인 필요)' },
+      { error: 'Server misconfigured' },
       { status: 500 },
     );
   }
 
-  const { files } = (await request.json()) as { files: FileMetadata[] };
+  try {
+    // 프론트에서 { files: [{ filename: "a.jpg", type: "image/jpeg" }, ...] } 형태로 보낸다고 가정
+    const { files } = await request.json();
 
-  if (!files || files.length === 0) {
+    if (!files || !Array.isArray(files)) {
+      return NextResponse.json({ error: 'No files provided' }, { status: 400 });
+    }
+
+    // Promise.all을 사용해 여러 개의 URL을 동시에 생성합니다 (속도 향상)
+    const presignedUrls = await Promise.all(
+      files.map(async (file: { filename: string; type: string }) => {
+        const uniqueFileName = `${Date.now()}_${file.filename}`;
+
+        const command = new PutObjectCommand({
+          Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME,
+          Key: uniqueFileName,
+          ContentType: file.type,
+        });
+
+        const url = await getSignedUrl(client, command, { expiresIn: 60 });
+
+        return {
+          originalName: file.filename,
+          fileName: uniqueFileName, // 실제 저장된 이름
+          url, // 업로드용 URL
+        };
+      }),
+    );
+
+    return NextResponse.json({ urls: presignedUrls });
+  } catch (error: any) {
+    console.error('S3 Presigned URL Error:', error);
     return NextResponse.json(
-      { error: '업로드할 파일 정보가 없습니다.' },
-      { status: 400 },
+      {
+        error: 'Error creating urls',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
     );
   }
-
-  const invalidFile = files.find((f) => !ALLOWED_MIME_TYPES.includes(f.type));
-  if (invalidFile) {
-    return NextResponse.json(
-      { error: `허용되지 않는 파일 형식입니다: ${invalidFile.type}` },
-      { status: 400 },
-    );
-  }
-
-  const bucket = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME;
-  const region = process.env.NEXT_PUBLIC_AWS_REGION;
-
-  const presignedFiles = await Promise.all(
-    files.map(async (file) => {
-      const ext = file.name.split('.').pop() ?? 'jpg';
-      const baseName = file.name.replace(/\.[^.]+$/, '');
-      const key = `${Date.now()}_${baseName}.${ext}`;
-
-      const command = new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        ContentType: file.type,
-      });
-
-      const presignedUrl = await getSignedUrl(client, command, {
-        expiresIn: 300,
-      });
-      const publicUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
-
-      return { presignedUrl, publicUrl };
-    }),
-  );
-
-  return NextResponse.json({ files: presignedFiles });
 }
