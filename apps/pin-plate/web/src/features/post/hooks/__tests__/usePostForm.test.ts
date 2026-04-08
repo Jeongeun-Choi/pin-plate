@@ -136,16 +136,26 @@ describe('usePostForm', () => {
   });
 
   it('handleRemovePhoto로 특정 사진을 제거할 수 있다', async () => {
+    // 1) presigned URL 발급 응답
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () =>
         Promise.resolve({
-          urls: [
-            'https://s3.example.com/a.jpg?token=x',
-            'https://s3.example.com/b.jpg?token=x',
+          files: [
+            {
+              presignedUrl: 'https://s3.example.com/a.jpg?presigned',
+              publicUrl: 'https://s3.example.com/a.jpg',
+            },
+            {
+              presignedUrl: 'https://s3.example.com/b.jpg?presigned',
+              publicUrl: 'https://s3.example.com/b.jpg',
+            },
           ],
         }),
     });
+    // 2) S3 PUT 응답 2개
+    mockFetch.mockResolvedValueOnce({ ok: true });
+    mockFetch.mockResolvedValueOnce({ ok: true });
 
     const { result } = renderHook(() => usePostForm(), {
       wrapper: createWrapper(),
@@ -181,9 +191,15 @@ describe('usePostForm', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            urls: [`https://s3.example.com/${i}.jpg?token=x`],
+            files: [
+              {
+                presignedUrl: `https://s3.example.com/${i}.jpg?presigned`,
+                publicUrl: `https://s3.example.com/${i}.jpg`,
+              },
+            ],
           }),
       });
+      mockFetch.mockResolvedValueOnce({ ok: true });
 
       await act(async () => {
         await result.current.handlers.handleUploadAndSetImages([
