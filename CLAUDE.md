@@ -134,6 +134,20 @@ Plan mode에서 **구현·설계·기능 개발** 요청이 오면 반드시 `.c
 
 ---
 
+## Lint & Formatting
+
+코드 추가·수정 후 반드시 아래 명령을 실행해 린트와 포매팅을 맞춘다:
+
+```bash
+pnpm lint:fix
+```
+
+- ESLint 자동 수정 + Prettier 포매팅이 함께 적용됨
+- 수정된 파일이 있으면 커밋에 포함시킨다
+- `warning`은 무시하지 말고 가능하면 해소한다 (단, 기존 코드의 경고는 별도 커밋으로 분리)
+
+---
+
 ## General
 
 - Prefer composition over prop drilling — use children or compound components
