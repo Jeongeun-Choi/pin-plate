@@ -83,7 +83,9 @@ jobs:
           CLOUDFLARE_DEFAULT_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_DEFAULT_ACCOUNT_ID }}
         run: |
           for attempt in 1 2 3; do
-            pnpm sst:deploy && break
+            pnpm sst deploy --stage production && exit 0
             echo "Attempt $attempt failed. Retrying in 30s..."
             sleep 30
           done
+          echo "All deploy attempts failed."
+          exit 1
