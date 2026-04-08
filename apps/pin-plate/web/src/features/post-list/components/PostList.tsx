@@ -23,9 +23,9 @@ const getCardImageProps = (imageUrl: string) => {
     width: 400,
     height: 192,
     sizes: '(min-width: 640px) 400px, 100vw',
-  })
-  return { srcSet: props.srcSet, sizes: props.sizes }
-}
+  });
+  return { srcSet: props.srcSet, sizes: props.sizes };
+};
 
 // Haversine formula to calculate distance
 const getDistance = (
@@ -169,7 +169,9 @@ export const PostList = () => {
                 day: 'numeric',
               })}
               imageUrl={post.image_urls?.[0]}
-              {...(post.image_urls?.[0] ? getCardImageProps(post.image_urls[0]) : {})}
+              {...(post.image_urls?.[0]
+                ? getCardImageProps(post.image_urls[0])
+                : {})}
             />
           ))}
         </div>
