@@ -26,6 +26,10 @@ vi.mock('@/hooks/useCurrentLocation', () => ({
   }),
 }));
 
+vi.mock('../../utils/compressImages', () => ({
+  compressImages: (files: File[]) => Promise.resolve(files),
+}));
+
 const mockCreatePost = vi.fn();
 const mockGetUser = vi.fn();
 const mockFetch = vi.fn();
