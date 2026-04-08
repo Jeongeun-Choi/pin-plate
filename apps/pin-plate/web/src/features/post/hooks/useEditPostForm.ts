@@ -3,6 +3,7 @@ import { useUpdatePost } from './useUpdatePost';
 import { KakaoPlace } from '../types/search';
 import { Post } from '../types/post';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
+import { compressImages } from '../utils/compressImages';
 
 export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
   const [content, setContent] = useState(initialData.content);
@@ -39,6 +40,8 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
       return;
     }
 
+    const filesToUpload = await compressImages(fileList);
+
     // 1. Presigned URL Request
     let presignedRes;
     try {
@@ -46,7 +49,7 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          files: fileList.map((f) => ({ filename: f.name, type: f.type })),
+          files: filesToUpload.map((f) => ({ filename: f.name, type: f.type })),
         }),
       });
     } catch (err) {
@@ -72,7 +75,7 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
         item: { originalName: string; fileName: string; url: string },
         index: number,
       ) => {
-        const file = fileList[index];
+        const file = filesToUpload[index];
         try {
           const s3Res = await fetch(item.url, {
             method: 'PUT',

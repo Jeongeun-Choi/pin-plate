@@ -3,6 +3,7 @@ import { useCreatePost } from './useCreatePost';
 import { KakaoPlace } from '../types/search';
 import { createClient } from '@/utils/supabase/client';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
+import { compressImages } from '../utils/compressImages';
 
 export const usePostForm = (
   onSuccess?: () => void,
@@ -43,6 +44,8 @@ export const usePostForm = (
       return;
     }
 
+    const filesToUpload = await compressImages(fileList);
+
     // 1. Presigned URL Request
     let presignedRes;
     try {
@@ -50,7 +53,7 @@ export const usePostForm = (
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          files: fileList.map((f) => ({ filename: f.name, type: f.type })),
+          files: filesToUpload.map((f) => ({ filename: f.name, type: f.type })),
         }),
       });
     } catch (err) {
@@ -76,7 +79,7 @@ export const usePostForm = (
         item: { originalName: string; fileName: string; url: string },
         index: number,
       ) => {
-        const file = fileList[index];
+        const file = filesToUpload[index];
         try {
           const s3Res = await fetch(item.url, {
             method: 'PUT',
