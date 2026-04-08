@@ -2,6 +2,7 @@
 
 import * as styles from './PostList.css';
 import { useMemo, useState } from 'react';
+import { getImageProps } from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAtomValue } from 'jotai';
 import { Card, IcClock, IcNavigation, IcOutlinestar } from '@pin-plate/ui';
@@ -14,6 +15,17 @@ import { createClient } from '@/utils/supabase/client';
 import { searchQueryAtom } from '@/app/atoms';
 
 type SortType = 'latest' | 'rating' | 'distance';
+
+const getCardImageProps = (imageUrl: string) => {
+  const { props } = getImageProps({
+    src: imageUrl,
+    alt: '',
+    width: 400,
+    height: 192,
+    sizes: '(min-width: 640px) 400px, 100vw',
+  });
+  return { srcSet: props.srcSet, sizes: props.sizes };
+};
 
 // Haversine formula to calculate distance
 const getDistance = (
@@ -157,6 +169,9 @@ export const PostList = () => {
                 day: 'numeric',
               })}
               imageUrl={post.image_urls?.[0]}
+              {...(post.image_urls?.[0]
+                ? getCardImageProps(post.image_urls[0])
+                : {})}
             />
           ))}
         </div>

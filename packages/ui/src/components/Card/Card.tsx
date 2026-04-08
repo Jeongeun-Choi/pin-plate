@@ -9,6 +9,8 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   description: string;
   date: string;
   imageUrl?: string;
+  srcSet?: string;
+  sizes?: string;
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
@@ -20,6 +22,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       description,
       date,
       imageUrl,
+      srcSet,
+      sizes,
       className,
       ...props
     },
@@ -31,6 +35,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
           {imageUrl ? (
             <img
               src={imageUrl}
+              srcSet={srcSet}
+              sizes={sizes}
               alt={title}
               loading="lazy"
               className={styles.cardImage}

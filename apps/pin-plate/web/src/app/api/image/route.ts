@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
           ContentType: file.type,
         });
 
-        const url = await getSignedUrl(client, command, { expiresIn: 60 });
+        const url = await getSignedUrl(client, command, { expiresIn: 300 });
 
         return {
           originalName: file.filename,
