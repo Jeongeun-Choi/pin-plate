@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+];
 
 const client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -8,6 +16,11 @@ const client = new S3Client({
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
   },
 });
+
+interface FileMetadata {
+  name: string;
+  type: string;
+}
 
 export async function POST(request: NextRequest) {
   if (
@@ -22,45 +35,46 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  try {
-    const formData = await request.formData();
-    const files = formData.getAll('files') as File[];
+  const { files } = (await request.json()) as { files: FileMetadata[] };
 
-    if (!files || files.length === 0) {
-      return NextResponse.json(
-        { error: '업로드할 파일이 없습니다.' },
-        { status: 400 },
-      );
-    }
-
-    const uploadedUrls = await Promise.all(
-      files.map(async (file) => {
-        const imageData = await file.arrayBuffer();
-        const buffer = Buffer.from(imageData);
-
-        const ext = file.name.split('.').pop() ?? 'jpg';
-        const baseName = file.name.replace(/\.[^.]+$/, '');
-        const fileName = `${Date.now()}_${baseName}.${ext}`;
-
-        await client.send(
-          new PutObjectCommand({
-            Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME,
-            Key: fileName,
-            Body: buffer,
-            ContentType: file.type || 'image/jpeg',
-          }),
-        );
-
-        return `https://${process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${fileName}`;
-      }),
-    );
-
-    return NextResponse.json({ urls: uploadedUrls });
-  } catch (error) {
-    console.error('Image upload error:', error);
+  if (!files || files.length === 0) {
     return NextResponse.json(
-      { error: '이미지 업로드 중 서버 오류가 발생했습니다.' },
-      { status: 500 },
+      { error: '업로드할 파일 정보가 없습니다.' },
+      { status: 400 },
     );
   }
+
+  const invalidFile = files.find((f) => !ALLOWED_MIME_TYPES.includes(f.type));
+  if (invalidFile) {
+    return NextResponse.json(
+      { error: `허용되지 않는 파일 형식입니다: ${invalidFile.type}` },
+      { status: 400 },
+    );
+  }
+
+  const bucket = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME;
+  const region = process.env.NEXT_PUBLIC_AWS_REGION;
+
+  const presignedFiles = await Promise.all(
+    files.map(async (file) => {
+      const ext = file.name.split('.').pop() ?? 'jpg';
+      const baseName = file.name.replace(/\.[^.]+$/, '');
+      const key = `${Date.now()}_${baseName}.${ext}`;
+
+      const command = new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        ContentType: file.type,
+      });
+
+      const presignedUrl = await getSignedUrl(client, command, {
+        expiresIn: 300,
+      });
+      const publicUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+
+      return { presignedUrl, publicUrl };
+    }),
+  );
+
+  return NextResponse.json({ files: presignedFiles });
 }
