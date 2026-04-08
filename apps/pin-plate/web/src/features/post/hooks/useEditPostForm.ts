@@ -49,7 +49,10 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          files: filesToUpload.map((f) => ({ filename: f.name, type: f.type })),
+          files: filesToUpload.map((f) => ({
+            filename: f.name.replace(/\.[^.]+$/, '.webp'),
+            type: f.type,
+          })),
         }),
       });
     } catch (err) {

@@ -4,6 +4,7 @@ const COMPRESSION_OPTIONS = {
   maxSizeMB: 1,
   maxWidthOrHeight: 1920,
   useWebWorker: true,
+  fileType: 'image/webp',
 };
 
 const SKIP_COMPRESSION_TYPES = new Set(['image/gif', 'image/svg+xml']);
