@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { vars } from '@pin-plate/ui/styles/vars.css';
+import { vars } from '@pin-plate/ui/vars';
 
 export const container = style({
   display: 'flex',
@@ -28,15 +28,15 @@ export const card = style({
 });
 
 export const iconContainer = style({
-  width: '100px',
-  height: '100px',
+  width: '120px',
+  height: '120px',
   borderRadius: '50%',
   backgroundColor: vars.colors.primary.light,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '50px',
   marginBottom: vars.spacing[2],
+  overflow: 'hidden',
 });
 
 export const title = style({
