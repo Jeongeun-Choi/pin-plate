@@ -1,9 +1,12 @@
 import { useState } from 'react';
+import { useAtomValue } from 'jotai';
 import { useCreatePost } from './useCreatePost';
 import { KakaoPlace } from '../types/search';
 import { createClient } from '@/utils/supabase/client';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
+import { viewModeAtom } from '@/app/atoms';
+import { mapStore } from '@/features/map/store/MapStore';
 
 export const usePostForm = (
   onSuccess?: () => void,
@@ -18,6 +21,8 @@ export const usePostForm = (
 
   const { location: currentLocation, fetchLocation: fetchCurrentLocation } =
     useCurrentLocation();
+
+  const viewMode = useAtomValue(viewModeAtom);
 
   const { mutateAsync: createPost } = useCreatePost();
 
@@ -133,17 +138,24 @@ export const usePostForm = (
         return;
       }
 
+      const lat = parseFloat(selectedPlace.y);
+      const lng = parseFloat(selectedPlace.x);
+
       await createPost({
         content,
         rating,
         image_urls: photos,
         place_name: selectedPlace.place_name,
         address: selectedPlace.road_address_name || selectedPlace.address_name,
-        lat: parseFloat(selectedPlace.y),
-        lng: parseFloat(selectedPlace.x),
+        lat,
+        lng,
         kakao_place_id: selectedPlace.id,
         user_id: user.id,
       });
+
+      if (viewMode === 'map' && Number.isFinite(lat) && Number.isFinite(lng)) {
+        mapStore.moveTo(lat, lng);
+      }
 
       alert('게시글이 등록되었습니다!');
       resetForm();
