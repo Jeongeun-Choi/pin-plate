@@ -50,6 +50,12 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'pin-plate-image.s3.ap-southeast-2.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'via.placeholder.com',
         port: '',
         pathname: '/**',
