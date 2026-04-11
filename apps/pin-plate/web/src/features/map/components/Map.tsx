@@ -18,12 +18,16 @@ import {
   searchPlacesAtom,
   selectedSearchPlaceAtom,
 } from '../atoms';
+import { mapStore } from '../store/MapStore';
 
 export const Map = () => {
-  const [map, setMap] = useState<naver.maps.Map | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   const mapRef = useRef<HTMLDivElement>(null);
   const currentLocationMarkerRef = useRef<naver.maps.Marker | null>(null);
+  const markersRef = useRef<naver.maps.Marker[]>([]);
+  const searchMarkersRef = useRef<naver.maps.Marker[]>([]);
+
   const router = useRouter();
   const setClickedMapInfo = useSetAtom(clickedMapInfoAtom);
   const setSelectedSearchPlace = useSetAtom(selectedSearchPlaceAtom);
@@ -42,86 +46,107 @@ export const Map = () => {
   }, [posts, searchQuery]);
 
   const initializeMap = () => {
-    if (window.naver && mapRef.current) {
-      const initialCenter = window.nativeLocation
-        ? new window.naver.maps.LatLng(
-            window.nativeLocation.coords.latitude,
-            window.nativeLocation.coords.longitude,
-          )
-        : new window.naver.maps.LatLng(37.3595704, 127.105399);
-
-      const mapOptions = {
-        center: initialCenter,
-        zoom: 15,
-        scaleControl: false,
-        logoControl: false,
-        mapDataControl: false,
-        zoomControl: false,
-        mapTypeControl: false,
-      };
-      const mapInstance = new window.naver.maps.Map(mapRef.current, mapOptions);
-      setMap(mapInstance);
-
-      mapInstance.addListener(
-        'click',
-        (e: { coord: naver.maps.LatLng; domEvent: MouseEvent }) => {
-          setClickedMapInfo({
-            lat: e.coord.y,
-            lng: e.coord.x,
-            clientX: e.domEvent.clientX,
-            clientY: e.domEvent.clientY,
-          });
-        },
-      );
-
-      const updateCurrentLocation = (lat: number, lng: number) => {
-        const position = new window.naver.maps.LatLng(lat, lng);
-        mapInstance.setCenter(position);
-
-        if (currentLocationMarkerRef.current) {
-          currentLocationMarkerRef.current.setPosition(position);
-        } else {
-          currentLocationMarkerRef.current = new window.naver.maps.Marker({
-            position,
-            map: mapInstance,
-            icon: {
-              content: getCurrentLocationIcon(),
-              anchor: new window.naver.maps.Point(12, 12),
-            },
-            zIndex: 200,
-          });
-        }
-      };
-
-      if (window.nativeLocation) {
-        updateCurrentLocation(
-          window.nativeLocation.coords.latitude,
-          window.nativeLocation.coords.longitude,
-        );
-      }
-
-      if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(
-          JSON.stringify({ type: 'REQ_LOCATION' }),
-        );
-      } else if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          updateCurrentLocation(
-            position.coords.latitude,
-            position.coords.longitude,
-          );
-        });
-      }
-    } else {
+    if (!window.naver || !mapRef.current) {
       console.error('initializeMap failed: window.naver or mapRef missing', {
         hasNaver: !!window.naver,
         hasRef: !!mapRef.current,
+      });
+      return;
+    }
+
+    const initialCenter = window.nativeLocation
+      ? {
+          lat: window.nativeLocation.coords.latitude,
+          lng: window.nativeLocation.coords.longitude,
+        }
+      : undefined;
+
+    const mapInstance = mapStore.init(mapRef.current, {
+      center: initialCenter,
+    });
+    setIsMapReady(true);
+
+    mapInstance.addListener(
+      'click',
+      (e: { coord: naver.maps.LatLng; domEvent: MouseEvent }) => {
+        setClickedMapInfo({
+          lat: e.coord.y,
+          lng: e.coord.x,
+          clientX: e.domEvent.clientX,
+          clientY: e.domEvent.clientY,
+        });
+      },
+    );
+
+    const updateCurrentLocation = (lat: number, lng: number) => {
+      const position = new window.naver.maps.LatLng(lat, lng);
+      mapInstance.setCenter(position);
+
+      if (currentLocationMarkerRef.current) {
+        currentLocationMarkerRef.current.setPosition(position);
+      } else {
+        currentLocationMarkerRef.current = new window.naver.maps.Marker({
+          position,
+          map: mapInstance,
+          icon: {
+            content: getCurrentLocationIcon(),
+            anchor: new window.naver.maps.Point(12, 12),
+          },
+          zIndex: 200,
+        });
+      }
+    };
+
+    if (window.nativeLocation) {
+      updateCurrentLocation(
+        window.nativeLocation.coords.latitude,
+        window.nativeLocation.coords.longitude,
+      );
+    }
+
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({ type: 'REQ_LOCATION' }),
+      );
+    } else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        updateCurrentLocation(
+          position.coords.latitude,
+          position.coords.longitude,
+        );
       });
     }
   };
 
   useEffect(() => {
-    if (!map || !window.naver) return;
+    return () => {
+      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current = [];
+      searchMarkersRef.current.forEach((marker) => marker.setMap(null));
+      searchMarkersRef.current = [];
+      if (currentLocationMarkerRef.current) {
+        currentLocationMarkerRef.current.setMap(null);
+        currentLocationMarkerRef.current = null;
+      }
+      mapStore.destroy();
+      setIsMapReady(false);
+    };
+  }, []);
+
+  useEffect(() => {
+    // 이미 스크립트가 로드되어 있는 경우 (페이지 이동 후 복귀 등)
+    if (window.naver && mapRef.current && window.naver.maps) {
+      initializeMap();
+    }
+    // initializeMap은 마운트 시 한 번만 실행되어야 하므로 의존성에서 제외
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!isMapReady || !window.naver) return;
+
+    const map = mapStore.getMap();
+    if (!map) return;
 
     const handleMessage = (event: MessageEvent) => {
       try {
@@ -165,57 +190,50 @@ export const Map = () => {
         handleMessage as unknown as EventListener,
       );
     };
-  }, [map]);
+  }, [isMapReady]);
 
   useEffect(() => {
-    // 이미 스크립트가 로드되어 있는 경우 (페이지 이동 후 복귀 등)
-    if (window.naver && mapRef.current && window.naver.maps) {
-      initializeMap();
-    }
-  }, []);
+    if (!isMapReady || !window.naver?.maps) return;
 
-  const markersRef = useRef<naver.maps.Marker[]>([]);
-  const searchMarkersRef = useRef<naver.maps.Marker[]>([]);
+    const map = mapStore.getMap();
+    if (!map) return;
 
-  useEffect(() => {
-    if (map && filteredPosts && window.naver && window.naver.maps) {
-      // Clear existing markers
-      markersRef.current.forEach((marker) => marker.setMap(null));
-      markersRef.current = [];
+    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current = [];
 
-      // Add new markers
-      filteredPosts.forEach((post) => {
-        const ratingColor = getPinColor(post.rating);
-        const pinWidth = 40;
-        const pinHeight = pinWidth * 2;
-        const markerContent = getPinIcon(
-          ratingColor,
-          pinWidth,
-          pinHeight,
-          post.rating,
-        );
+    filteredPosts.forEach((post) => {
+      const ratingColor = getPinColor(post.rating);
+      const pinWidth = 40;
+      const pinHeight = pinWidth * 2;
+      const markerContent = getPinIcon(
+        ratingColor,
+        pinWidth,
+        pinHeight,
+        post.rating,
+      );
 
-        const marker = new window.naver.maps.Marker({
-          position: new window.naver.maps.LatLng(post.lat, post.lng),
-          map: map,
-          icon: {
-            content: markerContent,
-            // size: new window.naver.maps.Size(pinWidth, pinHeight),
-            anchor: new window.naver.maps.Point(pinWidth / 2, pinHeight),
-          },
-        });
-
-        marker.addListener('click', () => {
-          router.push(`/post/${post.id}`);
-        });
-
-        markersRef.current.push(marker);
+      const marker = new window.naver.maps.Marker({
+        position: new window.naver.maps.LatLng(post.lat, post.lng),
+        map,
+        icon: {
+          content: markerContent,
+          anchor: new window.naver.maps.Point(pinWidth / 2, pinHeight),
+        },
       });
-    }
-  }, [map, filteredPosts, setClickedMapInfo]);
+
+      marker.addListener('click', () => {
+        router.push(`/post/${post.id}`);
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [isMapReady, filteredPosts, router]);
 
   useEffect(() => {
-    if (!map || !window.naver?.maps) return;
+    if (!isMapReady || !window.naver?.maps) return;
+
+    const map = mapStore.getMap();
+    if (!map) return;
 
     searchMarkersRef.current.forEach((marker) => marker.setMap(null));
     searchMarkersRef.current = [];
@@ -259,7 +277,7 @@ export const Map = () => {
     });
 
     map.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
-  }, [map, searchPlaces, setSelectedSearchPlace, setClickedMapInfo]);
+  }, [isMapReady, searchPlaces, setSelectedSearchPlace, setClickedMapInfo]);
 
   return (
     <>
