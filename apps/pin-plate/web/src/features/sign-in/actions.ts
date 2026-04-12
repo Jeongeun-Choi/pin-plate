@@ -3,7 +3,14 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
-export async function login(prevState: any, formData: FormData) {
+interface LoginState {
+  error: string;
+}
+
+export async function login(
+  prevState: LoginState,
+  formData: FormData,
+): Promise<LoginState> {
   const supabase = await createClient();
 
   const email = formData.get('email') as string;
@@ -24,5 +31,5 @@ export async function login(prevState: any, formData: FormData) {
     };
   }
 
-  redirect('/home');
+  redirect('/');
 }
