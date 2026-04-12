@@ -82,7 +82,7 @@ export const vars = createGlobalTheme(':root', {
       rating1: 'rgba(255, 242, 235, 0.5)',
       rating0: 'rgba(232, 232, 232, 0.5)',
     },
-    overlay: 'rgba(139, 69, 19, 0.4)', // Chocolate Brown with opacity for modal backdrop
+    overlay: 'rgba(0, 0, 0, 0.4)', // Black with opacity for modal backdrop
   },
 
   fontFamily: {
