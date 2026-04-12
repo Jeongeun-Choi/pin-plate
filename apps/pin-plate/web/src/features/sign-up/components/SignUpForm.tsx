@@ -78,6 +78,10 @@ export function SignUpForm() {
           </>
         )}
       </Button>
+
+      <p className={styles.loginLink}>
+        이미 계정이 있으신가요? <a href="/sign-in">로그인</a>
+      </p>
     </form>
   );
 }
