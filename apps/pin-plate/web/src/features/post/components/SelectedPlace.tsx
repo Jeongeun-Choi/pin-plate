@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { KakaoPlace } from '../types/search';
 import * as styles from './styles/SelectedPlace.css';
 import { IcMarker } from '@pin-plate/ui';
@@ -10,7 +11,7 @@ interface SelectedPlaceProps {
   onReset: () => void;
 }
 
-export const SelectedPlace = ({ place, onReset }: SelectedPlaceProps) => {
+export const SelectedPlace = memo(({ place, onReset }: SelectedPlaceProps) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -39,6 +40,8 @@ export const SelectedPlace = ({ place, onReset }: SelectedPlaceProps) => {
       </div>
     </div>
   );
-};
+});
+
+SelectedPlace.displayName = 'SelectedPlace';
 
 export default SelectedPlace;

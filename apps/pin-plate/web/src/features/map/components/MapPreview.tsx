@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useRef, useCallback } from 'react';
+import { memo, useEffect, useRef, useCallback } from 'react';
 import * as styles from './MapPreview.styles.css';
 import { getPinIcon } from '../utils/marker';
 import { vars } from '@pin-plate/ui';
@@ -11,7 +11,7 @@ interface MapPreviewProps {
   lng: number;
 }
 
-export const MapPreview = ({ lat, lng }: MapPreviewProps) => {
+export const MapPreview = memo(({ lat, lng }: MapPreviewProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
 
   const initializeMap = useCallback(() => {
@@ -69,4 +69,6 @@ export const MapPreview = ({ lat, lng }: MapPreviewProps) => {
       <div id="map-preview" ref={mapRef} className={styles.map} />
     </div>
   );
-};
+});
+
+MapPreview.displayName = 'MapPreview';
