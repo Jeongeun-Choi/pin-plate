@@ -1,19 +1,34 @@
+'use client';
+
 import { PropsWithChildren } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalContext } from './context';
-import * as styles from './styles.css';
+import { useModalA11y } from './useModalA11y';
+import * as s from './styles.css';
 
-export default function ModalContainer({ children }: PropsWithChildren) {
-  const { isOpen, close } = useModalContext();
-
-  if (!isOpen) return null;
+function ModalContainerInner({ children }: PropsWithChildren) {
+  const { close } = useModalContext();
+  const { dialogRef, a11yProps } = useModalA11y();
 
   return createPortal(
-    <div className={styles.overlay} onClick={close}>
-      <div className={styles.container} onClick={(e) => e.stopPropagation()}>
+    <div className={s.overlay} onClick={close}>
+      <div
+        ref={dialogRef}
+        className={s.container}
+        {...a11yProps}
+        onClick={(e) => e.stopPropagation()}
+      >
         {children}
       </div>
     </div>,
     document.body,
   );
+}
+
+export default function ModalContainer({ children }: PropsWithChildren) {
+  const { isOpen } = useModalContext();
+
+  if (!isOpen) return null;
+
+  return <ModalContainerInner>{children}</ModalContainerInner>;
 }

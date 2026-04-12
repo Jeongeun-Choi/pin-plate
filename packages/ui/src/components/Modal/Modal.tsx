@@ -1,4 +1,6 @@
-import { PropsWithChildren, useState } from 'react';
+'use client';
+
+import { PropsWithChildren, useId, useState } from 'react';
 import { ModalContext } from './context';
 
 export interface ModalProps extends PropsWithChildren {
@@ -12,18 +14,16 @@ export default function Modal({
   onClose: externalOnClose,
 }: ModalProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const [isTitleMounted, setIsTitleMounted] = useState(false);
 
-  // Use external state if provided, otherwise internal
+  const titleId = useId();
+
   const isControlled =
     externalIsOpen !== undefined && externalOnClose !== undefined;
   const open = isControlled ? externalIsOpen : internalIsOpen;
 
   const handleOpenModal = () => {
-    if (isControlled) {
-      // Controlled mode: Parent handles opening
-      // Provide a warning or no-op if this is called in controlled mode?
-      // Or maybe we treat 'open' as request to open.
-    } else {
+    if (!isControlled) {
       setInternalIsOpen(true);
     }
   };
@@ -42,6 +42,9 @@ export default function Modal({
         isOpen: open,
         open: handleOpenModal,
         close: handleCloseModal,
+        titleId,
+        isTitleMounted,
+        setIsTitleMounted,
       }}
     >
       {children}

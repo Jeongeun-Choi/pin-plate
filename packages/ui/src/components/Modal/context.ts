@@ -1,10 +1,14 @@
+'use client';
+
 import { createContext, useContext } from 'react';
 
-// 1. Context 타입 정의
 interface ModalContextProps {
   isOpen: boolean;
   open: () => void;
   close: () => void;
+  titleId: string;
+  isTitleMounted: boolean;
+  setIsTitleMounted: (mounted: boolean) => void;
 }
 
 const ModalContext = createContext<ModalContextProps | undefined>(undefined);
