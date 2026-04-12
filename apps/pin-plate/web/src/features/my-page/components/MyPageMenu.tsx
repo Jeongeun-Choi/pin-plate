@@ -25,7 +25,7 @@ export const MyPageMenu = ({ className }: MyPageMenuProps) => {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.replace('/login');
+    router.replace('/sign-in');
   };
 
   const handleGoToProfile = () => {
