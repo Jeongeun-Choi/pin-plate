@@ -1,7 +1,9 @@
+'use client';
+
 import { ButtonHTMLAttributes, MouseEvent } from 'react';
 import { IcDismiss } from '../../icons';
 import { useModalContext } from './context';
-import * as styles from './styles.css';
+import * as s from './styles.css';
 
 interface ModalCloseProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
 
@@ -16,9 +18,9 @@ export default function ModalClose({ onClick, ...props }: ModalCloseProps) {
   return (
     <button
       type="button"
-      className={styles.closeButton}
+      className={s.closeButton}
       onClick={handleClick}
-      aria-label="modal-close"
+      aria-label="닫기"
       {...props}
     >
       <IcDismiss />

@@ -1,19 +1,21 @@
+'use client';
+
 import { PropsWithChildren } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalContext } from './context';
-import * as styles from './styles.css';
+import { useModalA11y } from './useModalA11y';
+import * as s from './styles.css';
 
-export default function FullScreenModalContainer({
-  children,
-}: PropsWithChildren) {
-  const { isOpen, close } = useModalContext();
-
-  if (!isOpen) return null;
+function FullScreenModalContainerInner({ children }: PropsWithChildren) {
+  const { close } = useModalContext();
+  const { dialogRef, a11yProps } = useModalA11y();
 
   return createPortal(
-    <div className={styles.overlay} onClick={close}>
+    <div className={s.overlay} onClick={close}>
       <div
-        className={styles.fullScreenContainer}
+        ref={dialogRef}
+        className={s.fullScreenContainer}
+        {...a11yProps}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -21,4 +23,14 @@ export default function FullScreenModalContainer({
     </div>,
     document.body,
   );
+}
+
+export default function FullScreenModalContainer({
+  children,
+}: PropsWithChildren) {
+  const { isOpen } = useModalContext();
+
+  if (!isOpen) return null;
+
+  return <FullScreenModalContainerInner>{children}</FullScreenModalContainerInner>;
 }
