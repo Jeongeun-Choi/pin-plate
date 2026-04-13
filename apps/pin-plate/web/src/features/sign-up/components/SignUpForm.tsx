@@ -1,12 +1,10 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Input, Button } from '@pin-plate/ui';
 import { signup } from '../actions';
 import * as styles from './SignUpForm.styles.css';
-
-const signupIcon =
-  'http://localhost:3845/assets/fa4a3321d9658b6667b8a4fe466a85f9de569dd1.svg';
 
 const initialState = {
   error: '',
@@ -14,6 +12,14 @@ const initialState = {
 
 export function SignUpForm() {
   const [state, formAction, isPending] = useActionState(signup, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state?.success) {
+      alert('회원가입이 완료됐습니다.');
+      router.push('/sign-in');
+    }
+  }, [state?.success, router]);
 
   return (
     <form className={styles.form} action={formAction}>
@@ -58,25 +64,30 @@ export function SignUpForm() {
           placeholder="••••••••"
           disabled={isPending}
           required
-          minLength={6}
+          minLength={8}
         />
       </div>
 
-      {state?.error && (
-        <div style={{ color: 'red', fontSize: '14px', textAlign: 'center' }}>
-          {state.error}
-        </div>
-      )}
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="confirmPassword">
+          비밀번호 확인
+        </label>
+        <Input
+          id="confirmPassword"
+          name="confirmPassword"
+          className={styles.input}
+          type="password"
+          placeholder="••••••••"
+          disabled={isPending}
+          required
+          minLength={8}
+        />
+      </div>
+
+      {state?.error && <div className={styles.errorMessage}>{state.error}</div>}
 
       <Button type="submit" size="full" disabled={isPending}>
-        {isPending ? (
-          '가입 중...'
-        ) : (
-          <>
-            <img src={signupIcon} alt="signup" width={20} height={20} />
-            회원가입
-          </>
-        )}
+        회원가입
       </Button>
 
       <p className={styles.loginLink}>
