@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { IcLogout, IcSetting } from '@pin-plate/ui/icons';
 import * as styles from './AccountPopover.css';
 import { useMyProfile } from '@/features/my-page';
+import { createClient } from '@/utils/supabase/client';
 
 interface AccountPopoverProps {
   onClose: () => void;
@@ -25,10 +26,11 @@ export const AccountPopover = ({
     router.push('/my-page');
   };
 
-  const handleLogoutClick = () => {
+  const handleLogoutClick = async () => {
     onClose();
-    // TODO: implement actual logout logic
-    alert('로그아웃 기능은 아직 구현되지 않았습니다.');
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.replace('/sign-in');
   };
 
   useEffect(() => {

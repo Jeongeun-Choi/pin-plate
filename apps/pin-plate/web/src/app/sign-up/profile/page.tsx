@@ -54,9 +54,10 @@ export default function ProfileSetupPage() {
         'is_in_registration_flow=; path=/sign-up/profile; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 
       router.push('/');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Profile update failed:', err);
-      setError(err.message || '프로필 설정 중 오류가 발생했습니다.');
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage || '프로필 설정 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }

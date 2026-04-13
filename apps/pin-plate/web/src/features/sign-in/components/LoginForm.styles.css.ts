@@ -119,6 +119,86 @@ export const policyText = style({
   marginTop: '20px',
 });
 
+export const dividerWrap = style({
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.spacing[3],
+});
+
+export const dividerLine = style({
+  flex: 1,
+  height: '1px',
+  backgroundColor: '#D1D5DC',
+});
+
+export const dividerText = style({
+  fontSize: vars.fontSize.sm,
+  color: vars.colors.text.sub,
+  whiteSpace: 'nowrap',
+});
+
+export const fieldsWrap = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[4],
+});
+
+export const field = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[2],
+});
+
+export const label = style({
+  fontFamily: vars.fontFamily.body,
+  fontSize: vars.fontSize.sm,
+  fontWeight: vars.fontWeight.medium,
+  color: '#364153',
+});
+
+export const emailInput = style({
+  height: 50,
+  borderRadius: 14,
+  border: '0.9px solid #D1D5DC',
+  padding: '12px 16px',
+  fontSize: '16px',
+  color: 'rgba(10,10,10,0.85)',
+  fontFamily: vars.fontFamily.body,
+  outline: 'none',
+  ':focus': {
+    borderColor: vars.colors.primary.default,
+  },
+});
+
+export const loginButton = style({
+  width: '100%',
+  height: 50,
+  marginTop: vars.spacing[4],
+  borderRadius: 14,
+  backgroundColor: vars.colors.primary.default,
+  color: '#fff',
+  fontFamily: vars.fontFamily.body,
+  fontSize: vars.fontSize.base,
+  fontWeight: vars.fontWeight.bold,
+  border: 'none',
+  cursor: 'pointer',
+  transition: 'background-color 0.2s ease',
+  ':hover': {
+    backgroundColor: vars.colors.primary.hover,
+  },
+  ':disabled': {
+    opacity: 0.6,
+    cursor: 'not-allowed',
+  },
+});
+
+export const errorText = style({
+  color: vars.colors.status.error,
+  fontSize: '14px',
+  textAlign: 'center',
+});
+
 export const signupLink = style({
   width: '100%',
   textAlign: 'center',

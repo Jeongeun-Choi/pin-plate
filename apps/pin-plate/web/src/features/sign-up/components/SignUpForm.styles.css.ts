@@ -157,3 +157,9 @@ export const footerText = style({
   color: '#6A7282',
   textAlign: 'center',
 });
+
+export const errorMessage = style({
+  color: vars.colors.status.error,
+  fontSize: vars.fontSize.sm,
+  textAlign: 'center',
+});

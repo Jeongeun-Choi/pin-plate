@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ urls: presignedUrls });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('S3 Presigned URL Error:', error);
     return NextResponse.json(
       {

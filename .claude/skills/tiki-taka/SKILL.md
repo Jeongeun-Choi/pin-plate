@@ -1,6 +1,11 @@
+---
+name: tiki-taka
+description: Use when a design for a new feature, architecture change, or complex multi-file task (6+ files) has been finalized and approved — before writing the implementation spec or starting code. Must also be invoked during brainstorming's design review phase after user approves a design proposal. Do NOT skip because the user already approved: user approval is not a substitute for this review.
+---
+
 # Tiki-Taka: 설계 리뷰 스킬
 
-Plan mode에서 구현·설계·기능 개발 요청이 오면 이 스킬을 따른다.  
+구현·설계·기능 개발 요청이 오면 이 스킬을 따른다.  
 단, 아래 **적용하지 않는 경우**에 해당하면 설계 리뷰 없이 바로 구현한다.
 
 코드를 바로 작성하지 않는다. 설계 → 리뷰 → 구현 순서를 반드시 지킨다.
@@ -16,6 +21,15 @@ Plan mode에서 구현·설계·기능 개발 요청이 오면 이 스킬을 따
 - Claude가 판단했을 때 **명백히 단순한 작업**
 
 위 기준에 해당하지 않는 복잡하거나 새로운 기능 구현, 아키텍처 변경은 반드시 tiki-taka를 실행한다.
+
+### 자주 하는 합리화 (모두 틀림)
+
+| 합리화 | 현실 |
+|--------|------|
+| "유저가 이미 승인했으니까" | 유저 승인 ≠ 설계 리뷰. 리뷰는 별도로 진행해야 한다. |
+| "brainstorming에서 이미 충분히 논의했으니까" | brainstorming은 요구사항 확인 과정이고, tiki-taka는 구현 설계 검증 과정이다. |
+| "파일 6개지만 단순하니까" | 파일 수 기준(5개 초과)을 충족하면 반드시 실행한다. |
+| "빨리 구현하고 싶으니까" | 설계 결함은 구현 후 발견하면 더 느려진다. |
 
 ---
 

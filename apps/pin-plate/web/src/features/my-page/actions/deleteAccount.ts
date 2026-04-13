@@ -43,5 +43,6 @@ export async function deleteAccount(): Promise<{ error: string } | never> {
     return { error: '계정 삭제 중 오류가 발생했습니다.' };
   }
 
+  await supabase.auth.signOut();
   redirect('/sign-in');
 }

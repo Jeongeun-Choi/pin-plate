@@ -21,9 +21,11 @@ describe('LoginForm', () => {
 
   beforeEach(() => {
     queryClient = createTestQueryClient();
-    (useLoginHook.useGoogleLogin as any).mockReturnValue({
+
+    vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
       mutate: mockLoginWithGoogle,
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
     vi.clearAllMocks();
   });
 
@@ -47,9 +49,10 @@ describe('LoginForm', () => {
   });
 
   it('Google 버튼 클릭 시 loginWithGoogle을 호출한다', () => {
-    (useLoginHook.useGoogleLogin as any).mockReturnValue({
+    vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
       mutate: mockLoginWithGoogle,
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     renderComponent();
     const googleButton = screen.getByRole('button', {

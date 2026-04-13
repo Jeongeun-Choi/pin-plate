@@ -49,6 +49,21 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    if (user && !isPublicPath) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        await supabase.auth.signOut();
+        const url = request.nextUrl.clone();
+        url.pathname = '/sign-in';
+        return NextResponse.redirect(url);
+      }
+    }
+
     // 1. 이미 로그인한 사용자가 로그인/회원가입 페이지에 접근하려 할 때 -> 메인으로 리다이렉트
     if (
       user &&
