@@ -3,10 +3,10 @@
 import { useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input, Button } from '@pin-plate/ui';
-import { signup } from '../actions';
+import { signup, type SignupState } from '../actions';
 import * as styles from './SignUpForm.styles.css';
 
-const initialState = {
+const initialState: SignupState = {
   error: '',
 };
 

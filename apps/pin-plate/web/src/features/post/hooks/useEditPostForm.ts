@@ -134,17 +134,18 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
 
       alert('게시글이 수정되었습니다!');
       onSuccess?.();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Update Post Error:', error);
 
       // Supabase error handling
-      if (error?.code) {
+      const err = error as { code?: string; message?: string };
+      if (err?.code) {
         alert(
-          `게시글 수정 실패 (${error.code}): ${error.message}\n(내 글이 아니거나 권한이 없을 수 있습니다)`,
+          `게시글 수정 실패 (${err.code}): ${err.message || ''}\n(내 글이 아니거나 권한이 없을 수 있습니다)`,
         );
       } else {
         alert(
-          `게시글 수정에 실패했습니다.\n${error?.message || '알 수 없는 오류'}`,
+          `게시글 수정에 실패했습니다.\n${err?.message || '알 수 없는 오류'}`,
         );
       }
     }

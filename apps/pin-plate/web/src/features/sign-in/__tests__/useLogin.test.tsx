@@ -30,15 +30,17 @@ describe('useLogin', () => {
 
   beforeEach(() => {
     queryClient = createTestQueryClient();
-    (useRouter as any).mockReturnValue({ push: mockPush });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
     vi.clearAllMocks();
     localStorage.clear();
   });
 
   it('should redirect to home page and save token on success', async () => {
-    (authService.login as any).mockResolvedValue({
+    vi.mocked(authService.login).mockResolvedValue({
       session: { access_token: 'test-token' },
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: ({ children }) => (
@@ -59,7 +61,7 @@ describe('useLogin', () => {
   });
 
   it('should handle errors correctly', async () => {
-    (authService.login as any).mockRejectedValue(new Error('Login failed'));
+    vi.mocked(authService.login).mockRejectedValue(new Error('Login failed'));
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: ({ children }) => (

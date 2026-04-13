@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 
-interface SignupState {
+export interface SignupState {
   error: string;
   success?: boolean;
 }
