@@ -21,34 +21,36 @@ export function LoginForm() {
   return (
     <div className={styles.form}>
       <form action={formAction}>
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="email">
-            이메일
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            className={styles.emailInput}
-            placeholder="example@email.com"
-            disabled={isPending}
-            required
-          />
-        </div>
+        <div className={styles.fieldsWrap}>
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="email">
+              이메일
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              className={styles.emailInput}
+              placeholder="example@email.com"
+              disabled={isPending}
+              required
+            />
+          </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="password">
-            비밀번호
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            className={styles.emailInput}
-            placeholder="••••••••"
-            disabled={isPending}
-            required
-          />
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="password">
+              비밀번호
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              className={styles.emailInput}
+              placeholder="••••••••"
+              disabled={isPending}
+              required
+            />
+          </div>
         </div>
 
         {state?.error && <div className={styles.errorText}>{state.error}</div>}

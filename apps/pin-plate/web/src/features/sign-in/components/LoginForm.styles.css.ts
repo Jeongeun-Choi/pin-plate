@@ -138,6 +138,12 @@ export const dividerText = style({
   whiteSpace: 'nowrap',
 });
 
+export const fieldsWrap = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[4],
+});
+
 export const field = style({
   display: 'flex',
   flexDirection: 'column',
