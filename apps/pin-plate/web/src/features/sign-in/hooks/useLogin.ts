@@ -5,7 +5,6 @@ import { login, loginWithGoogle, LoginParams } from '../services/auth.service';
 
 export const useLogin = () => {
   const router = useRouter();
-  const supabase = createClient();
 
   return useMutation({
     mutationFn: (params: LoginParams) => login(params),
@@ -16,6 +15,7 @@ export const useLogin = () => {
         } catch (e) {
           console.error('Failed to save access token to localStorage:', e);
         }
+        const supabase = createClient();
         await checkUserProfileAndRedirect(
           supabase,
           data.session.user.id,
