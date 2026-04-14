@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import * as styles from './LoginForm.styles.css';
 import { useGoogleLogin } from '../hooks/useLogin';
@@ -11,12 +12,21 @@ const initialState = {
 };
 
 export function LoginForm() {
+  const router = useRouter();
+
   const [state, formAction, isPending] = useActionState(login, initialState);
   const { mutate: loginWithGoogle } = useGoogleLogin();
 
   const handleGoogleLogin = () => {
     loginWithGoogle();
   };
+
+  useEffect(() => {
+    if (state.isLoginSuccessful) {
+      router.push('/');
+      router.refresh();
+    }
+  }, [state.isLoginSuccessful, router]);
 
   return (
     <div className={styles.form}>

@@ -1,10 +1,10 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
 
 interface LoginState {
   error: string;
+  isLoginSuccessful?: boolean;
 }
 
 export async function login(
@@ -31,5 +31,5 @@ export async function login(
     };
   }
 
-  redirect('/');
+  return { error: '', isLoginSuccessful: true };
 }
