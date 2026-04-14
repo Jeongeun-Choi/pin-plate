@@ -5,19 +5,22 @@ import { login, loginWithGoogle, LoginParams } from '../services/auth.service';
 
 export const useLogin = () => {
   const router = useRouter();
+  const supabase = createClient();
 
   return useMutation({
     mutationFn: (params: LoginParams) => login(params),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.session) {
         try {
           localStorage.setItem('accessToken', data.session.access_token);
         } catch (e) {
           console.error('Failed to save access token to localStorage:', e);
-          // 선택적: 사용자에게 알림을 주거나, 인메모리 저장소로 대체할 수 있음
         }
-        // Assuming we want to redirect to home on success
-        router.push('/');
+        await checkUserProfileAndRedirect(
+          supabase,
+          data.session.user.id,
+          router,
+        );
       }
     },
   });
@@ -65,6 +68,7 @@ const checkUserProfileAndRedirect = async (
       'is_in_registration_flow=true; path=/sign-up/profile; max-age=300; SameSite=Lax';
     router.push('/sign-up/profile');
   } else {
+    router.refresh();
     router.push('/');
   }
 };
