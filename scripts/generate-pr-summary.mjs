@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : "";
+const BASE_BRANCH = process.env.BASE_BRANCH || "main";
 
 if (!GEMINI_API_KEY) {
   console.error("Error: GEMINI_API_KEY is not set.");
@@ -12,7 +13,7 @@ try {
   // Limit diff to avoid token limits. Gemini 1.5 Flash has a large context window, but we still handle huge diffs gracefully.
   // excluding lock files and minified files
   const diff = execSync(
-    "git diff origin/main..HEAD -- . ':!pnpm-lock.yaml' ':!*.min.js' ':!*.svg'"
+    `git diff origin/${BASE_BRANCH}..HEAD -- . ':!pnpm-lock.yaml' ':!*.min.js' ':!*.svg'`,
   ).toString();
 
   if (!diff.trim()) {
@@ -67,7 +68,7 @@ ${diffData}
             },
           ],
         }),
-      }
+      },
     );
 
     if (!response.ok) {

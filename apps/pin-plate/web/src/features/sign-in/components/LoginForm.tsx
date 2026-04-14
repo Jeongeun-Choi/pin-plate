@@ -1,18 +1,38 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import * as styles from './LoginForm.styles.css';
-import { useGoogleLogin } from '../hooks/useLogin';
-import { login } from '../actions';
-
-const initialState = {
-  error: '',
-};
+import { useGoogleLogin, useLogin } from '../hooks/useLogin';
 
 export function LoginForm() {
-  const [state, formAction, isPending] = useActionState(login, initialState);
+  const [loginError, setLoginError] = useState('');
+
+  const { mutate: loginWithEmail, isPending: isEmailLoginPending } = useLogin();
   const { mutate: loginWithGoogle } = useGoogleLogin();
+
+  const handleEmailLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    if (!email || !password) {
+      setLoginError('이메일과 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    setLoginError('');
+    loginWithEmail(
+      { email, password },
+      {
+        onError: () =>
+          setLoginError(
+            '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.',
+          ),
+      },
+    );
+  };
 
   const handleGoogleLogin = () => {
     loginWithGoogle();
@@ -20,7 +40,7 @@ export function LoginForm() {
 
   return (
     <div className={styles.form}>
-      <form action={formAction}>
+      <form onSubmit={handleEmailLogin}>
         <div className={styles.fieldsWrap}>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="email">
@@ -32,7 +52,7 @@ export function LoginForm() {
               type="email"
               className={styles.emailInput}
               placeholder="example@email.com"
-              disabled={isPending}
+              disabled={isEmailLoginPending}
               required
             />
           </div>
@@ -47,20 +67,20 @@ export function LoginForm() {
               type="password"
               className={styles.emailInput}
               placeholder="••••••••"
-              disabled={isPending}
+              disabled={isEmailLoginPending}
               required
             />
           </div>
         </div>
 
-        {state?.error && <div className={styles.errorText}>{state.error}</div>}
+        {loginError && <div className={styles.errorText}>{loginError}</div>}
 
         <button
           type="submit"
           className={styles.loginButton}
-          disabled={isPending}
+          disabled={isEmailLoginPending}
         >
-          {isPending ? '로그인 중...' : '로그인'}
+          {isEmailLoginPending ? '로그인 중...' : '로그인'}
         </button>
       </form>
 

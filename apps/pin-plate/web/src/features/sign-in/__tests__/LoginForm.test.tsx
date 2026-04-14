@@ -18,9 +18,16 @@ const createTestQueryClient = () =>
 describe('LoginForm', () => {
   let queryClient: QueryClient;
   const mockLoginWithGoogle = vi.fn();
+  const mockLoginWithEmail = vi.fn();
 
   beforeEach(() => {
     queryClient = createTestQueryClient();
+
+    vi.mocked(useLoginHook.useLogin).mockReturnValue({
+      mutate: mockLoginWithEmail,
+      isPending: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
       mutate: mockLoginWithGoogle,
