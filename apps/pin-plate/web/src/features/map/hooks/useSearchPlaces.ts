@@ -15,13 +15,14 @@ export const useSearchPlaces = () => {
 
     const map = mapStore.getMap();
     const center = map?.getCenter();
-    const x = center ? String(center.x) : '';
-    const y = center ? String(center.y) : '';
+    const params = new URLSearchParams({ query: keyword });
+    if (center) {
+      params.set('x', String(center.x));
+      params.set('y', String(center.y));
+    }
 
     try {
-      const response = await fetch(
-        `/api/search?query=${encodeURIComponent(keyword)}&x=${x}&y=${y}`,
-      );
+      const response = await fetch(`/api/search?${params.toString()}`);
       const data: KakaoSearchResponse = await response.json();
       setSearchPlaces(data.documents || []);
     } catch (error) {
