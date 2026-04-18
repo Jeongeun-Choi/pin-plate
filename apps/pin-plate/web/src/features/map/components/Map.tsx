@@ -19,6 +19,7 @@ import {
   selectedSearchPlaceAtom,
 } from '../atoms';
 import { mapStore } from '../store/MapStore';
+import { getClientPosition } from '../utils/event';
 
 export const Map = () => {
   const [isMapReady, setIsMapReady] = useState(false);
@@ -66,15 +67,35 @@ export const Map = () => {
     });
     setIsMapReady(true);
 
+    const handleMapClick = (e: {
+      coord: naver.maps.LatLng;
+      domEvent: MouseEvent | TouchEvent;
+    }) => {
+      const { clientX, clientY } = getClientPosition(e.domEvent);
+      setClickedMapInfo({
+        lat: e.coord.y,
+        lng: e.coord.x,
+        clientX,
+        clientY,
+      });
+    };
+
+    let touchStartPos = { x: 0, y: 0 };
+
+    mapInstance.addListener('click', handleMapClick);
+    mapInstance.addListener('touchstart', (e: { domEvent: TouchEvent }) => {
+      const touch = e.domEvent.changedTouches[0];
+      touchStartPos = { x: touch.clientX, y: touch.clientY };
+    });
     mapInstance.addListener(
-      'click',
-      (e: { coord: naver.maps.LatLng; domEvent: MouseEvent }) => {
-        setClickedMapInfo({
-          lat: e.coord.y,
-          lng: e.coord.x,
-          clientX: e.domEvent.clientX,
-          clientY: e.domEvent.clientY,
-        });
+      'touchend',
+      (e: { coord: naver.maps.LatLng; domEvent: TouchEvent }) => {
+        const touch = e.domEvent.changedTouches[0];
+        const dx = Math.abs(touch.clientX - touchStartPos.x);
+        const dy = Math.abs(touch.clientY - touchStartPos.y);
+        if (dx < 10 && dy < 10) {
+          handleMapClick(e);
+        }
       },
     );
 
@@ -221,9 +242,12 @@ export const Map = () => {
         },
       });
 
-      marker.addListener('click', () => {
+      const handlePostMarkerClick = () => {
         router.push(`/post/${post.id}`);
-      });
+      };
+
+      marker.addListener('click', handlePostMarkerClick);
+      marker.addListener('touchend', handlePostMarkerClick);
 
       markersRef.current.push(marker);
     });
@@ -263,15 +287,21 @@ export const Map = () => {
         zIndex: 50,
       });
 
-      marker.addListener('click', (e: { domEvent: MouseEvent }) => {
+      const handleSearchMarkerClick = (e: {
+        domEvent: MouseEvent | TouchEvent;
+      }) => {
+        const { clientX, clientY } = getClientPosition(e.domEvent);
         setSelectedSearchPlace(place);
         setClickedMapInfo({
           lat,
           lng,
-          clientX: e.domEvent.clientX,
-          clientY: e.domEvent.clientY,
+          clientX,
+          clientY,
         });
-      });
+      };
+
+      marker.addListener('click', handleSearchMarkerClick);
+      marker.addListener('touchend', handleSearchMarkerClick);
 
       searchMarkersRef.current.push(marker);
     });

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { Button, Spinner, IcMarker, IcDismiss } from '@pin-plate/ui';
 import { clickedMapInfoAtom, selectedSearchPlaceAtom } from '../atoms';
@@ -14,6 +15,7 @@ export const PlaceDetailSheet = () => {
   );
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
   const setPrefillPlace = useSetAtom(prefillPlaceAtom);
+  const openedAtRef = useRef(0);
 
   const isDirectPlace = !!selectedSearchPlace;
 
@@ -28,6 +30,7 @@ export const PlaceDetailSheet = () => {
   const closestPlace = selectedSearchPlace ?? nearbyRestaurants?.[0] ?? null;
 
   const handleClose = () => {
+    if (Date.now() - openedAtRef.current < 300) return;
     setClickedInfo(null);
     setSelectedSearchPlace(null);
   };
@@ -38,6 +41,12 @@ export const PlaceDetailSheet = () => {
     setIsPostModalOpen(true);
     setClickedInfo(null);
   };
+
+  useEffect(() => {
+    if (clickedInfo) {
+      openedAtRef.current = Date.now();
+    }
+  }, [clickedInfo]);
 
   if (!clickedInfo) return null;
 

@@ -102,18 +102,34 @@ export const searchInput = style({
   outline: 'none',
   boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
   color: vars.colors.text.primary,
+  WebkitAppearance: 'none',
   '::placeholder': {
     color: '#9CA3AF',
   },
+  selectors: {
+    '&::-webkit-search-cancel-button': {
+      WebkitAppearance: 'none',
+      display: 'none',
+    },
+  },
 });
 
-export const searchIcon = style({
+export const searchButton = style({
   position: 'absolute',
-  left: 16,
+  left: 12,
   top: '50%',
   transform: 'translateY(-50%)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 24,
+  height: 24,
+  padding: 0,
+  border: 'none',
+  background: 'none',
   color: '#9CA3AF',
-  pointerEvents: 'none',
+  cursor: 'pointer',
+  zIndex: 1,
 });
 
 export const clearButton = style({
