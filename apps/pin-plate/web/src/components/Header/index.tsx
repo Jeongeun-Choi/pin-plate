@@ -28,11 +28,15 @@ export const Header = () => {
   const queryClient = useQueryClient();
   const { searchPlaces, clearSearchPlaces } = useSearchPlaces();
 
+  const handleSearch = () => {
+    const query = searchInputValue.trim();
+    setSearchQuery(query);
+    searchPlaces(query);
+  };
+
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      const query = searchInputValue.trim();
-      setSearchQuery(query);
-      searchPlaces(query);
+      handleSearch();
     }
   };
 
@@ -74,9 +78,17 @@ export const Header = () => {
         </div>
 
         <div className={styles.searchContainer}>
-          <IcSearch className={styles.searchIcon} width={16} height={16} />
+          <button
+            type="button"
+            className={styles.searchButton}
+            onClick={handleSearch}
+            aria-label="검색"
+          >
+            <IcSearch width={16} height={16} />
+          </button>
           <input
-            type="text"
+            type="search"
+            enterKeyHint="search"
             className={styles.searchInput}
             placeholder="음식점 이름으로 검색..."
             value={searchInputValue}

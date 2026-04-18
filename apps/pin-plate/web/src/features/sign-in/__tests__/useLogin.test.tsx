@@ -36,7 +36,7 @@ describe('useLogin', () => {
 
   beforeEach(() => {
     queryClient = createTestQueryClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     vi.mocked(useRouter).mockReturnValue({
       push: mockPush,
       refresh: vi.fn(),
