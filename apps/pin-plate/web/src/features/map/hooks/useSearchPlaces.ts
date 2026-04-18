@@ -1,6 +1,7 @@
 import { useSetAtom } from 'jotai';
 import { searchPlacesAtom, selectedSearchPlaceAtom } from '../atoms';
 import { KakaoSearchResponse } from '@/features/post/types/search';
+import { mapStore } from '../store/MapStore';
 
 export const useSearchPlaces = () => {
   const setSearchPlaces = useSetAtom(searchPlacesAtom);
@@ -12,9 +13,14 @@ export const useSearchPlaces = () => {
       return;
     }
 
+    const map = mapStore.getMap();
+    const center = map?.getCenter();
+    const x = center ? String(center.x) : '';
+    const y = center ? String(center.y) : '';
+
     try {
       const response = await fetch(
-        `/api/search?query=${encodeURIComponent(keyword)}`,
+        `/api/search?query=${encodeURIComponent(keyword)}&x=${x}&y=${y}`,
       );
       const data: KakaoSearchResponse = await response.json();
       setSearchPlaces(data.documents || []);
