@@ -2,33 +2,37 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMyProfile } from '@/features/my-page';
+import type { ProfileWithEmail } from '@/features/my-page/api/getMyProfile';
 import { createClient } from '@/utils/supabase/client';
 import * as styles from './page.css';
 import { Button } from '@pin-plate/ui';
 
 export default function ProfileEditPage() {
-  const router = useRouter();
   const { data: profile, isLoading } = useMyProfile();
 
-  const [nickname, setNickname] = useState('');
+  if (isLoading) return <div>Loading...</div>;
+  if (!profile) return null;
+
+  return <ProfileEditForm profile={profile} />;
+}
+
+interface Props {
+  profile: ProfileWithEmail;
+}
+
+function ProfileEditForm({ profile }: Props) {
+  const router = useRouter();
+  const [nickname, setNickname] = useState(profile.nickname || '');
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (profile) {
-      setNickname(profile.nickname || '');
-    }
-  }, [profile]);
-
   const handleSave = async () => {
-    if (!profile) return;
     setIsSaving(true);
     const supabase = createClient();
 
     try {
-      // Update profile
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -50,8 +54,6 @@ export default function ProfileEditPage() {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>; // Simple loading state
-
   return (
     <div className={styles.container}>
       <section className={styles.section}>
@@ -59,7 +61,7 @@ export default function ProfileEditPage() {
 
         <div className={styles.inputGroup}>
           <label className={styles.inputLabel}>이메일</label>
-          <div className={styles.readOnlyField}>{profile?.email}</div>
+          <div className={styles.readOnlyField}>{profile.email}</div>
         </div>
 
         <div className={styles.inputGroup}>
