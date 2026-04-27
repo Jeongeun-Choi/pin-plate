@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { login } from '../services/auth.service';
+import { login } from '../api/auth';
 import { createClient } from '@/utils/supabase/client';
 
 // 모듈 전체를 Mocking하되, createClient를 vi.fn()으로 정의하여

@@ -1,24 +1,19 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useLogin } from '../hooks/useLogin';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { useRouter, AppRouterInstance } from 'next/navigation';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import * as authService from '../services/auth.service';
-import * as supabaseClient from '@/utils/supabase/client';
+import * as authApi from '../api/auth';
 
-// Mock next/navigation
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
 }));
 
-// Mock auth service
-vi.mock('../services/auth.service', () => ({
+vi.mock('../api/auth', () => ({
   login: vi.fn(),
-}));
-
-// Mock supabase client
-vi.mock('@/utils/supabase/client', () => ({
-  createClient: vi.fn(),
+  getUserNickname: vi.fn(),
+  getSession: vi.fn(),
+  loginWithGoogle: vi.fn(),
 }));
 
 const createTestQueryClient = () =>
@@ -40,30 +35,14 @@ describe('useLogin', () => {
     vi.mocked(useRouter).mockReturnValue({
       push: mockPush,
       refresh: vi.fn(),
-    } as any);
+    } as unknown as AppRouterInstance);
     vi.clearAllMocks();
     localStorage.clear();
   });
 
   it('should redirect to home page and save token on success', async () => {
-    const mockSupabaseClient = {
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            single: vi.fn().mockResolvedValue({
-              data: { nickname: 'Test User' },
-            }),
-          })),
-        })),
-      })),
-    };
-
-    vi.mocked(supabaseClient.createClient).mockReturnValue(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockSupabaseClient as any,
-    );
-
-    vi.mocked(authService.login).mockResolvedValue({
+    vi.mocked(authApi.getUserNickname).mockResolvedValue('Test User');
+    vi.mocked(authApi.login).mockResolvedValue({
       session: {
         access_token: 'test-token',
         user: { id: 'user-123' },
@@ -90,24 +69,7 @@ describe('useLogin', () => {
   });
 
   it('should handle errors correctly', async () => {
-    const mockSupabaseClient = {
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            single: vi.fn().mockResolvedValue({
-              data: null,
-            }),
-          })),
-        })),
-      })),
-    };
-
-    vi.mocked(supabaseClient.createClient).mockReturnValue(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockSupabaseClient as any,
-    );
-
-    vi.mocked(authService.login).mockRejectedValue(new Error('Login failed'));
+    vi.mocked(authApi.login).mockRejectedValue(new Error('Login failed'));
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: ({ children }) => (

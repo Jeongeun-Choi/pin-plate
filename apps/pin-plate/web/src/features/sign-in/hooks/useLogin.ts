@@ -1,7 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
-import { login, loginWithGoogle, LoginParams } from '../services/auth.service';
+import {
+  login,
+  loginWithGoogle,
+  getUserNickname,
+  getSession,
+  LoginParams,
+} from '../api/auth';
 
 export const useLogin = () => {
   const router = useRouter();
@@ -15,12 +20,7 @@ export const useLogin = () => {
         } catch (e) {
           console.error('Failed to save access token to localStorage:', e);
         }
-        const supabase = createClient();
-        await checkUserProfileAndRedirect(
-          supabase,
-          data.session.user.id,
-          router,
-        );
+        await redirectAfterLogin(data.session.user.id, router);
       }
     },
   });
@@ -32,18 +32,11 @@ export const useGoogleLogin = () => {
   return useMutation({
     mutationFn: () => loginWithGoogle(),
     onSuccess: async () => {
-      const supabase = createClient();
+      const session = await getSession();
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      if (!session) return;
 
-      // 세션이 없는 경우(인증 미완료)에는 리다이렉트하지 않고 로그인 페이지에 머뭄
-      if (!session) {
-        return;
-      }
-
-      await checkUserProfileAndRedirect(supabase, session.user.id, router);
+      await redirectAfterLogin(session.user.id, router);
     },
     onError: (error) => {
       console.error('Google login failed:', error);
@@ -51,19 +44,13 @@ export const useGoogleLogin = () => {
   });
 };
 
-const checkUserProfileAndRedirect = async (
-  supabase: ReturnType<typeof createClient>,
+const redirectAfterLogin = async (
   userId: string,
   router: ReturnType<typeof useRouter>,
 ) => {
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('nickname')
-    .eq('id', userId)
-    .single();
+  const nickname = await getUserNickname(userId);
 
-  if (!profile?.nickname) {
-    // Set a temporary cookie to allow access to the profile setup page
+  if (!nickname) {
     document.cookie =
       'is_in_registration_flow=true; path=/sign-up/profile; max-age=300; SameSite=Lax';
     router.push('/sign-up/profile');

@@ -26,6 +26,7 @@ describe('useSearchPlaces', () => {
       { id: '1', place_name: '스시 오마카세', x: '127.0', y: '37.5' },
     ];
     mockFetch.mockResolvedValueOnce({
+      ok: true,
       json: () => Promise.resolve({ documents: mockDocuments }),
     });
 
@@ -90,6 +91,7 @@ describe('useSearchPlaces', () => {
       { id: '1', place_name: '맛집', x: '127.0', y: '37.5' },
     ];
     mockFetch.mockResolvedValueOnce({
+      ok: true,
       json: () => Promise.resolve({ documents: mockDocuments }),
     });
 
