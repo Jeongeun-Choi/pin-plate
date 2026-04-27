@@ -14,7 +14,7 @@ import * as styles from './Header.css';
 import { isPostModalOpenAtom } from '@/features/post/atoms';
 import { AccountPopover } from './AccountPopover';
 import { useQueryClient } from '@tanstack/react-query';
-import { MY_PAGE_KEYS, getMyProfile } from '@/features/my-page';
+import { myPageKeys, getMyProfile } from '@/features/my-page';
 import { useSearchPlaces } from '@/features/map/hooks/useSearchPlaces';
 
 export const Header = () => {
@@ -48,7 +48,7 @@ export const Header = () => {
 
   const handleProfileHover = () => {
     queryClient.prefetchQuery({
-      queryKey: MY_PAGE_KEYS.profile(),
+      queryKey: myPageKeys.profile(),
       queryFn: getMyProfile,
     });
   };
