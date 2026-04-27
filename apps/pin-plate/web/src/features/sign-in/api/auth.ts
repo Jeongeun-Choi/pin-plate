@@ -15,10 +15,7 @@ export const login = async (
     password: params.password,
   });
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
+  if (error) throw new Error(error.message);
   return data;
 };
 
@@ -52,18 +49,30 @@ export const loginWithGoogle = async () => {
 
     return new Promise<void>((resolve) => {
       const channel = new BroadcastChannel('google_login_channel');
-
-      const handleMessage = (event: MessageEvent) => {
+      channel.onmessage = (event: MessageEvent) => {
         if (event.data.type === 'GOOGLE_LOGIN_SUCCESS') {
           channel.close();
-          // Check session after popup success to sync state
-          supabase.auth.getSession().then(() => {
-            resolve();
-          });
+          supabase.auth.getSession().then(() => resolve());
         }
       };
-
-      channel.onmessage = handleMessage;
     });
   }
+};
+
+export const getUserNickname = async (
+  userId: string,
+): Promise<string | null> => {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('profiles')
+    .select('nickname')
+    .eq('id', userId)
+    .single();
+  return data?.nickname ?? null;
+};
+
+export const getSession = async () => {
+  const supabase = createClient();
+  const { data } = await supabase.auth.getSession();
+  return data.session;
 };
