@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useAtomValue } from 'jotai';
 import { useCreatePost } from './useCreatePost';
 import { KakaoPlace } from '../types/search';
-import { createClient } from '@/utils/supabase/client';
+import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
 import { viewModeAtom } from '@/app/atoms';
@@ -37,11 +37,6 @@ export const usePostForm = (
     setSelectedPlace(null);
   }, []);
 
-  // Fixing the bug: The original code had a separate logic inside handleFileChange.
-  // It calculated tempUrls and S3 URLs.
-  // Actually, I should fix the uploading state logic.
-  // Let's rewrite uploadImages to return the S3 URLs or update the state correctly.
-
   const handleUploadAndSetImages = useCallback(
     async (fileList: File[]) => {
       const remainingSlots = 5 - photos.length;
@@ -52,7 +47,6 @@ export const usePostForm = (
 
       const filesToUpload = await compressImages(fileList);
 
-      // 1. Presigned URL Request
       let presignedRes;
       try {
         presignedRes = await fetch('/api/image', {
@@ -82,7 +76,6 @@ export const usePostForm = (
 
       const { urls } = await presignedRes.json();
 
-      // 2. Upload to S3
       const uploadPromises = urls.map(
         async (
           item: { originalName: string; fileName: string; url: string },
@@ -125,18 +118,9 @@ export const usePostForm = (
     }
 
     try {
-      // Need user ID. The original code fetched it inside submit.
-      // createPost hook handles the insertion.
-      // I need to fetch user inside here or rely on createPost to have userId?
-      // createPost payload requires userId.
-      // Let's import supabase client here to get user.
-      const supabase = createClient();
-      // TODO: user 정보를 tanstack query로 관리하기
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const currentUser = await getCurrentUser();
 
-      if (!user) {
+      if (!currentUser) {
         alert('로그인이 필요합니다.');
         return;
       }
@@ -153,7 +137,7 @@ export const usePostForm = (
         lat,
         lng,
         kakao_place_id: selectedPlace.id,
-        user_id: user.id,
+        user_id: currentUser.id,
       });
 
       if (viewMode === 'map' && Number.isFinite(lat) && Number.isFinite(lng)) {
