@@ -1,76 +1,239 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import {
+  Suspense,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  useEffect,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, Popover, Spinner } from '@pin-plate/ui';
 import { usePost } from '../hooks/usePost';
 import { useDeletePost } from '../hooks/useDeletePost';
-
-import PostDetailContent from './PostDetailContent';
+import { usePosts } from '../hooks/usePosts';
+import { usePostsByPlace } from '../hooks/usePostsByPlace';
+import { Post } from '../types/post';
 import EditPostContent from './EditPostContent';
+import PostDetailContent from './PostDetailContent';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import * as styles from './styles/PostDetailModal.styles.css';
 
 interface PostDetailModalProps {
   id: string;
   isIntercepted?: boolean;
 }
 
-// Inner component that suspends
-const PostDetailInner = ({ id }: { id: string }) => {
-  const { data: post } = usePost(Number(id));
-  const [isEditing, setIsEditing] = useState(false);
-  const router = useRouter();
-  const { mutate: deletePost } = useDeletePost(() => {
-    alert('게시글이 삭제되었습니다.');
-    router.back();
+interface ReviewCardProps {
+  post: Post;
+  isEditing: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  onEditSuccess: () => void;
+  sectionRef: (node: HTMLElement | null) => void;
+}
+
+const ReviewCard = ({
+  post,
+  isEditing,
+  onEdit,
+  onDelete,
+  onEditSuccess,
+  sectionRef,
+}: ReviewCardProps) => {
+  const formattedDate = new Date(post.created_at).toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   });
 
-  const handleOpenEditing = () => setIsEditing(true);
+  if (isEditing) {
+    return (
+      <section
+        ref={sectionRef}
+        data-post-id={post.id}
+        className={styles.reviewPanel}
+      >
+        <div className={styles.reviewPanelInner}>
+          <EditPostContent post={post} onSuccess={onEditSuccess} />
+        </div>
+      </section>
+    );
+  }
 
-  const handleCancelEditing = () => setIsEditing(false);
+  return (
+    <section
+      ref={sectionRef}
+      data-post-id={post.id}
+      className={styles.reviewPanel}
+    >
+      <div className={styles.reviewPanelInner}>
+        <PostDetailContent
+          post={post}
+          metaSlot={
+            <>
+              <span className={styles.reviewCardDate}>{formattedDate}</span>
+              <div className={styles.reviewMetaActions}>
+                <Popover>
+                  <Popover.Trigger>⋮</Popover.Trigger>
+                  <Popover.Menu>
+                    <Popover.Item onClick={onEdit}>수정하기</Popover.Item>
+                    <Popover.Item onClick={onDelete}>삭제하기</Popover.Item>
+                  </Popover.Menu>
+                </Popover>
+              </div>
+            </>
+          }
+        />
+      </div>
+    </section>
+  );
+};
 
-  const handleDelete = () => {
-    if (confirm('정말로 삭제하시겠습니까?')) {
-      deletePost(Number(id));
+ReviewCard.displayName = 'ReviewCard';
+
+const PostDetailInner = ({ id }: { id: string }) => {
+  const { data: initialPost } = usePost(Number(id));
+
+  const [kakaoPlaceId] = useState(initialPost.kakao_place_id);
+  const [placeName] = useState(initialPost.place_name);
+  const [editingPostId, setEditingPostId] = useState<number | null>(null);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const hasAlignedInitialPostRef = useRef(false);
+  const sectionRefs = useRef<Record<number, HTMLElement | null>>({});
+
+  const router = useRouter();
+  const { data: allPosts } = usePosts();
+  const {
+    data: reviewPages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePostsByPlace(kakaoPlaceId);
+  const { mutate: deletePost } = useDeletePost();
+
+  const visitCount = useMemo(
+    () =>
+      allPosts?.filter((p) => p.kakao_place_id === kakaoPlaceId).length ?? 0,
+    [allPosts, kakaoPlaceId],
+  );
+
+  const allReviews = useMemo(
+    () => reviewPages?.pages.flatMap((p) => p) ?? [],
+    [reviewPages],
+  );
+
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+      if (
+        scrollHeight - scrollTop - clientHeight < 150 &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
+        fetchNextPage();
+      }
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage],
+  );
+
+  const handleDelete = useCallback(
+    (postId: number) => {
+      if (!confirm('정말로 삭제하시겠습니까?')) return;
+      const isAnchor = postId === Number(id);
+      const isLast = allReviews.length === 1;
+      deletePost(postId, {
+        onSuccess: () => {
+          if (isAnchor || isLast) router.back();
+        },
+      });
+    },
+    [id, allReviews.length, deletePost, router],
+  );
+
+  useEffect(() => {
+    const containsInitialPost = allReviews.some(
+      (review) => review.id === Number(id),
+    );
+
+    if (!containsInitialPost && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  };
+  }, [allReviews, id, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (
+      el &&
+      el.scrollHeight <= el.clientHeight &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage();
+    }
+  }, [allReviews, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    if (hasAlignedInitialPostRef.current) return;
+
+    const initialSection = sectionRefs.current[Number(id)];
+    if (!initialSection) return;
+
+    initialSection.scrollIntoView({
+      block: 'start',
+      behavior: 'auto',
+    });
+    hasAlignedInitialPostRef.current = true;
+  }, [allReviews, id]);
 
   return (
     <>
       <Modal.Header>
-        <Modal.Title>{isEditing ? '리뷰 수정' : '리뷰 상세'} </Modal.Title>
-        {isEditing ? (
-          <Modal.Close />
-        ) : (
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <Popover>
-              <Popover.Trigger>⋮</Popover.Trigger>
-              <Popover.Menu>
-                <Popover.Item onClick={handleOpenEditing}>
-                  수정하기
-                </Popover.Item>
-                <Popover.Item onClick={handleDelete}>삭제하기</Popover.Item>
-              </Popover.Menu>
-            </Popover>
-            <Modal.Close />
-          </div>
-        )}
+        <Modal.Title>{placeName}</Modal.Title>
+        <Modal.Close />
       </Modal.Header>
 
-      {/* Content */}
+      {visitCount > 0 && (
+        <div className={styles.visitBanner}>{visitCount}회 방문했습니다!</div>
+      )}
+
       <Modal.Body>
-        {isEditing ? (
-          <EditPostContent post={post} onSuccess={() => setIsEditing(false)} />
-        ) : (
-          <PostDetailContent post={post} />
-        )}
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className={styles.scrollContainer}
+        >
+          {allReviews.map((review) => (
+            <ReviewCard
+              key={review.id}
+              post={review}
+              isEditing={editingPostId === review.id}
+              onEdit={() => setEditingPostId(review.id)}
+              onDelete={() => handleDelete(review.id)}
+              onEditSuccess={() => setEditingPostId(null)}
+              sectionRef={(node) => {
+                sectionRefs.current[review.id] = node;
+              }}
+            />
+          ))}
+
+          {isFetchingNextPage && (
+            <div className={styles.loadingRow}>
+              <Spinner />
+            </div>
+          )}
+
+          {!hasNextPage && allReviews.length > 0 && (
+            <div className={styles.reviewCardEmpty}>모든 기록을 불러왔어요</div>
+          )}
+        </div>
       </Modal.Body>
 
-      {/* Footer Actions - Only visible in Edit Mode */}
-      {isEditing && (
+      {editingPostId !== null && (
         <Modal.Footer>
           <Button
-            onClick={undefined}
             type="submit"
             form="edit-post-form"
             variant="solid"
@@ -78,7 +241,11 @@ const PostDetailInner = ({ id }: { id: string }) => {
           >
             완료
           </Button>
-          <Button onClick={handleCancelEditing} variant="secondary" size="full">
+          <Button
+            onClick={() => setEditingPostId(null)}
+            variant="secondary"
+            size="full"
+          >
             취소
           </Button>
         </Modal.Footer>
@@ -87,7 +254,6 @@ const PostDetailInner = ({ id }: { id: string }) => {
   );
 };
 
-// Fallback Loading Component
 const PostDetailSkeleton = () => (
   <Modal.Body>
     <div style={{ padding: '20px', display: 'flex', justifyContent: 'center' }}>
@@ -96,7 +262,6 @@ const PostDetailSkeleton = () => (
   </Modal.Body>
 );
 
-// Fallback Error Component
 const PostDetailError = () => (
   <Modal.Body>
     <div style={{ padding: '20px', color: 'red', textAlign: 'center' }}>
