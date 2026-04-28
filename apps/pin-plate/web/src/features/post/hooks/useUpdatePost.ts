@@ -10,6 +10,9 @@ export const useUpdatePost = (onSuccess?: () => void) => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: postKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: [...postKeys.all, 'by-place'],
+      });
       onSuccess?.();
     },
   });

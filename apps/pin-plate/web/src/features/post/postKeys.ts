@@ -5,4 +5,6 @@ export const postKeys = {
       ? ([...postKeys.all, 'list', { userId }] as const)
       : ([...postKeys.all, 'list'] as const),
   detail: (id: number) => [...postKeys.all, 'detail', id] as const,
+  byPlace: (userId: string, kakaoPlaceId: string) =>
+    [...postKeys.all, 'by-place', { userId, kakaoPlaceId }] as const,
 };

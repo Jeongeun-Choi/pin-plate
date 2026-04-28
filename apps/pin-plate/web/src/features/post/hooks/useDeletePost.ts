@@ -10,6 +10,9 @@ export const useDeletePost = (onSuccess?: () => void) => {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
       queryClient.removeQueries({ queryKey: postKeys.detail(id) });
+      queryClient.invalidateQueries({
+        queryKey: [...postKeys.all, 'by-place'],
+      });
       onSuccess?.();
     },
   });
