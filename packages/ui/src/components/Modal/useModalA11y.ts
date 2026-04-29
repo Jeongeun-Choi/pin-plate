@@ -12,7 +12,12 @@ export const useModalA11y = () => {
 
   useEffect(() => {
     const previousActiveElement = document.activeElement as HTMLElement | null;
-    dialogRef.current?.focus();
+    if (
+      dialogRef.current &&
+      !dialogRef.current.contains(document.activeElement)
+    ) {
+      dialogRef.current.focus();
+    }
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -21,9 +26,10 @@ export const useModalA11y = () => {
       }
 
       if (e.key === 'Tab' && dialogRef.current) {
-        const focusableElements = dialogRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-        );
+        const focusableElements =
+          dialogRef.current.querySelectorAll<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          );
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
 
