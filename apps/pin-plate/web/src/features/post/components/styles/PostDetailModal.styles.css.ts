@@ -101,6 +101,21 @@ export const scrollArea = style({
   },
 });
 
+export const detailLayout = style({
+  minHeight: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+
+  '@media': {
+    'screen and (min-width: 768px)': {
+      height: '100%',
+      minHeight: 'unset',
+      flexDirection: 'row',
+      overflow: 'hidden',
+    },
+  },
+});
+
 export const imageContainer = style({
   position: 'relative',
   width: '100%',
@@ -135,6 +150,7 @@ export const content = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '16px',
+  minHeight: 0,
 
   '@media': {
     'screen and (min-width: 768px)': {
@@ -243,3 +259,82 @@ export const deleteButton = style([
     },
   },
 ]);
+
+export const visitBanner = style({
+  padding: '10px 20px',
+  backgroundColor: vars.colors.primary.light,
+  borderBottom: `1px solid ${vars.colors.secondary.border}`,
+  color: vars.colors.text.body,
+  fontSize: '13px',
+  fontWeight: '700',
+  flexShrink: 0,
+});
+
+export const scrollContainer = style({
+  flex: 1,
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  scrollSnapType: 'y mandatory',
+  WebkitOverflowScrolling: 'touch',
+});
+
+export const reviewPanel = style({
+  minHeight: '100%',
+  scrollSnapAlign: 'start',
+  scrollSnapStop: 'always',
+  borderBottom: `1px solid ${vars.colors.secondary.border}`,
+  flexShrink: 0,
+
+  '@media': {
+    'screen and (min-width: 768px)': {
+      height: '100%',
+      minHeight: 'unset',
+    },
+  },
+});
+
+export const reviewPanelInner = style({
+  minHeight: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+
+  '@media': {
+    'screen and (min-width: 768px)': {
+      height: '100%',
+      minHeight: 'unset',
+    },
+  },
+});
+
+export const reviewMetaRow = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: '12px',
+});
+
+export const reviewMetaActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+});
+
+export const reviewCardDate = style({
+  fontSize: vars.fontSize.sm,
+  color: vars.colors.text.sub,
+});
+
+export const reviewCardEmpty = style({
+  padding: '20px',
+  textAlign: 'center',
+  color: vars.colors.text.sub,
+  fontSize: vars.fontSize.sm,
+});
+
+export const loadingRow = style({
+  padding: '20px',
+  display: 'flex',
+  justifyContent: 'center',
+});

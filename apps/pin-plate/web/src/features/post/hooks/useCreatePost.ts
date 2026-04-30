@@ -10,8 +10,10 @@ export const useCreatePost = () => {
   return useMutation({
     mutationFn: createPost,
     onSuccess: () => {
-      // 게시글 목록 쿼리 무효화 (새 글이 보이도록)
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: [...postKeys.all, 'by-place'],
+      });
     },
   });
 };

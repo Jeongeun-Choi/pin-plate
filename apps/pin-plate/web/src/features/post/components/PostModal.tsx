@@ -22,6 +22,8 @@ export const PostModal = memo(
         handlers.resetForm();
       }
     }, [isOpen, handlers]);
+    const visitCount = formState.existingReviewsForPlace.length;
+
     return (
       <Modal isOpen={isOpen} onClose={onClose}>
         <Modal.FullScreenContainer>
@@ -29,6 +31,12 @@ export const PostModal = memo(
             <Modal.Title>맛집 기록</Modal.Title>
             <Modal.Close />
           </Modal.Header>
+
+          {visitCount > 0 && (
+            <div className={styles.existingReviewBanner}>
+              이미 {visitCount}회 방문한 곳이에요. 새 리뷰를 추가할 수 있어요.
+            </div>
+          )}
 
           <Modal.Body>
             <div className={styles.formContainer}>

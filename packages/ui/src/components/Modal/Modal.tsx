@@ -1,6 +1,12 @@
 'use client';
 
-import { PropsWithChildren, useId, useState } from 'react';
+import {
+  PropsWithChildren,
+  useCallback,
+  useId,
+  useMemo,
+  useState,
+} from 'react';
 import { ModalContext } from './context';
 
 export interface ModalProps extends PropsWithChildren {
@@ -22,31 +28,41 @@ export default function Modal({
     externalIsOpen !== undefined && externalOnClose !== undefined;
   const open = isControlled ? externalIsOpen : internalIsOpen;
 
-  const handleOpenModal = () => {
+  const handleOpenModal = useCallback(() => {
     if (!isControlled) {
       setInternalIsOpen(true);
     }
-  };
+  }, [isControlled]);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     if (isControlled) {
-      externalOnClose();
+      externalOnClose?.();
     } else {
       setInternalIsOpen(false);
     }
-  };
+  }, [isControlled, externalOnClose]);
+
+  const contextValue = useMemo(
+    () => ({
+      isOpen: open,
+      open: handleOpenModal,
+      close: handleCloseModal,
+      titleId,
+      isTitleMounted,
+      setIsTitleMounted,
+    }),
+    [
+      open,
+      handleOpenModal,
+      handleCloseModal,
+      titleId,
+      isTitleMounted,
+      setIsTitleMounted,
+    ],
+  );
 
   return (
-    <ModalContext.Provider
-      value={{
-        isOpen: open,
-        open: handleOpenModal,
-        close: handleCloseModal,
-        titleId,
-        isTitleMounted,
-        setIsTitleMounted,
-      }}
-    >
+    <ModalContext.Provider value={contextValue}>
       {children}
     </ModalContext.Provider>
   );

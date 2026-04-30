@@ -260,7 +260,7 @@ describe('usePostForm', () => {
 
   it('유효한 데이터로 submit하면 createPost를 호출하고 폼을 초기화한다', async () => {
     const mockOnSuccess = vi.fn();
-    mockGetUser.mockResolvedValueOnce({
+    mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-123' } },
     });
     mockCreatePost.mockResolvedValueOnce({});

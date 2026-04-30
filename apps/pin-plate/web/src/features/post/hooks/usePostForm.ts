@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useAtomValue } from 'jotai';
 import { useCreatePost } from './useCreatePost';
+import { usePosts } from './usePosts';
 import { KakaoPlace } from '../types/search';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
@@ -22,9 +23,16 @@ export const usePostForm = (
   const { location: currentLocation, fetchLocation: fetchCurrentLocation } =
     useCurrentLocation();
 
+  const { data: posts } = usePosts();
+
   const viewMode = useAtomValue(viewModeAtom);
 
   const { mutateAsync: createPost } = useCreatePost();
+
+  const existingReviewsForPlace = useMemo(() => {
+    if (!selectedPlace || !posts) return [];
+    return posts.filter((p) => p.kakao_place_id === selectedPlace.id);
+  }, [selectedPlace, posts]);
 
   const handlePlaceSelect = useCallback((place: KakaoPlace | null) => {
     setSelectedPlace(place);
@@ -192,6 +200,7 @@ export const usePostForm = (
       photos,
       selectedPlace,
       currentLocation,
+      existingReviewsForPlace,
     },
     handlers,
     submit: handleSubmit,

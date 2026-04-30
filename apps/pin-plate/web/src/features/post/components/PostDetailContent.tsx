@@ -1,13 +1,18 @@
 import Image from 'next/image';
+import type { ReactNode } from 'react';
 import * as styles from './styles/PostDetailModal.styles.css';
 import { Post } from '../types/post';
 import { IcFork } from '@pin-plate/ui';
 
 interface IPostDetailContentProps {
   post: Post;
+  metaSlot?: ReactNode;
 }
 
-export default function PostDetailContent({ post }: IPostDetailContentProps) {
+export default function PostDetailContent({
+  post,
+  metaSlot,
+}: IPostDetailContentProps) {
   const hasImages = post.image_urls && post.image_urls.length > 0;
 
   // Format date
@@ -20,7 +25,7 @@ export default function PostDetailContent({ post }: IPostDetailContentProps) {
   });
 
   return (
-    <>
+    <div className={styles.detailLayout}>
       {/* Image */}
       <div className={styles.imageContainer}>
         {hasImages ? (
@@ -41,6 +46,10 @@ export default function PostDetailContent({ post }: IPostDetailContentProps) {
 
       {/* Content */}
       <div className={styles.content}>
+        {metaSlot ? (
+          <div className={styles.reviewMetaRow}>{metaSlot}</div>
+        ) : null}
+
         {/* Title & Rating */}
         <div className={styles.titleRow}>
           <h2 className={styles.title}>{post.place_name}</h2>
@@ -92,6 +101,6 @@ export default function PostDetailContent({ post }: IPostDetailContentProps) {
           <span>{formattedDate}</span>
         </div>
       </div>
-    </>
+    </div>
   );
 }
