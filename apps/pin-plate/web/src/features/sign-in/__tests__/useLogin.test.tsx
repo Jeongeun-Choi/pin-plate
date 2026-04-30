@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useLogin } from '../hooks/useLogin';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useRouter, AppRouterInstance } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import * as authApi from '../api/auth';
 
@@ -35,7 +35,7 @@ describe('useLogin', () => {
     vi.mocked(useRouter).mockReturnValue({
       push: mockPush,
       refresh: vi.fn(),
-    } as unknown as AppRouterInstance);
+    } as unknown as ReturnType<typeof useRouter>);
     vi.clearAllMocks();
     localStorage.clear();
   });
