@@ -6,6 +6,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { useRouter } from 'next/navigation';
 import * as styles from './Map.styles.css';
 import { usePosts } from '@/features/post/hooks/usePosts';
+import type { Post } from '@/features/post/types/post';
 import {
   getPinColor,
   getPinIcon,
@@ -45,6 +46,38 @@ export const Map = () => {
       post.place_name?.toLowerCase().includes(query),
     );
   }, [posts, searchQuery]);
+
+  const groupedByPlace = useMemo(() => {
+    if (!filteredPosts.length) return [];
+
+    const placeGroups = filteredPosts.reduce<Record<string, Post[]>>(
+      (acc, post) => {
+        acc[post.kakao_place_id] = acc[post.kakao_place_id]
+          ? [...acc[post.kakao_place_id], post]
+          : [post];
+        return acc;
+      },
+      {},
+    );
+
+    return Object.values(placeGroups).map((placePosts) => {
+      const latestPost = [...placePosts].sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )[0];
+      const averageRating = parseFloat(
+        (
+          placePosts.reduce((sum, p) => sum + p.rating, 0) / placePosts.length
+        ).toFixed(1),
+      );
+      return {
+        lat: latestPost.lat,
+        lng: latestPost.lng,
+        averageRating,
+        latestPostId: latestPost.id,
+      };
+    });
+  }, [filteredPosts]);
 
   const initializeMap = () => {
     if (!window.naver || !mapRef.current) {
@@ -222,19 +255,20 @@ export const Map = () => {
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
 
-    filteredPosts.forEach((post) => {
-      const ratingColor = getPinColor(post.rating);
-      const pinWidth = 40;
-      const pinHeight = pinWidth * 2;
+    const pinWidth = 40;
+    const pinHeight = pinWidth * 2;
+
+    groupedByPlace.forEach((group) => {
+      const ratingColor = getPinColor(group.averageRating);
       const markerContent = getPinIcon(
         ratingColor,
         pinWidth,
         pinHeight,
-        post.rating,
+        group.averageRating,
       );
 
       const marker = new window.naver.maps.Marker({
-        position: new window.naver.maps.LatLng(post.lat, post.lng),
+        position: new window.naver.maps.LatLng(group.lat, group.lng),
         map,
         icon: {
           content: markerContent,
@@ -243,7 +277,7 @@ export const Map = () => {
       });
 
       const handlePostMarkerClick = () => {
-        router.push(`/post/${post.id}`);
+        router.push(`/post/${group.latestPostId}`);
       };
 
       marker.addListener('click', handlePostMarkerClick);
@@ -251,7 +285,7 @@ export const Map = () => {
 
       markersRef.current.push(marker);
     });
-  }, [isMapReady, filteredPosts, router]);
+  }, [isMapReady, groupedByPlace, router]);
 
   useEffect(() => {
     if (!isMapReady || !window.naver?.maps) return;
