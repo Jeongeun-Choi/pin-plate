@@ -3,17 +3,20 @@
 ## React 19 Best Practices
 
 ### Server vs Client Components (Next.js App Router)
+
 - Default to **Server Components** — no `'use client'` unless the component uses hooks, browser APIs, or event handlers
 - Keep `'use client'` boundaries as small/deep as possible
 - Use `<Suspense>` with a `fallback` for async Server Components and lazy-loaded Client Components
 - Never use `useEffect` to fetch data — use Server Components or React Query (`useQuery`) instead
 
 ### Concurrent Features
+
 - Use `useTransition` for non-urgent state updates (e.g. filter changes, navigation)
 - Use `useDeferredValue` to defer expensive derived values
 - Prefer `<Suspense>` over manual loading state where possible
 
 ### Actions & Forms (React 19)
+
 - Use React 19 `useActionState` for form submissions instead of manual loading/error state
 - Use `useFormStatus` inside form child components to read pending state
 
@@ -145,6 +148,17 @@ pnpm lint:fix
 - ESLint 자동 수정 + Prettier 포매팅이 함께 적용됨
 - 수정된 파일이 있으면 커밋에 포함시킨다
 - `warning`은 무시하지 말고 가능하면 해소한다 (단, 기존 코드의 경고는 별도 커밋으로 분리)
+
+## Typecheck
+
+코드 추가, 수정 후 반드시 아래 명령을 실행해 타입 체크를 한다:
+
+```bash
+pnpm tsc
+```
+
+- type 에러를 자동 수정한다.
+- `warning`은 무시하지 말고 가능하면 해소한다.
 
 ---
 
