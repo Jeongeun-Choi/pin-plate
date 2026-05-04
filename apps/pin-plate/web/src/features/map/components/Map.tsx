@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import * as styles from './Map.styles.css';
 import { usePosts } from '@/features/post/hooks/usePosts';
 import type { Post } from '@/features/post/types/post';
+import { calcAverageRating } from '../utils/rating';
 import {
   getPinColor,
   getPinIcon,
@@ -65,11 +66,7 @@ export const Map = () => {
         (a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       )[0];
-      const averageRating = parseFloat(
-        (
-          placePosts.reduce((sum, p) => sum + p.rating, 0) / placePosts.length
-        ).toFixed(1),
-      );
+      const averageRating = calcAverageRating(placePosts.map((p) => p.rating));
       return {
         lat: latestPost.lat,
         lng: latestPost.lng,
