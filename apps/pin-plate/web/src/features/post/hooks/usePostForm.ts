@@ -7,7 +7,7 @@ import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
 import { viewModeAtom } from '@/app/atoms';
-import { mapStore } from '@/features/map/store/MapStore';
+import { useMap } from '@vis.gl/react-google-maps';
 
 export const usePostForm = (
   onSuccess?: () => void,
@@ -26,6 +26,8 @@ export const usePostForm = (
   const { data: posts } = usePosts();
 
   const viewMode = useAtomValue(viewModeAtom);
+
+  const map = useMap();
 
   const { mutateAsync: createPost } = useCreatePost();
 
@@ -149,7 +151,7 @@ export const usePostForm = (
       });
 
       if (viewMode === 'map' && Number.isFinite(lat) && Number.isFinite(lng)) {
-        mapStore.moveTo(lat, lng);
+        map?.setCenter({ lat, lng });
       }
 
       alert('게시글이 등록되었습니다!');
@@ -168,6 +170,7 @@ export const usePostForm = (
     createPost,
     onSuccess,
     resetForm,
+    map,
   ]);
 
   const handleRemovePhoto = useCallback((index: number) => {
