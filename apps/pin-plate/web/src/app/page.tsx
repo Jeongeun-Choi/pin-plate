@@ -3,17 +3,22 @@
 export const dynamic = 'force-dynamic';
 
 import { useAtomValue } from 'jotai';
+import nextDynamic from 'next/dynamic';
+import { Suspense } from 'react';
 import { viewModeAtom } from '@/app/atoms';
-import { Map } from '@/features/map/components/Map';
 import { Navigation } from '@/components/Navigation';
 import { GlobalPostModal } from '@/components/GlobalPostModal';
 import { Header } from '@/components/Header';
 import { PostList } from '@/features/post-list/components/PostList';
 import { PlaceDetailSheet } from '@/features/map/components/PlaceDetailSheet';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
-import { Suspense } from 'react';
 import { Spinner } from '@pin-plate/ui';
 import * as styles from './page.css';
+
+const Map = nextDynamic(
+  () => import('@/features/map/components/Map').then((m) => m.Map),
+  { ssr: false },
+);
 
 export default function Home() {
   const viewMode = useAtomValue(viewModeAtom);
