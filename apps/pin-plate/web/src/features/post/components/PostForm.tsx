@@ -6,7 +6,7 @@ import AddPhotoButton from '@/components/common/AddPhotoButton';
 import * as styles from './styles/PostForm.styles.css';
 import LocationSearch from './LocationSearch';
 import MobileLocationSearch from './MobileLocationSearch';
-import { KakaoPlace } from '../types/search';
+import { Place } from '../types/search';
 import SelectedPlace from './SelectedPlace';
 
 interface PostFormProps {
@@ -14,7 +14,7 @@ interface PostFormProps {
     content: string;
     rating: number;
     photos: string[];
-    selectedPlace: KakaoPlace | null;
+    selectedPlace: Place | null;
     currentLocation?: { lat: number; lng: number } | null;
   };
   handlers: {
@@ -23,7 +23,7 @@ interface PostFormProps {
     handleUploadAndSetImages: (files: File[]) => void;
     handleRemovePhoto: (index: number) => void;
     fetchCurrentLocation: () => void;
-    handlePlaceSelect: (place: KakaoPlace | null) => void;
+    handlePlaceSelect: (place: Place | null) => void;
   };
 }
 

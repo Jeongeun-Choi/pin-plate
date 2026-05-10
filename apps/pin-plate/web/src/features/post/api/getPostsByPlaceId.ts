@@ -5,7 +5,7 @@ const PAGE_SIZE = 3;
 
 export const getPostsByPlaceId = async (
   userId: string,
-  kakaoPlaceId: string,
+  placeId: string,
   offset: number,
 ): Promise<Post[]> => {
   const supabase = createClient();
@@ -13,7 +13,7 @@ export const getPostsByPlaceId = async (
     .from('posts')
     .select('*')
     .eq('user_id', userId)
-    .eq('kakao_place_id', kakaoPlaceId)
+    .eq('kakao_place_id', placeId)
     .order('created_at', { ascending: false })
     .range(offset, offset + PAGE_SIZE - 1);
 

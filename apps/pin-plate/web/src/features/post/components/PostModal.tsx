@@ -4,13 +4,13 @@ import { memo, useEffect } from 'react';
 import { Button, Modal } from '@pin-plate/ui';
 import PostForm from './PostForm';
 import { usePostForm } from '../hooks/usePostForm';
-import { KakaoPlace } from '../types/search';
+import { Place } from '../types/search';
 import * as styles from './styles/PostModal.styles.css';
 
 interface PostModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialPlace?: KakaoPlace | null;
+  initialPlace?: Place | null;
 }
 
 export const PostModal = memo(

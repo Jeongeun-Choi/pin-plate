@@ -5,7 +5,7 @@ import { Provider } from 'jotai';
 import { useAtomValue } from 'jotai';
 import { useSearchPlaces } from '../useSearchPlaces';
 import { searchPlacesAtom, selectedSearchPlaceAtom } from '../../atoms';
-import { KakaoPlace } from '@/features/post/types/search';
+import { Place } from '@/features/post/types/search';
 
 const createWrapper = () => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -22,7 +22,7 @@ describe('useSearchPlaces', () => {
   });
 
   it('키워드로 검색하면 fetch를 호출한다', async () => {
-    const mockDocuments: Partial<KakaoPlace>[] = [
+    const mockDocuments: Partial<Place>[] = [
       { id: '1', place_name: '스시 오마카세', x: '127.0', y: '37.5' },
     ];
     mockFetch.mockResolvedValueOnce({
@@ -87,7 +87,7 @@ describe('useSearchPlaces', () => {
   });
 
   it('clearSearchPlaces 호출 시 atom을 초기화한다', async () => {
-    const mockDocuments: Partial<KakaoPlace>[] = [
+    const mockDocuments: Partial<Place>[] = [
       { id: '1', place_name: '맛집', x: '127.0', y: '37.5' },
     ];
     mockFetch.mockResolvedValueOnce({

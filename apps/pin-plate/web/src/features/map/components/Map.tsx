@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import * as styles from './Map.styles.css';
 import { usePosts } from '@/features/post/hooks/usePosts';
 import type { Post } from '@/features/post/types/post';
-import type { KakaoPlace } from '@/features/post/types/search';
+import type { Place } from '@/features/post/types/search';
 import { calcAverageRating } from '../utils/rating';
 import {
   getPinColor,
@@ -35,7 +35,7 @@ const SEOUL_DEFAULT: google.maps.LatLngLiteral = {
 };
 
 interface MapEffectsProps {
-  searchPlaces: KakaoPlace[];
+  searchPlaces: Place[];
   currentLocation: { lat: number; lng: number } | null;
 }
 

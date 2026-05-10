@@ -1,9 +1,9 @@
-import { KakaoSearchResponse } from '@/features/post/types/search';
+import { PlaceSearchResponse } from '@/features/post/types/search';
 
 export const searchPlaces = async (
   keyword: string,
   center?: { x: number; y: number },
-): Promise<KakaoSearchResponse> => {
+): Promise<PlaceSearchResponse> => {
   const params = new URLSearchParams({ query: keyword });
   if (center) {
     params.set('x', String(center.x));

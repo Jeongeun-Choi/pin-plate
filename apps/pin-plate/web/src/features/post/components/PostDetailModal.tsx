@@ -96,7 +96,7 @@ ReviewCard.displayName = 'ReviewCard';
 const PostDetailInner = ({ id }: { id: string }) => {
   const { data: initialPost } = usePost(Number(id));
 
-  const [kakaoPlaceId] = useState(initialPost.kakao_place_id);
+  const [placeId] = useState(initialPost.kakao_place_id);
   const [placeName] = useState(initialPost.place_name);
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
 
@@ -111,13 +111,12 @@ const PostDetailInner = ({ id }: { id: string }) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = usePostsByPlace(kakaoPlaceId);
+  } = usePostsByPlace(placeId);
   const { mutate: deletePost } = useDeletePost();
 
   const visitCount = useMemo(
-    () =>
-      allPosts?.filter((p) => p.kakao_place_id === kakaoPlaceId).length ?? 0,
-    [allPosts, kakaoPlaceId],
+    () => allPosts?.filter((p) => p.kakao_place_id === placeId).length ?? 0,
+    [allPosts, placeId],
   );
 
   const allReviews = useMemo(

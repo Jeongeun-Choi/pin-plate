@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useAtomValue } from 'jotai';
 import { useCreatePost } from './useCreatePost';
 import { usePosts } from './usePosts';
-import { KakaoPlace } from '../types/search';
+import { Place } from '../types/search';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
@@ -11,12 +11,12 @@ import { useMap } from '@vis.gl/react-google-maps';
 
 export const usePostForm = (
   onSuccess?: () => void,
-  initialPlace?: KakaoPlace | null,
+  initialPlace?: Place | null,
 ) => {
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(0);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(
     initialPlace ?? null,
   );
 
@@ -36,7 +36,7 @@ export const usePostForm = (
     return posts.filter((p) => p.kakao_place_id === selectedPlace.id);
   }, [selectedPlace, posts]);
 
-  const handlePlaceSelect = useCallback((place: KakaoPlace | null) => {
+  const handlePlaceSelect = useCallback((place: Place | null) => {
     setSelectedPlace(place);
   }, []);
 

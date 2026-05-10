@@ -1,11 +1,11 @@
 import { useRef, useState, KeyboardEvent } from 'react';
-import { KakaoPlace, KakaoSearchResponse } from '../types/search';
+import { Place, PlaceSearchResponse } from '../types/search';
 import * as styles from './styles/LocationSearch.css';
 import { IcSearch, IcMarker, Spinner } from '@pin-plate/ui';
 
 interface LocationSearchProps {
   currentLocation?: { lat: number; lng: number } | null;
-  onSelectPlace?: (place: KakaoPlace) => void;
+  onSelectPlace?: (place: Place) => void;
 }
 
 const LocationSearch = ({
@@ -13,7 +13,7 @@ const LocationSearch = ({
   onSelectPlace,
 }: LocationSearchProps) => {
   const locationRef = useRef<HTMLInputElement>(null);
-  const [searchResults, setSearchResults] = useState<KakaoPlace[]>([]);
+  const [searchResults, setSearchResults] = useState<Place[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -30,7 +30,7 @@ const LocationSearch = ({
       }
 
       const response = await fetch(apiUrl);
-      const data: KakaoSearchResponse = await response.json();
+      const data: PlaceSearchResponse = await response.json();
       setSearchResults(data.documents || []);
     } catch (error) {
       console.error('Search failed:', error);

@@ -1,13 +1,13 @@
 'use client';
 
 import { memo } from 'react';
-import { KakaoPlace } from '../types/search';
+import { Place } from '../types/search';
 import * as styles from './styles/SelectedPlace.css';
 import { IcMarker } from '@pin-plate/ui';
 import { MapPreview } from '@/features/map/components/MapPreview';
 
 interface SelectedPlaceProps {
-  place: KakaoPlace;
+  place: Place;
   onReset: () => void;
 }
 

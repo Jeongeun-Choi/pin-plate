@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { KakaoPlace } from '@/features/post/types/search';
+import { Place } from '@/features/post/types/search';
 
 interface MapClickInfo {
   lat: number;
@@ -10,6 +10,6 @@ interface MapClickInfo {
 
 export const clickedMapInfoAtom = atom<MapClickInfo | null>(null);
 
-export const searchPlacesAtom = atom<KakaoPlace[]>([]);
+export const searchPlacesAtom = atom<Place[]>([]);
 
-export const selectedSearchPlaceAtom = atom<KakaoPlace | null>(null);
+export const selectedSearchPlaceAtom = atom<Place | null>(null);
