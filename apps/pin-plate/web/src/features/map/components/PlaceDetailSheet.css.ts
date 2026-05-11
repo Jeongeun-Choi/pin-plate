@@ -179,3 +179,9 @@ export const distanceText = style({
   fontWeight: vars.fontWeight.medium,
   marginTop: vars.spacing[2],
 });
+
+export const buttonGroup = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[2],
+});

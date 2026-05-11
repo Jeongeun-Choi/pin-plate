@@ -6,6 +6,8 @@ import { Button, Spinner, IcMarker, IcDismiss } from '@pin-plate/ui';
 import { clickedMapInfoAtom, selectedSearchPlaceAtom } from '../atoms';
 import { useNearbyRestaurants } from '../hooks/useNearbyRestaurants';
 import { isPostModalOpenAtom, prefillPlaceAtom } from '@/features/post/atoms';
+import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
+import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import * as s from './PlaceDetailSheet.css';
 
 export const PlaceDetailSheet = () => {
@@ -16,6 +18,9 @@ export const PlaceDetailSheet = () => {
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
   const setPrefillPlace = useSetAtom(prefillPlaceAtom);
   const openedAtRef = useRef(0);
+
+  const { mutateAsync: createPlace, isPending: isAddingWish } =
+    useCreatePlace();
 
   const isDirectPlace = !!selectedSearchPlace;
 
@@ -40,6 +45,38 @@ export const PlaceDetailSheet = () => {
     setPrefillPlace(closestPlace);
     setIsPostModalOpen(true);
     setClickedInfo(null);
+  };
+
+  const handleAddWish = async () => {
+    if (!closestPlace) return;
+    try {
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+      await createPlace({
+        userId: currentUser.id,
+        payload: {
+          kakao_place_id: closestPlace.id,
+          place_name: closestPlace.place_name,
+          address: closestPlace.road_address_name || closestPlace.address_name,
+          lat: parseFloat(closestPlace.y),
+          lng: parseFloat(closestPlace.x),
+          status: 'wish',
+          tags: [],
+        },
+      });
+      alert('위시리스트에 추가되었습니다!');
+      handleClose();
+    } catch (err: unknown) {
+      const pgError = err as { code?: string };
+      if (pgError?.code === '23505') {
+        alert('이미 저장된 장소입니다.');
+      } else {
+        alert('저장에 실패했습니다.');
+      }
+    }
   };
 
   useEffect(() => {
@@ -112,9 +149,19 @@ export const PlaceDetailSheet = () => {
                   </div>
                 )}
               </div>
-              <Button variant="solid" size="full" onClick={handleWritePost}>
-                글 작성하기
-              </Button>
+              <div className={s.buttonGroup}>
+                <Button
+                  variant="outline"
+                  size="full"
+                  onClick={handleAddWish}
+                  disabled={isAddingWish}
+                >
+                  가보고싶음
+                </Button>
+                <Button variant="solid" size="full" onClick={handleWritePost}>
+                  글 작성하기
+                </Button>
+              </div>
             </>
           ) : (
             <div className={s.emptyContainer}>

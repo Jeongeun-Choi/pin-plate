@@ -1,4 +1,5 @@
 export interface CreatePostPayload {
+  place_id?: string;
   content: string;
   rating: number;
   image_urls: string[];

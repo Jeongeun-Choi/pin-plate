@@ -10,12 +10,11 @@ import type { MapMouseEvent } from '@vis.gl/react-google-maps';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useRouter } from 'next/navigation';
 import * as styles from './Map.styles.css';
-import { usePosts } from '@/features/post/hooks/usePosts';
-import type { Post } from '@/features/post/types/post';
+import { usePlaces } from '@/features/place/hooks/usePlaces';
+import type { PlaceWithStats } from '@/features/place/types/place';
 import type { Place } from '@/features/post/types/search';
-import { calcAverageRating } from '../utils/rating';
 import {
-  getPinColor,
+  getStatusPinColor,
   getCurrentLocationIcon,
   toDataUrl,
 } from '../utils/marker';
@@ -24,6 +23,7 @@ import {
   clickedMapInfoAtom,
   searchPlacesAtom,
   selectedSearchPlaceAtom,
+  statusFilterAtom,
 } from '../atoms';
 import { getClientPosition } from '../utils/event';
 import CustomMarker from './CustomMarker';
@@ -70,45 +70,22 @@ export const Map = () => {
   const setSelectedSearchPlace = useSetAtom(selectedSearchPlaceAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
   const searchPlaces = useAtomValue(searchPlacesAtom);
+  const statusFilter = useAtomValue(statusFilterAtom);
 
-  const { data: posts } = usePosts();
+  const { data: places } = usePlaces();
 
-  const filteredPosts = useMemo(() => {
-    if (!posts) return [];
-    if (!searchQuery.trim()) return posts;
+  const visiblePlaces = useMemo(() => {
+    if (!places) return [];
+
     const query = searchQuery.trim().toLowerCase();
-    return posts.filter((post: Post) =>
-      post.place_name?.toLowerCase().includes(query),
-    );
-  }, [posts, searchQuery]);
-
-  const groupedByPlace = useMemo(() => {
-    if (!filteredPosts.length) return [];
-
-    const placeGroups = filteredPosts.reduce<Record<string, Post[]>>(
-      (acc, post) => {
-        acc[post.kakao_place_id] = acc[post.kakao_place_id]
-          ? [...acc[post.kakao_place_id], post]
-          : [post];
-        return acc;
-      },
-      {},
-    );
-
-    return Object.values(placeGroups).map((placePosts) => {
-      const latestPost = [...placePosts].sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      )[0];
-      const averageRating = calcAverageRating(placePosts.map((p) => p.rating));
-      return {
-        lat: latestPost.lat,
-        lng: latestPost.lng,
-        averageRating,
-        latestPostId: latestPost.id,
-      };
+    return places.filter((place: PlaceWithStats) => {
+      const matchesSearch =
+        !query || place.place_name.toLowerCase().includes(query);
+      const matchesStatus =
+        statusFilter === 'all' || place.status === statusFilter;
+      return matchesSearch && matchesStatus;
     });
-  }, [filteredPosts]);
+  }, [places, searchQuery, statusFilter]);
 
   useEffect(() => {
     const updateLocation = (lat: number, lng: number) => {
@@ -198,22 +175,39 @@ export const Map = () => {
         currentLocation={currentLocation}
       />
 
-      {groupedByPlace.map((group) => {
+      {visiblePlaces.map((place) => {
         const pinWidth = 40;
         const pinHeight = pinWidth * 2;
-        const ratingColor = getPinColor(group.averageRating);
+        const pinColor = getStatusPinColor(place.status, place.avg_rating);
+        const latestPostId = [...place.posts]
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
+          )
+          .at(0)?.id;
+
+        const handlePlaceMarkerClick = () => {
+          if (latestPostId) {
+            router.push(`/post/${latestPostId}`);
+          }
+        };
 
         return (
           <AdvancedMarker
-            key={group.latestPostId}
-            position={{ lat: group.lat, lng: group.lng }}
-            onClick={() => router.push(`/post/${group.latestPostId}`)}
+            key={place.id}
+            position={{ lat: place.lat, lng: place.lng }}
+            onClick={handlePlaceMarkerClick}
           >
             <CustomMarker
               width={pinWidth}
               height={pinHeight}
-              color={ratingColor}
-              rating={group.averageRating}
+              color={pinColor}
+              rating={
+                place.status !== 'wish' && place.avg_rating != null
+                  ? Math.round(place.avg_rating * 10) / 10
+                  : undefined
+              }
             />
           </AdvancedMarker>
         );

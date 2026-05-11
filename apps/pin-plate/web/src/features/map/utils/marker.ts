@@ -1,4 +1,10 @@
 import { vars } from '@pin-plate/ui';
+import type { PlaceStatus } from '@/features/place/types/place';
+import {
+  WISH_PIN_COLOR,
+  WANT_TO_REVISIT_PIN_COLOR,
+  RECOMMEND_PIN_COLOR,
+} from '@/features/place/constants/status';
 
 export const toDataUrl = (svg: string): string =>
   `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -63,5 +69,22 @@ export const getPinColor = (rating: number) => {
     case rating <= 5:
     default:
       return vars.colors.pin[500];
+  }
+};
+
+export const getStatusPinColor = (
+  status: PlaceStatus,
+  avgRating: number | null,
+): string => {
+  switch (status) {
+    case 'wish':
+      return WISH_PIN_COLOR;
+    case 'want_to_revisit':
+      return WANT_TO_REVISIT_PIN_COLOR;
+    case 'recommend':
+      return RECOMMEND_PIN_COLOR;
+    case 'visited':
+    default:
+      return getPinColor(avgRating ?? 0);
   }
 };
