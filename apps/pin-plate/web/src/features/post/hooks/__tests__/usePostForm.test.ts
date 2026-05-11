@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { usePostForm } from '../usePostForm';
 import { createWrapper } from '@/test-utils';
-import { KakaoPlace } from '../../types/search';
+import { Place } from '../../types/search';
 
 // Mock dependencies
 vi.mock('../useCreatePost', () => ({
@@ -35,7 +35,7 @@ const mockGetUser = vi.fn();
 const mockFetch = vi.fn();
 const mockAlert = vi.fn();
 
-const createMockPlace = (overrides?: Partial<KakaoPlace>): KakaoPlace => ({
+const createMockPlace = (overrides?: Partial<Place>): Place => ({
   id: '123',
   place_name: '테스트 맛집',
   address_name: '서울시 강남구',
@@ -46,7 +46,7 @@ const createMockPlace = (overrides?: Partial<KakaoPlace>): KakaoPlace => ({
   category_group_code: 'FD6',
   category_group_name: '음식점',
   phone: '02-1234-5678',
-  place_url: 'https://place.map.kakao.com/123',
+  place_url: 'https://maps.google.com/?cid=123',
   distance: '100',
   ...overrides,
 });

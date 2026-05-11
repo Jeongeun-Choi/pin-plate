@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useUpdatePost } from './useUpdatePost';
-import { KakaoPlace } from '../types/search';
+import { Place } from '../types/search';
 import { Post } from '../types/post';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
@@ -9,7 +9,7 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
   const [content, setContent] = useState(initialData.content);
   const [rating, setRating] = useState(initialData.rating);
   const [photos, setPhotos] = useState<string[]>(initialData.image_urls || []);
-  const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>({
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>({
     id: initialData.kakao_place_id,
     place_name: initialData.place_name,
     address_name: initialData.address,
@@ -29,7 +29,7 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
 
   const { mutateAsync: updatePost } = useUpdatePost();
 
-  const handlePlaceSelect = (place: KakaoPlace | null) => {
+  const handlePlaceSelect = (place: Place | null) => {
     setSelectedPlace(place);
   };
 

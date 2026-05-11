@@ -4,6 +4,7 @@ export const mainWrapper = style({
   position: 'relative',
   width: '100%',
   height: '100dvh',
+  overflow: 'hidden',
 });
 
 export const fallbackContainer = style({

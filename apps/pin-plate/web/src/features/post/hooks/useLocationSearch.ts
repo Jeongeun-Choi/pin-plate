@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KakaoPlace, KakaoSearchResponse } from '../types/search';
+import { Place, PlaceSearchResponse } from '../types/search';
 
 interface UseLocationSearchProps {
   currentLocation?: { lat: number; lng: number } | null;
@@ -8,7 +8,7 @@ interface UseLocationSearchProps {
 export const useLocationSearch = ({
   currentLocation,
 }: UseLocationSearchProps) => {
-  const [searchResults, setSearchResults] = useState<KakaoPlace[]>([]);
+  const [searchResults, setSearchResults] = useState<Place[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -24,7 +24,7 @@ export const useLocationSearch = ({
         apiUrl += `&x=${currentLocation.lng}&y=${currentLocation.lat}`;
       }
       const response = await fetch(apiUrl);
-      const data: KakaoSearchResponse = await response.json();
+      const data: PlaceSearchResponse = await response.json();
       setSearchResults(data.documents || []);
     } catch (error) {
       console.error('Search failed:', error);

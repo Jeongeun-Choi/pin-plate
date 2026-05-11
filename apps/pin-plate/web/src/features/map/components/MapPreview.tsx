@@ -1,72 +1,43 @@
 'use client';
 
-import Script from 'next/script';
-import { memo, useEffect, useRef, useCallback } from 'react';
+import { memo } from 'react';
+import { Map as GoogleMap, AdvancedMarker } from '@vis.gl/react-google-maps';
 import * as styles from './MapPreview.styles.css';
-import { getPinIcon } from '../utils/marker';
+import { getPinIcon, toDataUrl } from '../utils/marker';
 import { vars } from '@pin-plate/ui';
 
-interface MapPreviewProps {
+interface Props {
   lat: number;
   lng: number;
 }
 
-export const MapPreview = memo(({ lat, lng }: MapPreviewProps) => {
-  const mapRef = useRef<HTMLDivElement>(null);
-
-  const initializeMap = useCallback(() => {
-    if (window.naver && mapRef.current) {
-      const position = new window.naver.maps.LatLng(lat, lng);
-      const mapOptions = {
-        center: position,
-        zoom: 16,
-        scaleControl: false,
-        logoControl: false,
-        mapDataControl: false,
-        zoomControl: false,
-        mapTypeControl: false,
-        draggable: false,
-        scrollWheel: false,
-        disableDoubleClickZoom: true,
-        disableDoubleTapZoom: true,
-        disableTwoFingerTapZoom: true,
-      };
-      const mapInstance = new window.naver.maps.Map(mapRef.current, mapOptions);
-
-      // Add marker
-      const pinWidth = 40;
-      const pinHeight = pinWidth * 2;
-      const markerContent = getPinIcon(
-        vars.colors.pin[500],
-        pinWidth,
-        pinHeight,
-      );
-      new window.naver.maps.Marker({
-        position: position,
-        map: mapInstance,
-        icon: {
-          content: markerContent,
-          anchor: new window.naver.maps.Point(pinWidth / 2, pinHeight),
-        },
-      });
-    }
-  }, [lat, lng]);
-
-  useEffect(() => {
-    if (window.naver && mapRef.current) {
-      initializeMap();
-    }
-  }, [initializeMap]);
+export const MapPreview = memo(({ lat, lng }: Props) => {
+  const position = { lat, lng };
+  const pinWidth = 40;
+  const pinHeight = pinWidth * 2;
 
   return (
     <div className={styles.container}>
-      <Script
-        id="naver-map-script"
-        strategy="afterInteractive"
-        src={`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID}`}
-        onReady={initializeMap}
-      />
-      <div id="map-preview" ref={mapRef} className={styles.map} />
+      <GoogleMap
+        defaultCenter={position}
+        defaultZoom={16}
+        disableDefaultUI
+        clickableIcons={false}
+        gestureHandling="none"
+        className={styles.map}
+      >
+        <AdvancedMarker position={position}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={toDataUrl(
+              getPinIcon(vars.colors.pin[500], pinWidth, pinHeight),
+            )}
+            width={pinWidth}
+            height={pinHeight}
+            alt=""
+          />
+        </AdvancedMarker>
+      </GoogleMap>
     </div>
   );
 });

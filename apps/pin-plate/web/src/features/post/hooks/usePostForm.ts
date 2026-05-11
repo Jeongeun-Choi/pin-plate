@@ -2,21 +2,21 @@ import { useState, useCallback, useMemo } from 'react';
 import { useAtomValue } from 'jotai';
 import { useCreatePost } from './useCreatePost';
 import { usePosts } from './usePosts';
-import { KakaoPlace } from '../types/search';
+import { Place } from '../types/search';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
 import { viewModeAtom } from '@/app/atoms';
-import { mapStore } from '@/features/map/store/MapStore';
+import { useMap } from '@vis.gl/react-google-maps';
 
 export const usePostForm = (
   onSuccess?: () => void,
-  initialPlace?: KakaoPlace | null,
+  initialPlace?: Place | null,
 ) => {
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(0);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(
     initialPlace ?? null,
   );
 
@@ -27,6 +27,8 @@ export const usePostForm = (
 
   const viewMode = useAtomValue(viewModeAtom);
 
+  const map = useMap();
+
   const { mutateAsync: createPost } = useCreatePost();
 
   const existingReviewsForPlace = useMemo(() => {
@@ -34,7 +36,7 @@ export const usePostForm = (
     return posts.filter((p) => p.kakao_place_id === selectedPlace.id);
   }, [selectedPlace, posts]);
 
-  const handlePlaceSelect = useCallback((place: KakaoPlace | null) => {
+  const handlePlaceSelect = useCallback((place: Place | null) => {
     setSelectedPlace(place);
   }, []);
 
@@ -149,7 +151,7 @@ export const usePostForm = (
       });
 
       if (viewMode === 'map' && Number.isFinite(lat) && Number.isFinite(lng)) {
-        mapStore.moveTo(lat, lng);
+        map?.setCenter({ lat, lng });
       }
 
       alert('게시글이 등록되었습니다!');
@@ -168,6 +170,7 @@ export const usePostForm = (
     createPost,
     onSuccess,
     resetForm,
+    map,
   ]);
 
   const handleRemovePhoto = useCallback((index: number) => {

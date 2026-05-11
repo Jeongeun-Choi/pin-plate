@@ -1,9 +1,10 @@
 import { useSetAtom } from 'jotai';
+import { useMap } from '@vis.gl/react-google-maps';
 import { searchPlacesAtom, selectedSearchPlaceAtom } from '../atoms';
-import { mapStore } from '../store/MapStore';
 import { searchPlaces as fetchSearchPlaces } from '../api/searchPlaces';
 
 export const useSearchPlaces = () => {
+  const map = useMap();
   const setSearchPlaces = useSetAtom(searchPlacesAtom);
   const setSelectedSearchPlace = useSetAtom(selectedSearchPlaceAtom);
 
@@ -13,13 +14,12 @@ export const useSearchPlaces = () => {
       return;
     }
 
-    const map = mapStore.getMap();
     const center = map?.getCenter();
 
     try {
       const data = await fetchSearchPlaces(
         keyword,
-        center ? { x: center.x, y: center.y } : undefined,
+        center ? { x: center.lng(), y: center.lat() } : undefined,
       );
       setSearchPlaces(data.documents || []);
     } catch {

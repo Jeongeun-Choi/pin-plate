@@ -1,4 +1,4 @@
-export interface KakaoPlace {
+export interface Place {
   id: string;
   place_name: string;
   category_name: string;
@@ -13,7 +13,7 @@ export interface KakaoPlace {
   distance: string;
 }
 
-export interface KakaoSearchResponse {
+export interface PlaceSearchResponse {
   meta: {
     total_count: number;
     pageable_count: number;
@@ -24,5 +24,5 @@ export interface KakaoSearchResponse {
       selected_region: string;
     };
   };
-  documents: KakaoPlace[];
+  documents: Place[];
 }

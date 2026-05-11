@@ -1,13 +1,13 @@
 import { useRef, KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { KakaoPlace } from '../types/search';
+import { Place } from '../types/search';
 import { useLocationSearch } from '../hooks/useLocationSearch';
 import * as styles from './styles/MobileLocationSearch.css';
 import { IcSearch, IcMarker, IcDismiss, Spinner } from '@pin-plate/ui';
 
 interface MobileLocationSearchProps {
   currentLocation?: { lat: number; lng: number } | null;
-  onSelectPlace?: (place: KakaoPlace) => void;
+  onSelectPlace?: (place: Place) => void;
   onClose: () => void;
   isOpen: boolean;
 }

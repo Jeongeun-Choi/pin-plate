@@ -19,7 +19,7 @@ importers:
         version: 15.1.0(eslint@9.39.4)(typescript@5.9.3)
       sst:
         specifier: latest
-        version: 4.6.11
+        version: 4.13.0
 
   apps/pin-plate/mobile:
     dependencies:
@@ -99,6 +99,9 @@ importers:
       '@vanilla-extract/css':
         specifier: ^1.18.0
         version: 1.20.1
+      '@vis.gl/react-google-maps':
+        specifier: ^1.8.3
+        version: 1.8.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       browser-image-compression:
         specifier: ^2.0.2
         version: 2.0.2
@@ -136,9 +139,9 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.1.0(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@types/navermaps':
-        specifier: ^3.9.1
-        version: 3.9.1
+      '@types/google.maps':
+        specifier: ^3.64.0
+        version: 3.64.0
       '@types/node':
         specifier: ^20
         version: 20.19.39
@@ -467,6 +470,10 @@ packages:
   '@aws-sdk/xml-builder@3.972.16':
     resolution: {integrity: sha512-iu2pyvaqmeatIJLURLqx9D+4jKAdTH20ntzB6BFwjyN7V960r4jK32mx0Zf7YbtOYAbmbtQfDNuL60ONinyw7A==}
     engines: {node: '>=20.0.0'}
+
+  '@aws/durable-execution-sdk-js@1.0.2':
+    resolution: {integrity: sha512-KIYBVqV9gArkWdPEDYOjJqLlO+NecmCXOXadNBlOspJTmqztwuiyb6aZc468bYWSGuL4Me/gyTIK97ubkwFNCw==}
+    engines: {node: '>=22'}
 
   '@aws/lambda-invoke-store@0.2.4':
     resolution: {integrity: sha512-iY8yvjE0y651BixKNPgmv1WrQc+GZ142sb0z4gYnChDDY2YqI4P/jsSopBWrKfAt7LOJAkOXt7rC/hms+WclQQ==}
@@ -1488,6 +1495,9 @@ packages:
     resolution: {integrity: sha512-KZNxZvnGCtiM2aYYZ6Wz0Ix5r47dAvpNLApFtZWnSoERzAdOMzVBOPysBoM0JlF6FKWZ8GPqgn6qt3dV/8Zlpg==}
     hasBin: true
 
+  '@googlemaps/js-api-loader@2.0.2':
+    resolution: {integrity: sha512-bKVuTqatS8Jven5aFqVB7rCHF1VFEzpzyi0ruzO0GUR+A7m9oMqMgtnmpANj7kMYEvvhty8Fk7TnJ1MKjWHu+Q==}
+
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -2377,8 +2387,8 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
-  '@types/geojson@7946.0.16':
-    resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
+  '@types/google.maps@3.64.0':
+    resolution: {integrity: sha512-dN0H6tB4lgLQLovcbPXFYYOEV41TpyyJghzb5jrzjB96FZmjeOghevVdC+BMGd6YqyCqXaggyEtqRXLRjzCBZA==}
 
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
@@ -2397,9 +2407,6 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
-
-  '@types/navermaps@3.9.1':
-    resolution: {integrity: sha512-XCYtuJ0mYaXx5lBeB0iahk+sPG7Q9tLHQGR6AkGCOGwrRG8qowdG5/FIYlI7am59j/Hm4vaiR+eRZ31kTgMWjA==}
 
   '@types/node@20.19.39':
     resolution: {integrity: sha512-orrrD74MBUyK8jOAD/r0+lfa1I2MO6I+vAkmAWzMYbCcgrN4lCrmK52gRFQq/JRxfYPfonkr4b0jcY7Olqdqbw==}
@@ -2634,6 +2641,12 @@ packages:
     resolution: {integrity: sha512-B2uuMfbjHEQ5LRcc/rHAp4pADGVG70NO1rkLI22Et6V6OMdG7D3+Ysg9hwCn51b5ICVD6rsm7vGdHMLn6EcK0Q==}
     peerDependencies:
       webpack: ^4.30.0 || ^5.20.2
+
+  '@vis.gl/react-google-maps@1.8.3':
+    resolution: {integrity: sha512-DW7nEuvOJ299DmdBnvGiUARrgS/+sTEO1iJgG9J8YaErZqLoq7S4TJ22f3EjJvR4dti4L4gft43JEK77nnKXDw==}
+    peerDependencies:
+      react: '>=16.8.0 || ^19.0 || ^19.0.0-rc'
+      react-dom: '>=16.8.0 || ^19.0 || ^19.0.0-rc'
 
   '@vitejs/plugin-react@5.2.0':
     resolution: {integrity: sha512-YmKkfhOAi3wsB1PhJq5Scj3GXMn3WvtQ/JC0xoopuHoXSdmtdStOpFrYaT1kie2YgFBcIe64ROzMYRjCrYOdYw==}
@@ -5411,48 +5424,48 @@ packages:
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
 
-  sst-darwin-arm64@4.6.11:
-    resolution: {integrity: sha512-FUnvogAL7iQYjcfF9Ne3YT9Ku0a8f3dd+5N/I4FP6PaqHYdHsOvS/tMU2xyokLuiZdbQ8kzh8JYZTCtZfbGe9A==}
+  sst-darwin-arm64@4.13.0:
+    resolution: {integrity: sha512-CvqxzkpLW85Iy8h/gtdVQCoVhqGNCDUIoBA5xV7lDBEpbHBiXyrRaGxE7CGplk3OG4t4d7IogyNz5T54qo8lug==}
     cpu: [arm64]
     os: [darwin]
 
-  sst-darwin-x64@4.6.11:
-    resolution: {integrity: sha512-T3wmeYKjsggcHDD9eE17pf4mP5J+u6OlZSIJNSPJaEmx8UiJJMiqWK7o0c0EbmPngTOGDtkceNxLKBhj2TsCeQ==}
+  sst-darwin-x64@4.13.0:
+    resolution: {integrity: sha512-DY1iIXxLpmak1iIEMtyYcNByVPCBHM3jvYEeUidGc8KbjToIcWHG74tvFQnHeyWxA3xfnYRZURLqIIve3EFNUA==}
     cpu: [x64]
     os: [darwin]
 
-  sst-linux-arm64@4.6.11:
-    resolution: {integrity: sha512-1ACzUFRFIu5bW2ncIm+AtPAEggYoXBSNDMs/cgiWkQ5D2m2MzcYRf99D6cankEXFMxv2qCkXouYo9WfWNlpDvQ==}
+  sst-linux-arm64@4.13.0:
+    resolution: {integrity: sha512-mxcFr23WxR6RKnuukDUe8p7p9pnPlDCfKhO4zBkRCFxZHH7qEo5P2KENr8eCsgChMJyBhe4b3m3Lege8Ima0IA==}
     cpu: [arm64]
     os: [linux]
 
-  sst-linux-x64@4.6.11:
-    resolution: {integrity: sha512-8pbmkApHWBkw4Wuj7V5XyIOTDYpDK9Vw13nq/4hoxv+C2UDheLix3ribOycAIH2JtdpwAhyMsztFrXO0zclseg==}
+  sst-linux-x64@4.13.0:
+    resolution: {integrity: sha512-2p1ra9L6pf397vJsNwuvUCKuE7FQSLWNKpaDHU5d5W+8PKA6eq4rHTZ+iGYSxdy1Chh1dwuCP3PbznW0JXt1Sw==}
     cpu: [x64]
     os: [linux]
 
-  sst-linux-x86@4.6.11:
-    resolution: {integrity: sha512-vO2RgtsuPy+4ee0RqAtYWvrguH4xPjl7XHsyqYOyt+dzOmCWiP/27AmYTWFt/yLay5leatYma/qqyZwe8avMHg==}
+  sst-linux-x86@4.13.0:
+    resolution: {integrity: sha512-et1GapdenkcX84zBalGTpCGIx08eD4pK4WVknVfj0cE0a47mfZ2FsXGr0IJD9xfFbttH8wsdwDuSCWDb0t4/EA==}
     cpu: [x86]
     os: [linux]
 
-  sst-win32-arm64@4.6.11:
-    resolution: {integrity: sha512-2NulfXFSCOXSLfSYGeHOH27T3pWhsu/GDM6wlya12wSb2taOtXkVIXBnPNxxRIMPIeMweKNTsxeMZSBI2PfTWw==}
+  sst-win32-arm64@4.13.0:
+    resolution: {integrity: sha512-gDcrb6BNFV7acA4MGqeCifk5UQl0oXgxBwmmaUi6m4x6nxMr/AGOpCLcfYYl+Yq9+7+c6Elk5uVrJvrspXRXaA==}
     cpu: [arm64]
     os: [win32]
 
-  sst-win32-x64@4.6.11:
-    resolution: {integrity: sha512-yAEKwpPv0qeE1mx6KHvg81uN5ZxCqzfmDansxpiTFvnyRm3+p7mDc2YrP3nXvqO17sbawPKibaJwM4V3C98OXg==}
+  sst-win32-x64@4.13.0:
+    resolution: {integrity: sha512-Hs+wozWBbkSx5NWRDG3cCw9XDPOTWfZaKw/LnhcvG100/rbxHWIXSwqrQWy6UkEC17YZUlrC3bOqo5j6l0p0Yg==}
     cpu: [x64]
     os: [win32]
 
-  sst-win32-x86@4.6.11:
-    resolution: {integrity: sha512-xeRxuI+GdWBEjP9SvO3IdIcSGzhhnDcmsUfMkiHmIJDAXzAOQbrNhoYfPGeFzPPDeCJZSYWF623NSL+OUiCLFQ==}
+  sst-win32-x86@4.13.0:
+    resolution: {integrity: sha512-1VaI1JCR7AF1agzNz1QuxXdtFuvKSZ6QorDql439mA1Lym6GjxDvGcQY0AoBP4tK19AYwGcH3pEofD0m7zJEHg==}
     cpu: [x86]
     os: [win32]
 
-  sst@4.6.11:
-    resolution: {integrity: sha512-fepz1Xb8boDegv4mcgvZRmXQ7vObl09cX2e4cKrQiosZD3GeOC1MnMt08yyQcfOv12LcOI77/5+Hki9w2+6qGw==}
+  sst@4.13.0:
+    resolution: {integrity: sha512-D5JK6K4Wwp7xFAV/U2OcRqMY3i508xbR0aFBhetzZjZyqmp97QS4ucQGB0CgBpTADq44c4v4A/nLPsrUjxB/Ig==}
     hasBin: true
 
   stable-hash@0.0.5:
@@ -6778,6 +6791,12 @@ snapshots:
       fast-xml-parser: 5.5.8
       tslib: 2.8.1
 
+  '@aws/durable-execution-sdk-js@1.0.2':
+    dependencies:
+      '@aws-sdk/client-lambda': 3.1025.0
+    transitivePeerDependencies:
+      - aws-crt
+
   '@aws/lambda-invoke-store@0.2.4': {}
 
   '@babel/code-frame@7.10.4':
@@ -7944,6 +7963,10 @@ snapshots:
       chalk: 4.1.2
       js-yaml: 4.1.1
 
+  '@googlemaps/js-api-loader@2.0.2':
+    dependencies:
+      '@types/google.maps': 3.64.0
+
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.7':
@@ -8940,7 +8963,7 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@types/geojson@7946.0.16': {}
+  '@types/google.maps@3.64.0': {}
 
   '@types/graceful-fs@4.1.9':
     dependencies:
@@ -8959,10 +8982,6 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
-
-  '@types/navermaps@3.9.1':
-    dependencies:
-      '@types/geojson': 7946.0.16
 
   '@types/node@20.19.39':
     dependencies:
@@ -9302,6 +9321,14 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
+
+  '@vis.gl/react-google-maps@1.8.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@googlemaps/js-api-loader': 2.0.2
+      '@types/google.maps': 3.64.0
+      fast-deep-equal: 3.1.3
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
 
   '@vitejs/plugin-react@5.2.0(vite@8.0.7(@types/node@20.19.39)(esbuild@0.19.2)(terser@5.46.1)(yaml@2.8.3))':
     dependencies:
@@ -12732,44 +12759,47 @@ snapshots:
 
   sprintf-js@1.0.3: {}
 
-  sst-darwin-arm64@4.6.11:
+  sst-darwin-arm64@4.13.0:
     optional: true
 
-  sst-darwin-x64@4.6.11:
+  sst-darwin-x64@4.13.0:
     optional: true
 
-  sst-linux-arm64@4.6.11:
+  sst-linux-arm64@4.13.0:
     optional: true
 
-  sst-linux-x64@4.6.11:
+  sst-linux-x64@4.13.0:
     optional: true
 
-  sst-linux-x86@4.6.11:
+  sst-linux-x86@4.13.0:
     optional: true
 
-  sst-win32-arm64@4.6.11:
+  sst-win32-arm64@4.13.0:
     optional: true
 
-  sst-win32-x64@4.6.11:
+  sst-win32-x64@4.13.0:
     optional: true
 
-  sst-win32-x86@4.6.11:
+  sst-win32-x86@4.13.0:
     optional: true
 
-  sst@4.6.11:
+  sst@4.13.0:
     dependencies:
+      '@aws/durable-execution-sdk-js': 1.0.2
       aws4fetch: 1.0.18
       jose: 5.2.3
       openid-client: 5.6.4
     optionalDependencies:
-      sst-darwin-arm64: 4.6.11
-      sst-darwin-x64: 4.6.11
-      sst-linux-arm64: 4.6.11
-      sst-linux-x64: 4.6.11
-      sst-linux-x86: 4.6.11
-      sst-win32-arm64: 4.6.11
-      sst-win32-x64: 4.6.11
-      sst-win32-x86: 4.6.11
+      sst-darwin-arm64: 4.13.0
+      sst-darwin-x64: 4.13.0
+      sst-linux-arm64: 4.13.0
+      sst-linux-x64: 4.13.0
+      sst-linux-x86: 4.13.0
+      sst-win32-arm64: 4.13.0
+      sst-win32-x64: 4.13.0
+      sst-win32-x86: 4.13.0
+    transitivePeerDependencies:
+      - aws-crt
 
   stable-hash@0.0.5: {}
 

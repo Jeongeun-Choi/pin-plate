@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import QueryProvider from '@/providers/QueryProvider';
+import MapProvider from '@/providers/MapProvider';
 import '@pin-plate/ui/reset'; // UI 패키지의 Reset CSS 적용
 
 export const dynamic = 'force-dynamic';
@@ -23,8 +24,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <QueryProvider>
-          {children}
-          {modal}
+          <MapProvider>
+            {children}
+            {modal}
+          </MapProvider>
         </QueryProvider>
       </body>
     </html>
