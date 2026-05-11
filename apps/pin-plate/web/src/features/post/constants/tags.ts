@@ -35,11 +35,18 @@ export const TAG_GROUPS: Record<
     tags: [
       { id: 'korean', label: '한식', group: 'food' },
       { id: 'japanese', label: '일식', group: 'food' },
+      { id: 'chinese', label: '중식', group: 'food' },
       { id: 'western', label: '양식', group: 'food' },
+      { id: 'bunsik', label: '분식', group: 'food' },
+      { id: 'asian', label: '아시안', group: 'food' },
+      { id: 'mexican', label: '멕시칸/타코', group: 'food' },
       { id: 'cafe', label: '카페', group: 'food' },
+      { id: 'bakery', label: '베이커리', group: 'food' },
       { id: 'dessert', label: '디저트', group: 'food' },
       { id: 'bar', label: '술집', group: 'food' },
+      { id: 'wine-bar', label: '와인바', group: 'food' },
       { id: 'brunch', label: '브런치', group: 'food' },
+      { id: 'vegan', label: '비건/건강식', group: 'food' },
     ],
   },
   judgment: {
