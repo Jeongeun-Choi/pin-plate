@@ -4,11 +4,13 @@ import { Place } from '../types/search';
 import { Post } from '../types/post';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
+import { sanitizeTags } from '../constants/tags';
 
 export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
   const [content, setContent] = useState(initialData.content);
   const [rating, setRating] = useState(initialData.rating);
   const [photos, setPhotos] = useState<string[]>(initialData.image_urls || []);
+  const [tags, setTags] = useState<string[]>(initialData.tags ?? []);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>({
     id: initialData.kakao_place_id,
     place_name: initialData.place_name,
@@ -129,6 +131,7 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
           lat: parseFloat(selectedPlace.y),
           lng: parseFloat(selectedPlace.x),
           kakao_place_id: selectedPlace.id,
+          tags: sanitizeTags(tags),
         },
       });
 
@@ -156,12 +159,14 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
       content,
       rating,
       photos,
+      tags,
       selectedPlace,
       currentLocation,
     },
     handlers: {
       setContent,
       setRating,
+      setTags,
       handleUploadAndSetImages,
       handleRemovePhoto,
       fetchCurrentLocation,

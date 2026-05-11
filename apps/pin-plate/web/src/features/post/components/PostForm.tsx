@@ -1,6 +1,6 @@
 import { ChangeEvent, useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Rate, Textarea, IcSearch } from '@pin-plate/ui';
+import { Rate, Textarea, IcSearch, TagChip } from '@pin-plate/ui';
 import RatingBadge from '@/components/common/RatingBadge';
 import AddPhotoButton from '@/components/common/AddPhotoButton';
 import * as styles from './styles/PostForm.styles.css';
@@ -8,18 +8,22 @@ import LocationSearch from './LocationSearch';
 import MobileLocationSearch from './MobileLocationSearch';
 import { Place } from '../types/search';
 import SelectedPlace from './SelectedPlace';
+import TagPickerSheet from './TagPickerSheet';
+import { getTagLabel } from '../constants/tags';
 
-interface PostFormProps {
+interface Props {
   formState: {
     content: string;
     rating: number;
     photos: string[];
+    tags: string[];
     selectedPlace: Place | null;
     currentLocation?: { lat: number; lng: number } | null;
   };
   handlers: {
     setContent: (content: string) => void;
     setRating: (rating: number) => void;
+    setTags: (tags: string[]) => void;
     handleUploadAndSetImages: (files: File[]) => void;
     handleRemovePhoto: (index: number) => void;
     fetchCurrentLocation: () => void;
@@ -27,12 +31,14 @@ interface PostFormProps {
   };
 }
 
-const PostForm = ({ formState, handlers }: PostFormProps) => {
-  const { content, rating, photos, selectedPlace, currentLocation } = formState;
+const PostForm = ({ formState, handlers }: Props) => {
+  const { content, rating, photos, tags, selectedPlace, currentLocation } =
+    formState;
 
   const {
     setContent,
     setRating,
+    setTags,
     handleUploadAndSetImages,
     handleRemovePhoto,
     handlePlaceSelect,
@@ -40,6 +46,13 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
   } = handlers;
 
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isTagPickerOpen, setIsTagPickerOpen] = useState(false);
+  const [tagPickerOpenKey, setTagPickerOpenKey] = useState(0);
+
+  const handleOpenTagPicker = () => {
+    setTagPickerOpenKey((k) => k + 1);
+    setIsTagPickerOpen(true);
+  };
 
   useEffect(() => {
     fetchCurrentLocation();
@@ -61,7 +74,6 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
 
     handleUploadAndSetImages(Array.from(files));
 
-    // input 초기화
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -74,6 +86,14 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
         onClose={() => setIsMobileSearchOpen(false)}
         onSelectPlace={handlePlaceSelect}
         currentLocation={currentLocation}
+      />
+
+      <TagPickerSheet
+        key={tagPickerOpenKey}
+        isOpen={isTagPickerOpen}
+        onClose={() => setIsTagPickerOpen(false)}
+        selectedTags={tags}
+        onConfirm={setTags}
       />
 
       <div className={styles.form}>
@@ -89,7 +109,6 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
                 장소 검색
               </label>
 
-              {/* Mobile Trigger Button */}
               <button
                 type="button"
                 className={styles.mobileSearchTrigger}
@@ -104,7 +123,6 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
                 </div>
               </button>
 
-              {/* Desktop Search Component */}
               <div className={styles.desktopSearchContainer}>
                 <LocationSearch
                   currentLocation={currentLocation}
@@ -130,6 +148,37 @@ const PostForm = ({ formState, handlers }: PostFormProps) => {
             onChange={(e) => setContent(e.target.value)}
             placeholder="맛, 서비스, 분위기는 어땠나요?"
           />
+        </div>
+
+        <div className={styles.fieldWrapper}>
+          <label className={styles.label}>태그</label>
+          {tags.length > 0 ? (
+            <div className={styles.tagChipList}>
+              {tags.map((id) => (
+                <TagChip
+                  key={id}
+                  label={getTagLabel(id)}
+                  selected
+                  onRemove={() => setTags(tags.filter((t) => t !== id))}
+                />
+              ))}
+              <button
+                type="button"
+                className={styles.tagEditBtn}
+                onClick={handleOpenTagPicker}
+              >
+                + 편집
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className={styles.tagAddBtn}
+              onClick={handleOpenTagPicker}
+            >
+              + 태그 추가
+            </button>
+          )}
         </div>
 
         <div className={styles.fieldWrapper}>
