@@ -57,10 +57,10 @@ describe('getPinIcon', () => {
     expect(result).toContain('<svg');
   });
 
-  it('width와 height가 컨테이너에 적용된다', () => {
+  it('width와 height가 SVG 속성에 적용된다', () => {
     const result = getPinIcon('#FF6B00', 32, 100);
-    expect(result).toContain('width: 32px');
-    expect(result).toContain('height: 100px');
+    expect(result).toContain('width="32"');
+    expect(result).toContain('height="100"');
   });
 
   it('rating이 있으면 text 요소가 포함된다', () => {
@@ -82,10 +82,10 @@ describe('getSearchPinIcon', () => {
     expect(result).toContain('</svg>');
   });
 
-  it('width와 height가 컨테이너에 적용된다', () => {
+  it('width와 height가 SVG 속성에 적용된다', () => {
     const result = getSearchPinIcon(24, 48);
-    expect(result).toContain('width: 24px');
-    expect(result).toContain('height: 48px');
+    expect(result).toContain('width="24"');
+    expect(result).toContain('height="48"');
   });
 
   it('회색(#9E9E9E) 색상을 사용한다', () => {
@@ -107,7 +107,7 @@ describe('getCurrentLocationIcon', () => {
 
   it('pulse 애니메이션을 포함한다', () => {
     const result = getCurrentLocationIcon();
-    expect(result).toContain('currentLocationPulse');
-    expect(result).toContain('@keyframes');
+    expect(result).toContain('<animate');
+    expect(result).toContain('repeatCount="indefinite"');
   });
 });
