@@ -2,10 +2,21 @@
 
 import { useRef, useEffect } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
-import { Button, Spinner, IcMarker, IcDismiss } from '@pin-plate/ui';
+import {
+  Button,
+  Spinner,
+  IcMarker,
+  IcDismiss,
+  IcBookmark,
+  IcFilledBookmark,
+} from '@pin-plate/ui';
 import { clickedMapInfoAtom, selectedSearchPlaceAtom } from '../atoms';
 import { useNearbyRestaurants } from '../hooks/useNearbyRestaurants';
 import { isPostModalOpenAtom, prefillPlaceAtom } from '@/features/post/atoms';
+import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
+import { useDeletePlace } from '@/features/place/hooks/useDeletePlace';
+import { usePlaces } from '@/features/place/hooks/usePlaces';
+import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import * as s from './PlaceDetailSheet.css';
 
 export const PlaceDetailSheet = () => {
@@ -16,6 +27,13 @@ export const PlaceDetailSheet = () => {
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
   const setPrefillPlace = useSetAtom(prefillPlaceAtom);
   const openedAtRef = useRef(0);
+
+  const { mutateAsync: createPlace, isPending: isAddingWish } =
+    useCreatePlace();
+  const { mutateAsync: removePlace, isPending: isRemovingWish } =
+    useDeletePlace();
+
+  const { data: places } = usePlaces();
 
   const isDirectPlace = !!selectedSearchPlace;
 
@@ -29,6 +47,12 @@ export const PlaceDetailSheet = () => {
 
   const closestPlace = selectedSearchPlace ?? nearbyRestaurants?.[0] ?? null;
 
+  const savedPlace =
+    places?.find(
+      (p) => p.kakao_place_id === closestPlace?.id && p.status === 'wish',
+    ) ?? null;
+  const isAlreadySaved = !!savedPlace;
+
   const handleClose = () => {
     if (Date.now() - openedAtRef.current < 300) return;
     setClickedInfo(null);
@@ -40,6 +64,45 @@ export const PlaceDetailSheet = () => {
     setPrefillPlace(closestPlace);
     setIsPostModalOpen(true);
     setClickedInfo(null);
+  };
+
+  const handleRemoveWish = async () => {
+    if (!savedPlace) return;
+    try {
+      await removePlace(savedPlace.id);
+    } catch {
+      alert('삭제에 실패했습니다.');
+    }
+  };
+
+  const handleAddWish = async () => {
+    if (!closestPlace) return;
+    try {
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+      await createPlace({
+        userId: currentUser.id,
+        payload: {
+          kakao_place_id: closestPlace.id,
+          place_name: closestPlace.place_name,
+          address: closestPlace.road_address_name || closestPlace.address_name,
+          lat: parseFloat(closestPlace.y),
+          lng: parseFloat(closestPlace.x),
+          status: 'wish',
+          tags: [],
+        },
+      });
+    } catch (err: unknown) {
+      const pgError = err as { code?: string };
+      if (pgError?.code === '23505') {
+        alert('이미 저장된 장소예요.');
+      } else {
+        alert('저장에 실패했습니다.');
+      }
+    }
   };
 
   useEffect(() => {
@@ -87,12 +150,16 @@ export const PlaceDetailSheet = () => {
           ) : closestPlace ? (
             <>
               <div className={s.detailSection}>
-                <div className={s.placeName}>{closestPlace.place_name}</div>
-                {closestPlace.category_name && (
-                  <div className={s.category}>
-                    {formatCategory(closestPlace.category_name)}
+                <div className={s.headerRow}>
+                  <div className={s.placeTextGroup}>
+                    <div className={s.placeName}>{closestPlace.place_name}</div>
+                    {closestPlace.category_name && (
+                      <div className={s.category}>
+                        {formatCategory(closestPlace.category_name)}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
                 <div className={s.infoRow}>
                   <IcMarker width={14} height={14} />
                   <span>
@@ -112,9 +179,24 @@ export const PlaceDetailSheet = () => {
                   </div>
                 )}
               </div>
-              <Button variant="solid" size="full" onClick={handleWritePost}>
-                글 작성하기
-              </Button>
+              <div className={s.buttonGroup}>
+                <Button
+                  variant="outline"
+                  size="full"
+                  className={s.wishButton}
+                  onClick={isAlreadySaved ? handleRemoveWish : handleAddWish}
+                  disabled={isAddingWish || isRemovingWish}
+                >
+                  {isAlreadySaved ? (
+                    <IcFilledBookmark width={16} height={16} />
+                  ) : (
+                    <IcBookmark width={16} height={16} />
+                  )}
+                </Button>
+                <Button variant="solid" size="full" onClick={handleWritePost}>
+                  글 작성하기
+                </Button>
+              </div>
             </>
           ) : (
             <div className={s.emptyContainer}>

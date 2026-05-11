@@ -1,4 +1,6 @@
 export * from './IcArrowLeft';
+export * from './IcBookmark';
+export * from './IcFilledBookmark';
 export * from './IcCalendar';
 export * from './IcFork';
 export * from './IcClock';

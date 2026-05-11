@@ -7,12 +7,15 @@ import { useRouter } from 'next/navigation';
 import { useAtomValue } from 'jotai';
 import { Card, IcClock, IcNavigation, IcOutlinestar } from '@pin-plate/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { getPosts } from '../../post/api/getPosts';
-import { Post } from '../../post/types/post';
+import { getPlaces } from '../../place/api/getPlaces';
+import { placeKeys } from '../../place/placeKeys';
+import { PlaceStatusBadge } from '../../place/components/PlaceStatusBadge';
+import { StatusFilterChips } from '../../place/components/StatusFilterChips';
+import type { PlaceWithStats } from '../../place/types/place';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
-import { postKeys } from '../../post/postKeys';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { searchQueryAtom } from '@/app/atoms';
+import { statusFilterAtom } from '@/features/map/atoms';
 
 type SortType = 'latest' | 'rating' | 'distance';
 
@@ -27,14 +30,13 @@ const getCardImageProps = (imageUrl: string) => {
   return { srcSet: props.srcSet, sizes: props.sizes };
 };
 
-// Haversine formula to calculate distance
 const getDistance = (
   lat1: number,
   lon1: number,
   lat2: number,
   lon2: number,
 ) => {
-  const R = 6371; // Radius of the earth in km
+  const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
   const a =
@@ -43,13 +45,12 @@ const getDistance = (
       Math.cos(lat2 * (Math.PI / 180)) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const d = R * c; // Distance in km
-  return d;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
 export const PostList = () => {
   const [sortBy, setSortBy] = useState<SortType>('latest');
+  const statusFilter = useAtomValue(statusFilterAtom);
 
   const searchQuery = useAtomValue(searchQueryAtom);
 
@@ -61,53 +62,60 @@ export const PostList = () => {
     queryFn: getCurrentUser,
   });
 
-  // Fetch real data using TanStack Query
-  const { data: posts } = useSuspenseQuery<Post[]>({
-    queryKey: postKeys.lists(user?.id),
-    queryFn: () => getPosts(user!.id),
+  const { data: places } = useSuspenseQuery<PlaceWithStats[]>({
+    queryKey: placeKeys.lists(user?.id),
+    queryFn: () => getPlaces(user!.id),
   });
 
-  const filteredPosts = useMemo(() => {
-    if (!searchQuery.trim()) return posts;
-    const query = searchQuery.trim().toLowerCase();
-    return posts.filter((post) =>
-      post.place_name?.toLowerCase().includes(query),
-    );
-  }, [posts, searchQuery]);
+  const filteredPlaces = useMemo(() => {
+    return places.filter((place) => {
+      const query = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !query || place.place_name.toLowerCase().includes(query);
+      const matchesStatus =
+        statusFilter === 'all' || place.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [places, searchQuery, statusFilter]);
 
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
-    if (sortBy === 'latest') {
-      return (
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-    }
-    if (sortBy === 'rating') {
-      return Number(b.rating) - Number(a.rating);
-    }
-    if (sortBy === 'distance') {
-      if (!currentLocation) return 0;
-      if (!a.lat || !a.lng || !b.lat || !b.lng) return 0;
-      const distA = getDistance(
-        currentLocation.lat,
-        currentLocation.lng,
-        a.lat,
-        a.lng,
-      );
-      const distB = getDistance(
-        currentLocation.lat,
-        currentLocation.lng,
-        b.lat,
-        b.lng,
-      );
-      return distA - distB;
-    }
-    return 0;
-  });
+  const sortedPlaces = useMemo(() => {
+    return [...filteredPlaces].sort((a, b) => {
+      if (sortBy === 'latest') {
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      }
+      if (sortBy === 'rating') {
+        return (b.avg_rating ?? 0) - (a.avg_rating ?? 0);
+      }
+      if (sortBy === 'distance' && currentLocation) {
+        const distA = getDistance(
+          currentLocation.lat,
+          currentLocation.lng,
+          a.lat,
+          a.lng,
+        );
+        const distB = getDistance(
+          currentLocation.lat,
+          currentLocation.lng,
+          b.lat,
+          b.lng,
+        );
+        return distA - distB;
+      }
+      return 0;
+    });
+  }, [filteredPlaces, sortBy, currentLocation]);
 
   return (
     <div className={styles.container}>
-      {/* Filter / Sort Bar */}
       <div className={styles.filterBar}>
+        {/* 상태 필터 */}
+        <div className={styles.filterButtonGroup}>
+          <StatusFilterChips />
+        </div>
+
+        {/* 정렬 */}
         <div className={styles.filterButtonGroup}>
           <button
             className={`${styles.filterButton} ${sortBy === 'latest' ? styles.activeFilterButton : ''}`}
@@ -140,33 +148,79 @@ export const PostList = () => {
         </div>
 
         <div className={styles.reviewCount}>
-          총 {filteredPosts.length}개의 리뷰
+          총 {filteredPlaces.length}개의 장소
         </div>
       </div>
 
-      {/* Main Grid */}
       <div className={styles.contentWrapper}>
         <div className={styles.grid}>
-          {sortedPosts.map((post) => (
-            <Card
-              key={post.id}
-              onClick={() => router.push(`/post/${post.id}`)}
-              style={{ cursor: 'pointer' }}
-              title={post.place_name || '이름 없음'}
-              rating={Number(post.rating).toFixed(1) || '0.0'}
-              location={post.address || '주소 정보 없음'}
-              description={post.content}
-              date={new Date(post.created_at).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-              imageUrl={post.image_urls?.[0]}
-              {...(post.image_urls?.[0]
-                ? getCardImageProps(post.image_urls[0])
-                : {})}
-            />
-          ))}
+          {sortedPlaces.map((place) => {
+            const latestPost = [...place.posts]
+              .sort(
+                (a, b) =>
+                  new Date(b.created_at).getTime() -
+                  new Date(a.created_at).getTime(),
+              )
+              .at(0);
+
+            const handleClick = () => {
+              if (latestPost) {
+                router.push(`/post/${latestPost.id}`);
+              }
+            };
+
+            const ratingDisplay =
+              place.status === 'wish' || place.avg_rating == null
+                ? '—'
+                : place.avg_rating.toFixed(1);
+
+            const dateDisplay = place.last_visited_at
+              ? new Date(place.last_visited_at).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })
+              : new Date(place.created_at).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                });
+
+            const description =
+              place.status === 'wish'
+                ? '아직 방문하지 않은 장소'
+                : place.visit_count > 1
+                  ? `총 ${place.visit_count}번 방문`
+                  : undefined;
+
+            return (
+              <div key={place.id} style={{ position: 'relative' }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 12,
+                    left: 12,
+                    zIndex: 1,
+                  }}
+                >
+                  <PlaceStatusBadge status={place.status} />
+                </div>
+                <Card
+                  onClick={handleClick}
+                  style={{ cursor: 'pointer' }}
+                  title={place.place_name}
+                  rating={ratingDisplay}
+                  location={place.address}
+                  description={description ?? ''}
+                  date={dateDisplay}
+                  imageUrl={place.first_image ?? undefined}
+                  {...(place.first_image
+                    ? getCardImageProps(place.first_image)
+                    : {})}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

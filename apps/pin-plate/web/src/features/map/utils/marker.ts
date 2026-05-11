@@ -1,4 +1,10 @@
 import { vars } from '@pin-plate/ui';
+import type { PlaceStatus } from '@/features/place/types/place';
+import {
+  WISH_PIN_COLOR,
+  WANT_TO_REVISIT_PIN_COLOR,
+  RECOMMEND_PIN_COLOR,
+} from '@/features/place/constants/status';
 
 export const toDataUrl = (svg: string): string =>
   `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -20,6 +26,24 @@ export const getPinIcon = (
     <circle cx="50" cy="45" r="38" fill="#FFFFFF" stroke="${color}" stroke-width="2.5" />
     <circle cx="50" cy="45" r="30" stroke="${color}" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.6" />
     ${rating !== undefined ? `<text x="50" y="48" text-anchor="middle" dominant-baseline="middle" font-size="32" font-weight="700" fill="${color}" font-family="Pretendard, sans-serif">${rating}</text>` : ''}
+    <path d="M38 82C38 82 40 88 50 88C60 88 62 82 62 82" stroke="${color}" stroke-width="3" stroke-linecap="round" />
+    <path d="M42 89H58" stroke="${color}" stroke-width="2" stroke-linecap="round" opacity="0.8" />
+    <line x1="50" y1="89" x2="50" y2="145" stroke="${color}" stroke-width="4" stroke-linecap="round" />
+    <circle cx="50" cy="145" r="5" fill="${color}" />
+  </svg>`;
+};
+
+export const getWishPinIcon = (
+  color: string = WISH_PIN_COLOR,
+  width: number = 16,
+  height: number = 80,
+) => {
+  return `<svg width="${width}" height="${height}" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="45" r="38" fill="#FFFFFF" stroke="${color}" stroke-width="2.5" />
+    <circle cx="50" cy="45" r="30" stroke="${color}" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.6" />
+    <g transform="translate(34 27) scale(2)">
+      <path d="M4.33333 2H11.6667C12.403 2 13 2.59695 13 3.33333V14L8 11.3333L3 14V3.33333C3 2.59695 3.59695 2 4.33333 2Z" fill="${color}" />
+    </g>
     <path d="M38 82C38 82 40 88 50 88C60 88 62 82 62 82" stroke="${color}" stroke-width="3" stroke-linecap="round" />
     <path d="M42 89H58" stroke="${color}" stroke-width="2" stroke-linecap="round" opacity="0.8" />
     <line x1="50" y1="89" x2="50" y2="145" stroke="${color}" stroke-width="4" stroke-linecap="round" />
@@ -63,5 +87,22 @@ export const getPinColor = (rating: number) => {
     case rating <= 5:
     default:
       return vars.colors.pin[500];
+  }
+};
+
+export const getStatusPinColor = (
+  status: PlaceStatus,
+  avgRating: number | null,
+): string => {
+  switch (status) {
+    case 'wish':
+      return WISH_PIN_COLOR;
+    case 'want_to_revisit':
+      return WANT_TO_REVISIT_PIN_COLOR;
+    case 'recommend':
+      return RECOMMEND_PIN_COLOR;
+    case 'visited':
+    default:
+      return getPinColor(avgRating ?? 0);
   }
 };

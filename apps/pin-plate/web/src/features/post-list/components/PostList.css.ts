@@ -3,7 +3,9 @@ import { vars } from '@pin-plate/ui';
 
 export const container = style({
   width: '100%',
-  minHeight: '100dvh',
+  flex: 1,
+  minHeight: 0,
+  overflow: 'hidden',
   backgroundColor: '#fff8ed',
   display: 'flex',
   flexDirection: 'column',
@@ -11,6 +13,7 @@ export const container = style({
 
 // --- Filter Bar ---
 export const filterBar = style({
+  flexShrink: 0,
   backgroundColor: vars.colors.common.white,
   borderBottom: '4px solid #ffe4d6',
   padding: '16px',
@@ -91,6 +94,8 @@ export const reviewCount = style({
 // --- Main Content / Grid ---
 export const contentWrapper = style({
   flex: 1,
+  minHeight: 0,
+  overflowY: 'auto',
   padding: '16px',
   display: 'flex',
   '@media': {

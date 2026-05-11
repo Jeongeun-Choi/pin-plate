@@ -4,6 +4,14 @@ import { usePostForm } from '../usePostForm';
 import { createWrapper } from '@/test-utils';
 import { Place } from '../../types/search';
 
+const { mockCreatePost, mockGetUser, mockGetPlaceByKakaoId, mockCreatePlace } =
+  vi.hoisted(() => ({
+    mockCreatePost: vi.fn(),
+    mockGetUser: vi.fn(),
+    mockGetPlaceByKakaoId: vi.fn(),
+    mockCreatePlace: vi.fn(),
+  }));
+
 // Mock dependencies
 vi.mock('../useCreatePost', () => ({
   useCreatePost: () => ({
@@ -19,6 +27,14 @@ vi.mock('@/utils/supabase/client', () => ({
   }),
 }));
 
+vi.mock('@/features/place/api/getPlaceByKakaoId', () => ({
+  getPlaceByKakaoId: mockGetPlaceByKakaoId,
+}));
+
+vi.mock('@/features/place/api/createPlace', () => ({
+  createPlace: mockCreatePlace,
+}));
+
 vi.mock('@/hooks/useCurrentLocation', () => ({
   useCurrentLocation: () => ({
     location: null,
@@ -30,8 +46,6 @@ vi.mock('../../utils/compressImages', () => ({
   compressImages: (files: File[]) => Promise.resolve(files),
 }));
 
-const mockCreatePost = vi.fn();
-const mockGetUser = vi.fn();
 const mockFetch = vi.fn();
 const mockAlert = vi.fn();
 
@@ -57,6 +71,8 @@ describe('usePostForm', () => {
     vi.stubGlobal('alert', mockAlert);
     mockCreatePost.mockReset();
     mockGetUser.mockReset();
+    mockGetPlaceByKakaoId.mockReset();
+    mockCreatePlace.mockReset();
     mockFetch.mockReset();
     mockAlert.mockReset();
   });
@@ -263,6 +279,8 @@ describe('usePostForm', () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-123' } },
     });
+    mockGetPlaceByKakaoId.mockResolvedValueOnce(null);
+    mockCreatePlace.mockResolvedValueOnce({ id: 'place-456' });
     mockCreatePost.mockResolvedValueOnce({});
 
     const { result } = renderHook(() => usePostForm(mockOnSuccess), {

@@ -10,12 +10,12 @@ import type { MapMouseEvent } from '@vis.gl/react-google-maps';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useRouter } from 'next/navigation';
 import * as styles from './Map.styles.css';
-import { usePosts } from '@/features/post/hooks/usePosts';
-import type { Post } from '@/features/post/types/post';
+import { usePlaces } from '@/features/place/hooks/usePlaces';
+import type { PlaceWithStats } from '@/features/place/types/place';
 import type { Place } from '@/features/post/types/search';
-import { calcAverageRating } from '../utils/rating';
+import { StatusFilterChips } from '@/features/place/components/StatusFilterChips';
 import {
-  getPinColor,
+  getStatusPinColor,
   getCurrentLocationIcon,
   toDataUrl,
 } from '../utils/marker';
@@ -24,6 +24,7 @@ import {
   clickedMapInfoAtom,
   searchPlacesAtom,
   selectedSearchPlaceAtom,
+  statusFilterAtom,
 } from '../atoms';
 import { getClientPosition } from '../utils/event';
 import CustomMarker from './CustomMarker';
@@ -70,45 +71,22 @@ export const Map = () => {
   const setSelectedSearchPlace = useSetAtom(selectedSearchPlaceAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
   const searchPlaces = useAtomValue(searchPlacesAtom);
+  const statusFilter = useAtomValue(statusFilterAtom);
 
-  const { data: posts } = usePosts();
+  const { data: places } = usePlaces();
 
-  const filteredPosts = useMemo(() => {
-    if (!posts) return [];
-    if (!searchQuery.trim()) return posts;
+  const visiblePlaces = useMemo(() => {
+    if (!places) return [];
+
     const query = searchQuery.trim().toLowerCase();
-    return posts.filter((post: Post) =>
-      post.place_name?.toLowerCase().includes(query),
-    );
-  }, [posts, searchQuery]);
-
-  const groupedByPlace = useMemo(() => {
-    if (!filteredPosts.length) return [];
-
-    const placeGroups = filteredPosts.reduce<Record<string, Post[]>>(
-      (acc, post) => {
-        acc[post.kakao_place_id] = acc[post.kakao_place_id]
-          ? [...acc[post.kakao_place_id], post]
-          : [post];
-        return acc;
-      },
-      {},
-    );
-
-    return Object.values(placeGroups).map((placePosts) => {
-      const latestPost = [...placePosts].sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      )[0];
-      const averageRating = calcAverageRating(placePosts.map((p) => p.rating));
-      return {
-        lat: latestPost.lat,
-        lng: latestPost.lng,
-        averageRating,
-        latestPostId: latestPost.id,
-      };
+    return places.filter((place: PlaceWithStats) => {
+      const matchesSearch =
+        !query || place.place_name.toLowerCase().includes(query);
+      const matchesStatus =
+        statusFilter === 'all' || place.status === statusFilter;
+      return matchesSearch && matchesStatus;
     });
-  }, [filteredPosts]);
+  }, [places, searchQuery, statusFilter]);
 
   useEffect(() => {
     const updateLocation = (lat: number, lng: number) => {
@@ -184,83 +162,131 @@ export const Map = () => {
   };
 
   return (
-    <GoogleMap
-      mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
-      defaultCenter={initialCenter}
-      defaultZoom={15}
-      disableDefaultUI
-      clickableIcons={false}
-      className={styles.mapContainer}
-      onClick={handleMapClick}
-    >
-      <MapEffects
-        searchPlaces={searchPlaces}
-        currentLocation={currentLocation}
-      />
+    <div className={styles.mapWrapper}>
+      <div className={styles.filterOverlay}>
+        <StatusFilterChips />
+      </div>
+      <GoogleMap
+        mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
+        defaultCenter={initialCenter}
+        defaultZoom={15}
+        disableDefaultUI
+        clickableIcons={false}
+        className={styles.mapContainer}
+        onClick={handleMapClick}
+      >
+        <MapEffects
+          searchPlaces={searchPlaces}
+          currentLocation={currentLocation}
+        />
 
-      {groupedByPlace.map((group) => {
-        const pinWidth = 40;
-        const pinHeight = pinWidth * 2;
-        const ratingColor = getPinColor(group.averageRating);
+        {visiblePlaces.map((place) => {
+          const pinWidth = 40;
+          const pinHeight = pinWidth * 2;
+          const pinColor = getStatusPinColor(place.status, place.avg_rating);
+          const latestPostId = [...place.posts]
+            .sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime(),
+            )
+            .at(0)?.id;
 
-        return (
-          <AdvancedMarker
-            key={group.latestPostId}
-            position={{ lat: group.lat, lng: group.lng }}
-            onClick={() => router.push(`/post/${group.latestPostId}`)}
-          >
-            <CustomMarker
-              width={pinWidth}
-              height={pinHeight}
-              color={ratingColor}
-              rating={group.averageRating}
-            />
-          </AdvancedMarker>
-        );
-      })}
+          const handlePlaceMarkerClick = (e: google.maps.MapMouseEvent) => {
+            if (latestPostId) {
+              router.push(`/post/${latestPostId}`);
+              return;
+            }
+            if (!e.domEvent) return;
+            const { clientX, clientY } = getClientPosition(
+              e.domEvent as MouseEvent | TouchEvent,
+            );
+            setSelectedSearchPlace({
+              id: place.kakao_place_id,
+              place_name: place.place_name,
+              category_name: '',
+              category_group_code: '',
+              category_group_name: '',
+              phone: '',
+              address_name: place.address,
+              road_address_name: place.address,
+              x: String(place.lng),
+              y: String(place.lat),
+              place_url: '',
+              distance: '',
+            });
+            setClickedMapInfo({
+              lat: place.lat,
+              lng: place.lng,
+              clientX,
+              clientY,
+            });
+          };
 
-      {searchPlaces.map((place) => {
-        const pinWidth = 32;
-        const pinHeight = pinWidth * 2;
-        const lat = parseFloat(place.y);
-        const lng = parseFloat(place.x);
-
-        const handleSearchMarkerClick = (e: google.maps.MapMouseEvent) => {
-          if (!e.domEvent) return;
-          const { clientX, clientY } = getClientPosition(
-            e.domEvent as MouseEvent | TouchEvent,
+          return (
+            <AdvancedMarker
+              key={place.id}
+              position={{ lat: place.lat, lng: place.lng }}
+              onClick={handlePlaceMarkerClick}
+            >
+              <CustomMarker
+                width={pinWidth}
+                height={pinHeight}
+                color={pinColor}
+                icon={place.status === 'wish' ? 'bookmark' : undefined}
+                rating={
+                  place.status !== 'wish' && place.avg_rating != null
+                    ? Math.round(place.avg_rating * 10) / 10
+                    : undefined
+                }
+              />
+            </AdvancedMarker>
           );
-          setSelectedSearchPlace(place);
-          setClickedMapInfo({ lat, lng, clientX, clientY });
-        };
+        })}
 
-        return (
-          <AdvancedMarker
-            key={place.id}
-            position={{ lat, lng }}
-            zIndex={50}
-            onClick={handleSearchMarkerClick}
-          >
-            <CustomMarker
-              width={pinWidth}
-              height={pinHeight}
-              color={vars.colors.pin[0]}
+        {searchPlaces.map((place) => {
+          const pinWidth = 32;
+          const pinHeight = pinWidth * 2;
+          const lat = parseFloat(place.y);
+          const lng = parseFloat(place.x);
+
+          const handleSearchMarkerClick = (e: google.maps.MapMouseEvent) => {
+            if (!e.domEvent) return;
+            const { clientX, clientY } = getClientPosition(
+              e.domEvent as MouseEvent | TouchEvent,
+            );
+            setSelectedSearchPlace(place);
+            setClickedMapInfo({ lat, lng, clientX, clientY });
+          };
+
+          return (
+            <AdvancedMarker
+              key={place.id}
+              position={{ lat, lng }}
+              zIndex={50}
+              onClick={handleSearchMarkerClick}
+            >
+              <CustomMarker
+                width={pinWidth}
+                height={pinHeight}
+                color={vars.colors.pin[0]}
+              />
+            </AdvancedMarker>
+          );
+        })}
+
+        {currentLocation && (
+          <AdvancedMarker position={currentLocation} zIndex={200}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={toDataUrl(getCurrentLocationIcon())}
+              width={24}
+              height={24}
+              alt=""
             />
           </AdvancedMarker>
-        );
-      })}
-
-      {currentLocation && (
-        <AdvancedMarker position={currentLocation} zIndex={200}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={toDataUrl(getCurrentLocationIcon())}
-            width={24}
-            height={24}
-            alt=""
-          />
-        </AdvancedMarker>
-      )}
-    </GoogleMap>
+        )}
+      </GoogleMap>
+    </div>
   );
 };

@@ -9,6 +9,8 @@ import { compressImages } from '../utils/compressImages';
 import { viewModeAtom } from '@/app/atoms';
 import { useMap } from '@vis.gl/react-google-maps';
 import { sanitizeTags } from '../constants/tags';
+import { getPlaceByKakaoId } from '@/features/place/api/getPlaceByKakaoId';
+import { createPlace } from '@/features/place/api/createPlace';
 
 export const usePostForm = (
   onSuccess?: () => void,
@@ -140,13 +142,32 @@ export const usePostForm = (
 
       const lat = parseFloat(selectedPlace.y);
       const lng = parseFloat(selectedPlace.x);
+      const address =
+        selectedPlace.road_address_name || selectedPlace.address_name;
+
+      let existingPlace = await getPlaceByKakaoId(
+        currentUser.id,
+        selectedPlace.id,
+      );
+      if (!existingPlace) {
+        existingPlace = await createPlace(currentUser.id, {
+          kakao_place_id: selectedPlace.id,
+          place_name: selectedPlace.place_name,
+          address,
+          lat,
+          lng,
+          status: 'visited',
+          tags: sanitizeTags(tags),
+        });
+      }
 
       await createPost({
+        place_id: existingPlace.id,
         content,
         rating,
         image_urls: photos,
         place_name: selectedPlace.place_name,
-        address: selectedPlace.road_address_name || selectedPlace.address_name,
+        address,
         lat,
         lng,
         kakao_place_id: selectedPlace.id,
