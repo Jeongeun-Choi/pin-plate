@@ -4,13 +4,13 @@ import * as styles from './PostList.css';
 import { useMemo, useState } from 'react';
 import { getImageProps } from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { Card, IcClock, IcNavigation, IcOutlinestar } from '@pin-plate/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { getPlaces } from '../../place/api/getPlaces';
 import { placeKeys } from '../../place/placeKeys';
 import { PlaceStatusBadge } from '../../place/components/PlaceStatusBadge';
-import { PLACE_STATUS_FILTER_OPTIONS } from '../../place/constants/status';
+import { StatusFilterChips } from '../../place/components/StatusFilterChips';
 import type { PlaceWithStats } from '../../place/types/place';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
@@ -50,7 +50,7 @@ const getDistance = (
 
 export const PostList = () => {
   const [sortBy, setSortBy] = useState<SortType>('latest');
-  const [statusFilter, setStatusFilter] = useAtom(statusFilterAtom);
+  const statusFilter = useAtomValue(statusFilterAtom);
 
   const searchQuery = useAtomValue(searchQueryAtom);
 
@@ -112,15 +112,7 @@ export const PostList = () => {
       <div className={styles.filterBar}>
         {/* 상태 필터 */}
         <div className={styles.filterButtonGroup}>
-          {PLACE_STATUS_FILTER_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              className={`${styles.filterButton} ${statusFilter === option.value ? styles.activeFilterButton : ''}`}
-              onClick={() => setStatusFilter(option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
+          <StatusFilterChips />
         </div>
 
         {/* 정렬 */}

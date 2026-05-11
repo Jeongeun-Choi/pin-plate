@@ -13,6 +13,7 @@ import * as styles from './Map.styles.css';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import type { PlaceWithStats } from '@/features/place/types/place';
 import type { Place } from '@/features/post/types/search';
+import { StatusFilterChips } from '@/features/place/components/StatusFilterChips';
 import {
   getStatusPinColor,
   getCurrentLocationIcon,
@@ -161,100 +162,105 @@ export const Map = () => {
   };
 
   return (
-    <GoogleMap
-      mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
-      defaultCenter={initialCenter}
-      defaultZoom={15}
-      disableDefaultUI
-      clickableIcons={false}
-      className={styles.mapContainer}
-      onClick={handleMapClick}
-    >
-      <MapEffects
-        searchPlaces={searchPlaces}
-        currentLocation={currentLocation}
-      />
+    <div className={styles.mapWrapper}>
+      <div className={styles.filterOverlay}>
+        <StatusFilterChips />
+      </div>
+      <GoogleMap
+        mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
+        defaultCenter={initialCenter}
+        defaultZoom={15}
+        disableDefaultUI
+        clickableIcons={false}
+        className={styles.mapContainer}
+        onClick={handleMapClick}
+      >
+        <MapEffects
+          searchPlaces={searchPlaces}
+          currentLocation={currentLocation}
+        />
 
-      {visiblePlaces.map((place) => {
-        const pinWidth = 40;
-        const pinHeight = pinWidth * 2;
-        const pinColor = getStatusPinColor(place.status, place.avg_rating);
-        const latestPostId = [...place.posts]
-          .sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime(),
-          )
-          .at(0)?.id;
+        {visiblePlaces.map((place) => {
+          const pinWidth = 40;
+          const pinHeight = pinWidth * 2;
+          const pinColor = getStatusPinColor(place.status, place.avg_rating);
+          const latestPostId = [...place.posts]
+            .sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime(),
+            )
+            .at(0)?.id;
 
-        const handlePlaceMarkerClick = () => {
-          if (latestPostId) {
-            router.push(`/post/${latestPostId}`);
-          }
-        };
+          const handlePlaceMarkerClick = () => {
+            if (latestPostId) {
+              router.push(`/post/${latestPostId}`);
+            }
+          };
 
-        return (
-          <AdvancedMarker
-            key={place.id}
-            position={{ lat: place.lat, lng: place.lng }}
-            onClick={handlePlaceMarkerClick}
-          >
-            <CustomMarker
-              width={pinWidth}
-              height={pinHeight}
-              color={pinColor}
-              rating={
-                place.status !== 'wish' && place.avg_rating != null
-                  ? Math.round(place.avg_rating * 10) / 10
-                  : undefined
-              }
-            />
-          </AdvancedMarker>
-        );
-      })}
-
-      {searchPlaces.map((place) => {
-        const pinWidth = 32;
-        const pinHeight = pinWidth * 2;
-        const lat = parseFloat(place.y);
-        const lng = parseFloat(place.x);
-
-        const handleSearchMarkerClick = (e: google.maps.MapMouseEvent) => {
-          if (!e.domEvent) return;
-          const { clientX, clientY } = getClientPosition(
-            e.domEvent as MouseEvent | TouchEvent,
+          return (
+            <AdvancedMarker
+              key={place.id}
+              position={{ lat: place.lat, lng: place.lng }}
+              onClick={handlePlaceMarkerClick}
+            >
+              <CustomMarker
+                width={pinWidth}
+                height={pinHeight}
+                color={pinColor}
+                rating={
+                  place.status !== 'wish' && place.avg_rating != null
+                    ? Math.round(place.avg_rating * 10) / 10
+                    : undefined
+                }
+              />
+            </AdvancedMarker>
           );
-          setSelectedSearchPlace(place);
-          setClickedMapInfo({ lat, lng, clientX, clientY });
-        };
+        })}
 
-        return (
-          <AdvancedMarker
-            key={place.id}
-            position={{ lat, lng }}
-            zIndex={50}
-            onClick={handleSearchMarkerClick}
-          >
-            <CustomMarker
-              width={pinWidth}
-              height={pinHeight}
-              color={vars.colors.pin[0]}
+        {searchPlaces.map((place) => {
+          const pinWidth = 32;
+          const pinHeight = pinWidth * 2;
+          const lat = parseFloat(place.y);
+          const lng = parseFloat(place.x);
+
+          const handleSearchMarkerClick = (e: google.maps.MapMouseEvent) => {
+            if (!e.domEvent) return;
+            const { clientX, clientY } = getClientPosition(
+              e.domEvent as MouseEvent | TouchEvent,
+            );
+            setSelectedSearchPlace(place);
+            setClickedMapInfo({ lat, lng, clientX, clientY });
+          };
+
+          return (
+            <AdvancedMarker
+              key={place.id}
+              position={{ lat, lng }}
+              zIndex={50}
+              onClick={handleSearchMarkerClick}
+            >
+              <CustomMarker
+                width={pinWidth}
+                height={pinHeight}
+                color={vars.colors.pin[0]}
+              />
+            </AdvancedMarker>
+          );
+        })}
+
+        {currentLocation && (
+          <AdvancedMarker position={currentLocation} zIndex={200}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={toDataUrl(getCurrentLocationIcon())}
+              width={24}
+              height={24}
+              alt=""
             />
           </AdvancedMarker>
-        );
-      })}
-
-      {currentLocation && (
-        <AdvancedMarker position={currentLocation} zIndex={200}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={toDataUrl(getCurrentLocationIcon())}
-            width={24}
-            height={24}
-            alt=""
-          />
-        </AdvancedMarker>
-      )}
-    </GoogleMap>
+        )}
+      </GoogleMap>
+    </div>
   );
 };
