@@ -4,17 +4,13 @@ import { usePostForm } from '../usePostForm';
 import { createWrapper } from '@/test-utils';
 import { Place } from '../../types/search';
 
-const {
-  mockCreatePost,
-  mockGetUser,
-  mockGetPlaceByKakaoId,
-  mockCreatePlace,
-} = vi.hoisted(() => ({
-  mockCreatePost: vi.fn(),
-  mockGetUser: vi.fn(),
-  mockGetPlaceByKakaoId: vi.fn(),
-  mockCreatePlace: vi.fn(),
-}));
+const { mockCreatePost, mockGetUser, mockGetPlaceByKakaoId, mockCreatePlace } =
+  vi.hoisted(() => ({
+    mockCreatePost: vi.fn(),
+    mockGetUser: vi.fn(),
+    mockGetPlaceByKakaoId: vi.fn(),
+    mockCreatePlace: vi.fn(),
+  }));
 
 // Mock dependencies
 vi.mock('../useCreatePost', () => ({
