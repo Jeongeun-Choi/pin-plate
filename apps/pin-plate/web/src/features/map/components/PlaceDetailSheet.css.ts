@@ -137,6 +137,24 @@ export const detailSection = style({
   marginBottom: vars.spacing[5],
 });
 
+export const headerRow = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: vars.spacing[3],
+  marginBottom: vars.spacing[3],
+
+  '@media': {
+    '(min-width: 768px)': {
+      paddingRight: vars.spacing[8],
+    },
+  },
+});
+
+export const placeTextGroup = style({
+  flex: 1,
+  minWidth: 0,
+});
+
 export const placeName = style({
   fontSize: vars.fontSize.xl,
   fontWeight: vars.fontWeight.bold,
@@ -147,7 +165,6 @@ export const placeName = style({
   '@media': {
     '(min-width: 768px)': {
       fontSize: vars.fontSize.base,
-      paddingRight: vars.spacing[8],
     },
   },
 });
@@ -180,8 +197,12 @@ export const distanceText = style({
   marginTop: vars.spacing[2],
 });
 
+export const wishButton = style({
+  width: 54,
+});
+
 export const buttonGroup = style({
-  display: 'flex',
-  flexDirection: 'column',
+  display: 'grid',
+  gridTemplateColumns: 'auto 1fr',
   gap: vars.spacing[2],
 });

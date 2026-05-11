@@ -192,10 +192,35 @@ export const Map = () => {
             )
             .at(0)?.id;
 
-          const handlePlaceMarkerClick = () => {
+          const handlePlaceMarkerClick = (e: google.maps.MapMouseEvent) => {
             if (latestPostId) {
               router.push(`/post/${latestPostId}`);
+              return;
             }
+            if (!e.domEvent) return;
+            const { clientX, clientY } = getClientPosition(
+              e.domEvent as MouseEvent | TouchEvent,
+            );
+            setSelectedSearchPlace({
+              id: place.kakao_place_id,
+              place_name: place.place_name,
+              category_name: '',
+              category_group_code: '',
+              category_group_name: '',
+              phone: '',
+              address_name: place.address,
+              road_address_name: place.address,
+              x: String(place.lng),
+              y: String(place.lat),
+              place_url: '',
+              distance: '',
+            });
+            setClickedMapInfo({
+              lat: place.lat,
+              lng: place.lng,
+              clientX,
+              clientY,
+            });
           };
 
           return (
