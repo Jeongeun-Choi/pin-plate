@@ -338,3 +338,9 @@ export const loadingRow = style({
   display: 'flex',
   justifyContent: 'center',
 });
+
+export const tagList = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: vars.spacing[2],
+});

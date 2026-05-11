@@ -4,28 +4,29 @@ import { ChangeEvent, useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import * as styles from './styles/EditPostContent.styles.css';
 import { Post } from '../types/post';
-import { Rate, Textarea, IcSearch } from '@pin-plate/ui';
+import { Rate, Textarea, IcSearch, TagChip } from '@pin-plate/ui';
 import RatingBadge from '@/components/common/RatingBadge';
 import AddPhotoButton from '@/components/common/AddPhotoButton';
 import { useEditPostForm } from '../hooks/useEditPostForm';
 import LocationSearch from './LocationSearch';
 import MobileLocationSearch from './MobileLocationSearch';
 import SelectedPlace from './SelectedPlace';
+import TagPickerSheet from './TagPickerSheet';
+import { getTagLabel } from '../constants/tags';
 
-interface IEditPostContentProps {
+interface Props {
   post: Post;
   onSuccess: () => void;
 }
 
-export default function EditPostContent({
-  post,
-  onSuccess,
-}: IEditPostContentProps) {
+export default function EditPostContent({ post, onSuccess }: Props) {
   const { formState, handlers, submit } = useEditPostForm(post, onSuccess);
-  const { content, rating, photos, selectedPlace, currentLocation } = formState;
+  const { content, rating, photos, tags, selectedPlace, currentLocation } =
+    formState;
   const {
     setContent,
     setRating,
+    setTags,
     handleUploadAndSetImages,
     handleRemovePhoto,
     handlePlaceSelect,
@@ -33,6 +34,13 @@ export default function EditPostContent({
   } = handlers;
 
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isTagPickerOpen, setIsTagPickerOpen] = useState(false);
+  const [tagPickerOpenKey, setTagPickerOpenKey] = useState(0);
+
+  const handleOpenTagPicker = () => {
+    setTagPickerOpenKey((k) => k + 1);
+    setIsTagPickerOpen(true);
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +74,14 @@ export default function EditPostContent({
         onClose={() => setIsMobileSearchOpen(false)}
         onSelectPlace={handlePlaceSelect}
         currentLocation={currentLocation}
+      />
+
+      <TagPickerSheet
+        key={tagPickerOpenKey}
+        isOpen={isTagPickerOpen}
+        onClose={() => setIsTagPickerOpen(false)}
+        selectedTags={tags}
+        onConfirm={setTags}
       />
 
       <form
@@ -132,6 +148,37 @@ export default function EditPostContent({
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
+        </div>
+
+        <div className={styles.fieldWrapper}>
+          <label className={styles.label}>태그</label>
+          {tags.length > 0 ? (
+            <div className={styles.tagChipList}>
+              {tags.map((id) => (
+                <TagChip
+                  key={id}
+                  label={getTagLabel(id)}
+                  selected
+                  onRemove={() => setTags(tags.filter((t) => t !== id))}
+                />
+              ))}
+              <button
+                type="button"
+                className={styles.tagEditBtn}
+                onClick={handleOpenTagPicker}
+              >
+                + 편집
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className={styles.tagAddBtn}
+              onClick={handleOpenTagPicker}
+            >
+              + 태그 추가
+            </button>
+          )}
         </div>
 
         <div className={styles.fieldWrapper}>

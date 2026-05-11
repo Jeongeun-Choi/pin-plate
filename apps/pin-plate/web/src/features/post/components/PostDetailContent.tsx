@@ -2,7 +2,8 @@ import Image from 'next/image';
 import type { ReactNode } from 'react';
 import * as styles from './styles/PostDetailModal.styles.css';
 import { Post } from '../types/post';
-import { IcFork } from '@pin-plate/ui';
+import { IcFork, TagChip } from '@pin-plate/ui';
+import { getTagLabel } from '../constants/tags';
 
 interface IPostDetailContentProps {
   post: Post;
@@ -79,6 +80,15 @@ export default function PostDetailContent({
 
         {/* Description */}
         <div className={styles.descriptionBox}>{post.content}</div>
+
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className={styles.tagList}>
+            {post.tags.map((id) => (
+              <TagChip key={id} label={getTagLabel(id)} selected readonly />
+            ))}
+          </div>
+        )}
 
         {/* Date */}
         <div className={styles.infoRow}>

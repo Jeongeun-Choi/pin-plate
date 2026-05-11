@@ -8,6 +8,7 @@ import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
 import { viewModeAtom } from '@/app/atoms';
 import { useMap } from '@vis.gl/react-google-maps';
+import { sanitizeTags } from '../constants/tags';
 
 export const usePostForm = (
   onSuccess?: () => void,
@@ -16,6 +17,7 @@ export const usePostForm = (
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(0);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(
     initialPlace ?? null,
   );
@@ -44,6 +46,7 @@ export const usePostForm = (
     setContent('');
     setRating(0);
     setPhotos([]);
+    setTags([]);
     setSelectedPlace(null);
   }, []);
 
@@ -148,6 +151,7 @@ export const usePostForm = (
         lng,
         kakao_place_id: selectedPlace.id,
         user_id: currentUser.id,
+        tags: sanitizeTags(tags),
       });
 
       if (viewMode === 'map' && Number.isFinite(lat) && Number.isFinite(lng)) {
@@ -165,6 +169,7 @@ export const usePostForm = (
     content,
     rating,
     photos,
+    tags,
     selectedPlace,
     viewMode,
     createPost,
@@ -181,6 +186,7 @@ export const usePostForm = (
     () => ({
       setContent,
       setRating,
+      setTags,
       handleUploadAndSetImages,
       handleRemovePhoto,
       fetchCurrentLocation,
@@ -201,6 +207,7 @@ export const usePostForm = (
       content,
       rating,
       photos,
+      tags,
       selectedPlace,
       currentLocation,
       existingReviewsForPlace,

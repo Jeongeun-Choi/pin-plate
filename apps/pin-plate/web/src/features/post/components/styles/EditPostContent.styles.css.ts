@@ -123,3 +123,37 @@ export const desktopSearchContainer = style({
     },
   },
 });
+
+export const tagChipList = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: vars.spacing[2],
+  alignItems: 'center',
+});
+
+export const tagAddBtn = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: vars.spacing[1],
+  padding: `6px 14px`,
+  borderRadius: vars.borderRadius.full,
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.medium,
+  color: vars.colors.primary.default,
+  backgroundColor: vars.colors.primary.light,
+  border: `1.5px dashed ${vars.colors.primary.default}`,
+  cursor: 'pointer',
+});
+
+export const tagEditBtn = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: `6px 10px`,
+  borderRadius: vars.borderRadius.full,
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.medium,
+  color: vars.colors.text.sub,
+  backgroundColor: 'transparent',
+  border: `1.5px solid ${vars.colors.secondary.border}`,
+  cursor: 'pointer',
+});
