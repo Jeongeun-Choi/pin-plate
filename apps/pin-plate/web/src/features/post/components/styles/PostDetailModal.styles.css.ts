@@ -339,8 +339,21 @@ export const loadingRow = style({
   justifyContent: 'center',
 });
 
+export const errorMessage = style({
+  padding: '20px',
+  color: '#ff6b6b',
+  textAlign: 'center',
+});
+
 export const tagList = style({
   display: 'flex',
   flexWrap: 'wrap',
   gap: vars.spacing[2],
+});
+
+export const editScreenBody = style({
+  flex: 1,
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
 });
