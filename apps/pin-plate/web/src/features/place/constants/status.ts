@@ -26,6 +26,6 @@ export const PLACE_STATUS_FILTER_OPTIONS = [
   { value: 'recommend' as const, label: PLACE_STATUS_FILTER_LABEL.recommend },
 ];
 
-export const WISH_PIN_COLOR = '#BDBDBD';
+export const WISH_PIN_COLOR = '#ffd93d';
 export const WANT_TO_REVISIT_PIN_COLOR = '#4F8EF7';
 export const RECOMMEND_PIN_COLOR = '#F5A623';

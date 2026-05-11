@@ -233,6 +233,7 @@ export const Map = () => {
                 width={pinWidth}
                 height={pinHeight}
                 color={pinColor}
+                icon={place.status === 'wish' ? 'bookmark' : undefined}
                 rating={
                   place.status !== 'wish' && place.avg_rating != null
                     ? Math.round(place.avg_rating * 10) / 10

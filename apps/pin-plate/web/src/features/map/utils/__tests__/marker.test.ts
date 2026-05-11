@@ -3,6 +3,7 @@ import {
   getPinColor,
   getMarkerIcon,
   getPinIcon,
+  getWishPinIcon,
   getSearchPinIcon,
   getCurrentLocationIcon,
 } from '../marker';
@@ -71,6 +72,36 @@ describe('getPinIcon', () => {
 
   it('rating이 없으면 text 요소가 포함되지 않는다', () => {
     const result = getPinIcon('#FF6B00', 16, 80);
+    expect(result).not.toContain('<text');
+  });
+});
+
+describe('getWishPinIcon', () => {
+  it('SVG를 포함한 HTML 문자열을 반환한다', () => {
+    const result = getWishPinIcon();
+    expect(result).toContain('<svg');
+    expect(result).toContain('</svg>');
+  });
+
+  it('width와 height가 SVG 속성에 적용된다', () => {
+    const result = getWishPinIcon('#ffd93d', 32, 100);
+    expect(result).toContain('width="32"');
+    expect(result).toContain('height="100"');
+  });
+
+  it('지정 색상과 북마크 path를 포함한다', () => {
+    const result = getWishPinIcon('#ffd93d');
+    expect(result).toContain('fill="#ffd93d"');
+    expect(result).toContain('M4.33333 2H11.6667');
+  });
+
+  it('outline 북마크 stroke 속성이 포함되지 않는다', () => {
+    const result = getWishPinIcon('#ffd93d');
+    expect(result).not.toContain('stroke-width="1.75"');
+  });
+
+  it('rating text 요소가 포함되지 않는다', () => {
+    const result = getWishPinIcon('#ffd93d');
     expect(result).not.toContain('<text');
   });
 });

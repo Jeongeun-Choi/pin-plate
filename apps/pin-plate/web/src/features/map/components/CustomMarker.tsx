@@ -3,11 +3,13 @@ export default function CustomMarker({
   height,
   color,
   rating,
+  icon,
 }: {
   width: number;
   height: number;
   color: string;
   rating?: number;
+  icon?: 'bookmark';
 }) {
   return (
     <svg
@@ -34,7 +36,14 @@ export default function CustomMarker({
         strokeDasharray="4 4"
         opacity="0.6"
       />
-      {rating !== undefined ? (
+      {icon === 'bookmark' ? (
+        <g transform="translate(34 27) scale(2)">
+          <path
+            d="M4.33333 2H11.6667C12.403 2 13 2.59695 13 3.33333V14L8 11.3333L3 14V3.33333C3 2.59695 3.59695 2 4.33333 2Z"
+            fill={color}
+          />
+        </g>
+      ) : rating !== undefined ? (
         <text
           x="50"
           y="48"
@@ -47,9 +56,7 @@ export default function CustomMarker({
         >
           {rating}
         </text>
-      ) : (
-        ''
-      )}
+      ) : null}
       <path
         d="M38 82C38 82 40 88 50 88C60 88 62 82 62 82"
         stroke={color}
