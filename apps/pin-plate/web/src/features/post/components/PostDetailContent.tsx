@@ -79,7 +79,9 @@ export default function PostDetailContent({
         </div>
 
         {/* Description */}
-        <div className={styles.descriptionBox}>{post.content}</div>
+        {post.content && (
+          <div className={styles.descriptionBox}>{post.content}</div>
+        )}
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
