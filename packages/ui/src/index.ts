@@ -8,3 +8,4 @@ export * from './icons';
 export * from './components/Popover';
 export * from './components/Card';
 export * from './components/Spinner';
+export * from './components/TagChip';
