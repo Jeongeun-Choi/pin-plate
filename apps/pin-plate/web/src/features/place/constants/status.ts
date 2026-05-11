@@ -7,11 +7,23 @@ export const PLACE_STATUS_LABEL: Record<PlaceStatus, string> = {
   recommend: '추천하고싶음',
 };
 
+export const PLACE_STATUS_FILTER_LABEL: Record<PlaceStatus | 'all', string> = {
+  all: '전체',
+  wish: '가볼 곳',
+  visited: '다녀온',
+  want_to_revisit: '또 갈 곳',
+  recommend: '추천',
+};
+
 export const PLACE_STATUS_FILTER_OPTIONS = [
-  { value: 'all' as const, label: '전체' },
-  { value: 'wish' as const, label: '가보고싶음' },
-  { value: 'visited' as const, label: '다녀옴' },
-  { value: 'want_to_revisit' as const, label: '다시가고싶음' },
+  { value: 'all' as const, label: PLACE_STATUS_FILTER_LABEL.all },
+  { value: 'wish' as const, label: PLACE_STATUS_FILTER_LABEL.wish },
+  { value: 'visited' as const, label: PLACE_STATUS_FILTER_LABEL.visited },
+  {
+    value: 'want_to_revisit' as const,
+    label: PLACE_STATUS_FILTER_LABEL.want_to_revisit,
+  },
+  { value: 'recommend' as const, label: PLACE_STATUS_FILTER_LABEL.recommend },
 ];
 
 export const WISH_PIN_COLOR = '#BDBDBD';
