@@ -24,7 +24,7 @@ export const overlay = style({
   animation: `${fadeIn} 0.2s ease-out`,
 
   // Mobile: Full screen logic
-  alignItems: 'flex-start', // Start from top
+  alignItems: 'flex-end', // Stick to bottom
   padding: '0',
 
   '@media': {
