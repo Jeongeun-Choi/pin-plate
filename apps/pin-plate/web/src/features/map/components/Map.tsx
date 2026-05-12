@@ -13,7 +13,6 @@ import * as styles from './Map.styles.css';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import type { PlaceWithStats } from '@/features/place/types/place';
 import type { Place } from '@/features/post/types/search';
-import { StatusFilterChips } from '@/features/place/components/StatusFilterChips';
 import {
   getStatusPinColor,
   getCurrentLocationIcon,
@@ -189,9 +188,6 @@ export const Map = () => {
 
   return (
     <div className={styles.mapWrapper}>
-      <div className={styles.filterOverlay}>
-        <StatusFilterChips />
-      </div>
       <GoogleMap
         mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
         defaultCenter={initialCenter}
