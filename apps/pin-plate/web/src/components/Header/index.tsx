@@ -90,7 +90,7 @@ export const Header = () => {
             type="search"
             enterKeyHint="search"
             className={styles.searchInput}
-            placeholder="음식점 이름으로 검색..."
+            placeholder="음식점 이름으로 검색"
             value={searchInputValue}
             onChange={(e) => setSearchInputValue(e.target.value)}
             onKeyDown={handleSearchKeyDown}

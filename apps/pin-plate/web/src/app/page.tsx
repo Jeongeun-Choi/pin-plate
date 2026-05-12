@@ -11,6 +11,7 @@ import { GlobalPostModal } from '@/components/GlobalPostModal';
 import { Header } from '@/components/Header';
 import { PostList } from '@/features/post-list/components/PostList';
 import { PlaceDetailSheet } from '@/features/map/components/PlaceDetailSheet';
+import { NearbySearchRoot } from '@/features/nearby-search/components/NearbySearchRoot';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Spinner } from '@pin-plate/ui';
 import * as styles from './page.css';
@@ -26,6 +27,7 @@ export default function Home() {
   return (
     <main className={styles.mainWrapper}>
       <Header />
+      <NearbySearchRoot />
       {viewMode === 'map' ? (
         <Map />
       ) : (

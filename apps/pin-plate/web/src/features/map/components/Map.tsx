@@ -13,7 +13,6 @@ import * as styles from './Map.styles.css';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import type { PlaceWithStats } from '@/features/place/types/place';
 import type { Place } from '@/features/post/types/search';
-import { StatusFilterChips } from '@/features/place/components/StatusFilterChips';
 import {
   getStatusPinColor,
   getCurrentLocationIcon,
@@ -22,6 +21,8 @@ import {
 import { searchQueryAtom } from '@/app/atoms';
 import {
   clickedMapInfoAtom,
+  currentLocationAtom,
+  nearbyResultsAtom,
   searchPlacesAtom,
   selectedSearchPlaceAtom,
   statusFilterAtom,
@@ -37,10 +38,15 @@ const SEOUL_DEFAULT: google.maps.LatLngLiteral = {
 
 interface MapEffectsProps {
   searchPlaces: Place[];
+  nearbyPlaces: Place[];
   currentLocation: { lat: number; lng: number } | null;
 }
 
-const MapEffects = ({ searchPlaces, currentLocation }: MapEffectsProps) => {
+const MapEffects = ({
+  searchPlaces,
+  nearbyPlaces,
+  currentLocation,
+}: MapEffectsProps) => {
   const map = useMap();
 
   useEffect(() => {
@@ -53,6 +59,19 @@ const MapEffects = ({ searchPlaces, currentLocation }: MapEffectsProps) => {
   }, [map, searchPlaces]);
 
   useEffect(() => {
+    if (!map || nearbyPlaces.length === 0) return;
+    const bounds = new google.maps.LatLngBounds();
+    nearbyPlaces.forEach((place) => {
+      const lat = parseFloat(place.y);
+      const lng = parseFloat(place.x);
+      if (isFinite(lat) && isFinite(lng)) {
+        bounds.extend({ lat, lng });
+      }
+    });
+    map.fitBounds(bounds, 80);
+  }, [map, nearbyPlaces]);
+
+  useEffect(() => {
     if (!map || !currentLocation) return;
     map.setCenter(currentLocation);
   }, [map, currentLocation]);
@@ -61,7 +80,7 @@ const MapEffects = ({ searchPlaces, currentLocation }: MapEffectsProps) => {
 };
 
 export const Map = () => {
-  const [currentLocation, setCurrentLocation] = useState<{
+  const [localCurrentLocation, setLocalCurrentLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
@@ -69,28 +88,34 @@ export const Map = () => {
   const router = useRouter();
   const setClickedMapInfo = useSetAtom(clickedMapInfoAtom);
   const setSelectedSearchPlace = useSetAtom(selectedSearchPlaceAtom);
+  const setCurrentLocation = useSetAtom(currentLocationAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
   const searchPlaces = useAtomValue(searchPlacesAtom);
+  const nearbyPlaces = useAtomValue(nearbyResultsAtom);
   const statusFilter = useAtomValue(statusFilterAtom);
 
   const { data: places } = usePlaces();
 
-  const visiblePlaces = useMemo(() => {
+  const searchFilteredPlaces = useMemo(() => {
     if (!places) return [];
-
     const query = searchQuery.trim().toLowerCase();
-    return places.filter((place: PlaceWithStats) => {
-      const matchesSearch =
-        !query || place.place_name.toLowerCase().includes(query);
-      const matchesStatus =
-        statusFilter === 'all' || place.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [places, searchQuery, statusFilter]);
+    return places.filter(
+      (place: PlaceWithStats) =>
+        !query || place.place_name.toLowerCase().includes(query),
+    );
+  }, [places, searchQuery]);
+
+  const visiblePlaces = useMemo(() => {
+    return searchFilteredPlaces.filter(
+      (place) => statusFilter === 'all' || place.status === statusFilter,
+    );
+  }, [searchFilteredPlaces, statusFilter]);
 
   useEffect(() => {
     const updateLocation = (lat: number, lng: number) => {
-      setCurrentLocation({ lat, lng });
+      const loc = { lat, lng };
+      setLocalCurrentLocation(loc);
+      setCurrentLocation(loc);
     };
 
     const handleMessage = (event: MessageEvent) => {
@@ -139,7 +164,7 @@ export const Map = () => {
         handleMessage as unknown as EventListener,
       );
     };
-  }, []);
+  }, [setCurrentLocation]);
 
   const initialCenter: google.maps.LatLngLiteral = window.nativeLocation
     ? {
@@ -163,9 +188,6 @@ export const Map = () => {
 
   return (
     <div className={styles.mapWrapper}>
-      <div className={styles.filterOverlay}>
-        <StatusFilterChips />
-      </div>
       <GoogleMap
         mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
         defaultCenter={initialCenter}
@@ -177,7 +199,8 @@ export const Map = () => {
       >
         <MapEffects
           searchPlaces={searchPlaces}
-          currentLocation={currentLocation}
+          nearbyPlaces={nearbyPlaces}
+          currentLocation={localCurrentLocation}
         />
 
         {visiblePlaces.map((place) => {
@@ -275,8 +298,40 @@ export const Map = () => {
           );
         })}
 
-        {currentLocation && (
-          <AdvancedMarker position={currentLocation} zIndex={200}>
+        {nearbyPlaces.map((place) => {
+          const pinWidth = 32;
+          const pinHeight = pinWidth * 2;
+          const lat = parseFloat(place.y);
+          const lng = parseFloat(place.x);
+          if (!isFinite(lat) || !isFinite(lng)) return null;
+
+          const handleNearbyMarkerClick = (e: google.maps.MapMouseEvent) => {
+            if (!e.domEvent) return;
+            const { clientX, clientY } = getClientPosition(
+              e.domEvent as MouseEvent | TouchEvent,
+            );
+            setSelectedSearchPlace(place);
+            setClickedMapInfo({ lat, lng, clientX, clientY });
+          };
+
+          return (
+            <AdvancedMarker
+              key={`nearby-${place.id}`}
+              position={{ lat, lng }}
+              zIndex={40}
+              onClick={handleNearbyMarkerClick}
+            >
+              <CustomMarker
+                width={pinWidth}
+                height={pinHeight}
+                color={vars.colors.pin[0]}
+              />
+            </AdvancedMarker>
+          );
+        })}
+
+        {localCurrentLocation && (
+          <AdvancedMarker position={localCurrentLocation} zIndex={200}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={toDataUrl(getCurrentLocationIcon())}
