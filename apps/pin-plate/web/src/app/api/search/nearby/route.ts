@@ -1,3 +1,10 @@
+import { calcDistanceMeters } from '@/utils/distance';
+import {
+  CUISINE_TYPE_MAP,
+  VALID_CUISINE_IDS,
+  type CuisineId,
+} from '@/features/nearby-search/constants/cuisineTypes';
+
 const FIELD_MASK = [
   'places.id',
   'places.displayName',
@@ -20,22 +27,6 @@ interface GooglePlace {
   primaryTypeDisplayName?: { text: string };
 }
 
-const calcDistance = (
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number,
-): number => {
-  const R = 6371000;
-  const φ1 = (lat1 * Math.PI) / 180;
-  const φ2 = (lat2 * Math.PI) / 180;
-  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-  const Δλ = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
-  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-};
-
 const normalizePlace = (
   place: GooglePlace,
   refLat: number,
@@ -54,7 +45,7 @@ const normalizePlace = (
   place_url: place.googleMapsUri ?? '',
   distance: place.location
     ? String(
-        calcDistance(
+        calcDistanceMeters(
           refLat,
           refLng,
           place.location.latitude,
@@ -65,20 +56,44 @@ const normalizePlace = (
 });
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const x = searchParams.get('x'); // longitude
-  const y = searchParams.get('y'); // latitude
-  const radius = searchParams.get('radius') || '300';
-
-  if (!x || !y) {
-    return new Response(JSON.stringify({ error: 'x, y are required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  if (!process.env.GOOGLE_MAPS_API_KEY) {
+    return Response.json(
+      { error: 'server_configuration_error' },
+      { status: 500 },
+    );
   }
 
-  const lat = parseFloat(y);
-  const lng = parseFloat(x);
+  const { searchParams } = new URL(request.url);
+  const xParam = searchParams.get('x');
+  const yParam = searchParams.get('y');
+
+  if (!xParam || !yParam) {
+    return Response.json({ error: 'x_and_y_required' }, { status: 400 });
+  }
+
+  const lat = parseFloat(yParam);
+  const lng = parseFloat(xParam);
+
+  if (!isFinite(lat) || lat < -90 || lat > 90) {
+    return Response.json({ error: 'invalid_latitude' }, { status: 400 });
+  }
+  if (!isFinite(lng) || lng < -180 || lng > 180) {
+    return Response.json({ error: 'invalid_longitude' }, { status: 400 });
+  }
+
+  const radiusRaw = parseFloat(searchParams.get('radius') ?? '1000');
+  const radiusMeters = isFinite(radiusRaw)
+    ? Math.min(Math.max(radiusRaw, 1), 50000)
+    : 1000;
+
+  const cuisineParam = searchParams.get('cuisine') ?? 'all';
+  const cuisineId: CuisineId = VALID_CUISINE_IDS.includes(
+    cuisineParam as CuisineId,
+  )
+    ? (cuisineParam as CuisineId)
+    : 'all';
+
+  const includedTypes = [...CUISINE_TYPE_MAP[cuisineId]];
 
   try {
     const result = await fetch(
@@ -87,36 +102,39 @@ export async function GET(request: Request) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Goog-Api-Key': process.env.GOOGLE_MAPS_API_KEY ?? '',
+          'X-Goog-Api-Key': process.env.GOOGLE_MAPS_API_KEY,
           'X-Goog-FieldMask': FIELD_MASK,
         },
         body: JSON.stringify({
-          includedTypes: ['restaurant', 'cafe', 'bakery'],
-          maxResultCount: 10,
+          includedTypes,
+          maxResultCount: 20,
           languageCode: 'ko',
           rankPreference: 'DISTANCE',
           locationRestriction: {
             circle: {
               center: { latitude: lat, longitude: lng },
-              radius: parseFloat(radius),
+              radius: radiusMeters,
             },
           },
         }),
       },
     );
 
-    const data = await result.json();
-    const places: GooglePlace[] = data.places ?? [];
+    if (!result.ok) {
+      return Response.json({ error: 'upstream_error' }, { status: 500 });
+    }
+
+    const data: unknown = await result.json();
+    const places: GooglePlace[] = Array.isArray(
+      (data as { places?: unknown }).places,
+    )
+      ? (data as { places: GooglePlace[] }).places
+      : [];
+
     const documents = places.map((place) => normalizePlace(place, lat, lng));
 
-    return new Response(JSON.stringify({ documents }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({ error }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return Response.json({ documents });
+  } catch {
+    return Response.json({ error: 'upstream_error' }, { status: 500 });
   }
 }
