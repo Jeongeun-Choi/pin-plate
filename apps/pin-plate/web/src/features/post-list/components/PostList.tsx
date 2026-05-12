@@ -4,7 +4,7 @@ import * as styles from './PostList.css';
 import { useMemo, useState } from 'react';
 import { getImageProps } from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { Card, IcClock, IcNavigation, IcOutlinestar } from '@pin-plate/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { getPlaces } from '../../place/api/getPlaces';
@@ -15,7 +15,8 @@ import type { PlaceWithStats } from '../../place/types/place';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { searchQueryAtom } from '@/app/atoms';
-import { statusFilterAtom } from '@/features/map/atoms';
+import { currentLocationAtom, statusFilterAtom } from '@/features/map/atoms';
+import { calcDistanceMeters } from '@/utils/distance';
 
 type SortType = 'latest' | 'rating' | 'distance';
 
@@ -30,32 +31,15 @@ const getCardImageProps = (imageUrl: string) => {
   return { srcSet: props.srcSet, sizes: props.sizes };
 };
 
-const getDistance = (
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-) => {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
-
 export const PostList = () => {
   const [sortBy, setSortBy] = useState<SortType>('latest');
   const statusFilter = useAtomValue(statusFilterAtom);
-
   const searchQuery = useAtomValue(searchQueryAtom);
-
-  const { location: currentLocation, fetchLocation } = useCurrentLocation();
+  const currentLocation = useAtomValue(currentLocationAtom);
+  const setCurrentLocation = useSetAtom(currentLocationAtom);
   const router = useRouter();
+
+  const { fetchLocation } = useCurrentLocation();
 
   const { data: user } = useSuspenseQuery({
     queryKey: ['auth', 'user'],
@@ -67,19 +51,21 @@ export const PostList = () => {
     queryFn: () => getPlaces(user!.id),
   });
 
-  const filteredPlaces = useMemo(() => {
-    return places.filter((place) => {
-      const query = searchQuery.trim().toLowerCase();
-      const matchesSearch =
-        !query || place.place_name.toLowerCase().includes(query);
-      const matchesStatus =
-        statusFilter === 'all' || place.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [places, searchQuery, statusFilter]);
+  const searchFilteredPlaces = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return places.filter(
+      (place) => !query || place.place_name.toLowerCase().includes(query),
+    );
+  }, [places, searchQuery]);
 
-  const sortedPlaces = useMemo(() => {
-    return [...filteredPlaces].sort((a, b) => {
+  const statusFilteredPlaces = useMemo(() => {
+    return searchFilteredPlaces.filter(
+      (place) => statusFilter === 'all' || place.status === statusFilter,
+    );
+  }, [searchFilteredPlaces, statusFilter]);
+
+  const visiblePlaces = useMemo(() => {
+    return [...statusFilteredPlaces].sort((a, b) => {
       if (sortBy === 'latest') {
         return (
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -89,13 +75,13 @@ export const PostList = () => {
         return (b.avg_rating ?? 0) - (a.avg_rating ?? 0);
       }
       if (sortBy === 'distance' && currentLocation) {
-        const distA = getDistance(
+        const distA = calcDistanceMeters(
           currentLocation.lat,
           currentLocation.lng,
           a.lat,
           a.lng,
         );
-        const distB = getDistance(
+        const distB = calcDistanceMeters(
           currentLocation.lat,
           currentLocation.lng,
           b.lat,
@@ -105,17 +91,15 @@ export const PostList = () => {
       }
       return 0;
     });
-  }, [filteredPlaces, sortBy, currentLocation]);
+  }, [statusFilteredPlaces, sortBy, currentLocation]);
 
   return (
     <div className={styles.container}>
       <div className={styles.filterBar}>
-        {/* 상태 필터 */}
         <div className={styles.filterButtonGroup}>
           <StatusFilterChips />
         </div>
 
-        {/* 정렬 */}
         <div className={styles.filterButtonGroup}>
           <button
             className={`${styles.filterButton} ${sortBy === 'latest' ? styles.activeFilterButton : ''}`}
@@ -136,9 +120,9 @@ export const PostList = () => {
             onClick={() => {
               setSortBy('distance');
               if (!currentLocation) {
-                fetchLocation().catch((err) =>
-                  console.error('Error getting location for sorting', err),
-                );
+                fetchLocation()
+                  .then((loc) => setCurrentLocation(loc))
+                  .catch(console.error);
               }
             }}
           >
@@ -148,13 +132,13 @@ export const PostList = () => {
         </div>
 
         <div className={styles.reviewCount}>
-          총 {filteredPlaces.length}개의 장소
+          총 {visiblePlaces.length}개의 장소
         </div>
       </div>
 
       <div className={styles.contentWrapper}>
         <div className={styles.grid}>
-          {sortedPlaces.map((place) => {
+          {visiblePlaces.map((place) => {
             const latestPost = [...place.posts]
               .sort(
                 (a, b) =>

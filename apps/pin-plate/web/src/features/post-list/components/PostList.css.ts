@@ -115,3 +115,11 @@ export const grid = style({
 
 // --- Card ---
 // Card styles have been moved to @pin-plate/ui
+
+export const emptyMessage = style({
+  padding: '40px 16px',
+  textAlign: 'center',
+  fontSize: 14,
+  color: '#888888',
+  lineHeight: 1.6,
+});
