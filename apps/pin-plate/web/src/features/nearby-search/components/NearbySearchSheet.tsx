@@ -31,13 +31,24 @@ export const NearbySearchSheet = ({ onClose }: Props) => {
   const { mutateAsync, isPending } = useNearbySearch();
 
   const radiusLabel = radiusKm < 1 ? `${radiusKm * 1000}m` : `${radiusKm}km`;
-
-  const sliderValue = DISTANCE_OPTIONS.findIndex((o) => o.valueKm === radiusKm);
-  const sliderMax = DISTANCE_OPTIONS.length - 1;
+  const sliderFillPercent = ((radiusKm - 0.5) / (10 - 0.5)) * 100;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const idx = parseInt(e.target.value, 10);
-    setRadiusKm(DISTANCE_OPTIONS[idx].valueKm);
+    setRadiusKm(parseFloat(e.target.value));
+  };
+
+  const handleCuisineToggle = (id: CuisineId) => {
+    if (id === 'all') {
+      setCuisine(['all']);
+      return;
+    }
+    const withoutAll = cuisine.filter((c) => c !== 'all');
+    if (withoutAll.includes(id)) {
+      const next = withoutAll.filter((c) => c !== id);
+      setCuisine(next.length === 0 ? ['all'] : next);
+    } else {
+      setCuisine([...withoutAll, id]);
+    }
   };
 
   const handleSearch = async () => {
@@ -89,11 +100,17 @@ export const NearbySearchSheet = ({ onClose }: Props) => {
               </div>
               <input
                 type="range"
-                min={0}
-                max={sliderMax}
-                value={sliderValue === -1 ? 1 : sliderValue}
+                min={0.5}
+                max={10}
+                step={0.5}
+                value={radiusKm}
                 onChange={handleSliderChange}
                 className={s.slider}
+                style={
+                  {
+                    '--slider-fill': `${sliderFillPercent}%`,
+                  } as React.CSSProperties
+                }
                 aria-label={`거리 반경 선택, 현재 ${radiusLabel}`}
               />
               <div
@@ -119,17 +136,16 @@ export const NearbySearchSheet = ({ onClose }: Props) => {
               <span className={s.sectionLabel}>음식 종류</span>
               <div
                 className={s.chipRow}
-                role="radiogroup"
+                role="group"
                 aria-label="음식 종류 선택"
               >
                 {CUISINE_OPTIONS.map((option) => (
                   <button
                     key={option.id}
                     type="button"
-                    role="radio"
-                    aria-checked={cuisine === option.id}
-                    className={`${s.chip} ${cuisine === option.id ? s.chipSelected : ''}`}
-                    onClick={() => setCuisine(option.id as CuisineId)}
+                    aria-pressed={cuisine.includes(option.id as CuisineId)}
+                    className={`${s.chip} ${cuisine.includes(option.id as CuisineId) ? s.chipSelected : ''}`}
+                    onClick={() => handleCuisineToggle(option.id as CuisineId)}
                   >
                     {option.label}
                   </button>

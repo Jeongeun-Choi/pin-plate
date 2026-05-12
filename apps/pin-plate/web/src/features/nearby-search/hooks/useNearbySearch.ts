@@ -38,7 +38,7 @@ export const useNearbySearch = () => {
         currentLocation.lat,
         currentLocation.lng,
         radiusKm,
-        cuisine,
+        cuisine.includes('all') ? 'all' : cuisine.join(','),
       );
     },
     onSuccess: (places) => {

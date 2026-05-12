@@ -87,13 +87,15 @@ export async function GET(request: Request) {
     : 1000;
 
   const cuisineParam = searchParams.get('cuisine') ?? 'all';
-  const cuisineId: CuisineId = VALID_CUISINE_IDS.includes(
-    cuisineParam as CuisineId,
-  )
-    ? (cuisineParam as CuisineId)
-    : 'all';
-
-  const includedTypes = [...CUISINE_TYPE_MAP[cuisineId]];
+  const rawIds = cuisineParam.split(',').map((c) => c.trim());
+  const cuisineIds = rawIds.filter((c): c is CuisineId =>
+    VALID_CUISINE_IDS.includes(c as CuisineId),
+  );
+  const validIds =
+    cuisineIds.length > 0 ? cuisineIds : (['all'] as CuisineId[]);
+  const includedTypes = [
+    ...new Set(validIds.flatMap((id) => [...CUISINE_TYPE_MAP[id]])),
+  ];
 
   try {
     const result = await fetch(

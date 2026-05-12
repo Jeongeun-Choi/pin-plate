@@ -26,5 +26,5 @@ export const currentLocationAtom = atom<{ lat: number; lng: number } | null>(
 
 export const nearbyResultsAtom = atom<Place[]>([]);
 export const nearbySearchRadiusKmAtom = atom<number>(1);
-export const nearbySearchCuisineAtom = atom<CuisineId>('all');
+export const nearbySearchCuisineAtom = atom<CuisineId[]>(['all']);
 export const isNearbySheetOpenAtom = atom<boolean>(false);
