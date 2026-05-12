@@ -13,6 +13,7 @@ export const subtitle = style({
 });
 
 export const body = style({
+  width: '100%',
   display: 'flex',
   flexDirection: 'column',
   gap: vars.spacing[5],
@@ -32,7 +33,7 @@ export const sectionHeader = style({
 });
 
 export const sectionLabel = style({
-  fontSize: vars.fontSize.sm,
+  fontSize: vars.fontSize.base,
   fontWeight: vars.fontWeight.bold,
   color: vars.colors.text.body,
 });
@@ -45,8 +46,46 @@ export const radiusValue = style({
 
 export const slider = style({
   width: '100%',
-  accentColor: vars.colors.primary.default,
   cursor: 'pointer',
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  height: 10,
+  borderRadius: vars.borderRadius.full,
+  outline: 'none',
+  background: `linear-gradient(
+    to right,
+    ${vars.colors.primary.default} 0%,
+    ${vars.colors.primary.default} var(--slider-fill),
+    ${vars.colors.shadow.rating3} var(--slider-fill),
+    ${vars.colors.shadow.rating3} 100%
+  )`,
+  selectors: {
+    '&::-webkit-slider-thumb': {
+      appearance: 'none',
+      WebkitAppearance: 'none',
+      width: 22,
+      height: 22,
+      borderRadius: vars.borderRadius.full,
+      backgroundColor: vars.colors.common.white,
+      border: `4px solid ${vars.colors.primary.default}`,
+      cursor: 'pointer',
+      transition: 'box-shadow 0.15s ease',
+    },
+    '&::-moz-range-thumb': {
+      width: 22,
+      height: 22,
+      borderRadius: vars.borderRadius.full,
+      backgroundColor: vars.colors.common.white,
+      border: `2.5px solid ${vars.colors.primary.default}`,
+      boxShadow: `0 0 0 3px ${vars.colors.primary.light}`,
+      cursor: 'pointer',
+    },
+    '&::-moz-range-track': {
+      height: 6,
+      borderRadius: vars.borderRadius.full,
+      background: 'transparent',
+    },
+  },
 });
 
 export const chipRow = style({
