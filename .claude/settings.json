@@ -2,12 +2,11 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Bash(git push*)",
         "hooks": [
           {
             "type": "agent",
-            "if": "Bash(git push*)",
-            "prompt": "git push가 성공적으로 실행되었습니다. 현재 브랜치의 작업 내역을 분석하여 Obsidian devlog를 자동으로 저장하세요.\n\n## 실행 단계\n\n1. `git branch --show-current` — 현재 브랜치명 확인\n2. `date +%Y-%m-%d` — 오늘 날짜 확인\n3. `git log main..HEAD --oneline` — 커밋 목록 확인\n4. `git log main..HEAD --stat` — 변경 파일 목록 확인\n\n## 저장 템플릿\n\n위 정보를 분석하여 아래 형식으로 devlog를 작성하세요:\n\n```\n---\nbranch: {브랜치명}\ndate: {YYYY-MM-DD}\nrepo: pin-plate\ntags:\n  - devlog\n  - {작업 성격에 맞는 태그 (frontend, backend, refactor, fix 등)}\n---\n\n# {브랜치명} 작업 기록\n\n## 목표\n{브랜치의 주요 목적 한두 줄 요약}\n\n---\n\n## 오늘 작업 흐름\n\n### 1. {첫 번째 작업 단계}\n- {상세 내용}\n\n### 2. {두 번째 작업 단계}\n- {상세 내용}\n\n---\n\n## 주요 변경 파일\n- `{파일 경로}` (NEW/DELETED/수정)\n\n---\n\n## 핵심 의사결정\n- {중요한 기술적 결정사항}\n\n---\n\n## 남은 작업\n- [ ] {TODO 항목}\n\n---\n\n## 참고 커밋\n- `{hash}` — {커밋 메시지}\n```\n\n## Obsidian 저장 방법\n\n파일 경로: `pin-plate/Daily Logs/{브랜치명}/{YYYY-MM-DD}.md`\n\n- **신규 파일인 경우**: `obsidian create name={YYYY-MM-DD}.md path=\"pin-plate/Daily Logs/{브랜치명}\" content={작성한 markdown 전체}`\n- **기존 파일인 경우**: `obsidian append file={YYYY-MM-DD}.md path=\"pin-plate/Daily Logs/{브랜치명}\" content={작성한 markdown 전체}`",
+            "prompt": "git push가 완료되었습니다. /Users/jeongeun/Desktop/pin-plate/.claude/skills/auto-devlog/SKILL.md 파일을 읽고 그 지침에 따라 devlog를 작성하고 Obsidian에 저장하세요.",
             "timeout": 120,
             "statusMessage": "devlog 자동 생성 중..."
           }
