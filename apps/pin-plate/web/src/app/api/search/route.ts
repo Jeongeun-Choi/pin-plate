@@ -1,3 +1,5 @@
+import { checkGooglePlacesRateLimit } from '@/app/api/_utils/rateLimit';
+
 const FIELD_MASK = [
   'places.id',
   'places.displayName',
@@ -56,6 +58,10 @@ export async function GET(request: Request) {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
+  }
+
+  if (!checkGooglePlacesRateLimit(request)) {
+    return Response.json({ error: 'too_many_requests' }, { status: 429 });
   }
 
   try {
