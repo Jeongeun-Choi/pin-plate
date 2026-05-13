@@ -1,0 +1,206 @@
+---
+name: tiki-taka
+description: Use when a design for a new feature, architecture change, or complex multi-file task (6+ files) has been finalized and approved — before writing the implementation spec or starting code. Must also be invoked during brainstorming's design review phase after user approves a design proposal. Do NOT skip because the user already approved: user approval is not a substitute for this review.
+---
+
+# Tiki-Taka: 설계 리뷰 스킬
+
+구현·설계·기능 개발 요청이 오면 이 스킬을 따른다.  
+단, 아래 **적용하지 않는 경우**에 해당하면 설계 리뷰 없이 바로 구현한다.
+
+코드를 바로 작성하지 않는다. 설계 → 리뷰 → 구현 순서를 반드시 지킨다.
+
+### 적용하지 않는 경우
+
+다음 중 하나라도 해당하면 tiki-taka를 실행하지 않는다:
+
+- **변경 파일 5개 이하**로 완결되는 작업
+- **버그 수정**: 원인이 이미 파악되어 있고 범위가 한정된 경우
+- **단순 스타일 변경**: CSS, Vanilla Extract, 디자인 토큰 조정 등
+- **문서(docs) 수정**: README, 주석, 마크다운 파일 등
+- Codex가 판단했을 때 **명백히 단순한 작업**
+
+위 기준에 해당하지 않는 복잡하거나 새로운 기능 구현, 아키텍처 변경은 반드시 tiki-taka를 실행한다.
+
+### 자주 하는 합리화 (모두 틀림)
+
+| 합리화 | 현실 |
+|--------|------|
+| "유저가 이미 승인했으니까" | 유저 승인 ≠ 설계 리뷰. 리뷰는 별도로 진행해야 한다. |
+| "brainstorming에서 이미 충분히 논의했으니까" | brainstorming은 요구사항 확인 과정이고, tiki-taka는 구현 설계 검증 과정이다. |
+| "파일 6개지만 단순하니까" | 파일 수 기준(5개 초과)을 충족하면 반드시 실행한다. |
+| "빨리 구현하고 싶으니까" | 설계 결함은 구현 후 발견하면 더 느려진다. |
+
+---
+
+## Phase 1: 설계
+
+요청된 작업을 분석하고 관련 코드를 탐색한 뒤 구현 계획서 초안을 작성한다.
+
+계획서에 포함할 내용:
+- 변경하거나 새로 생성할 파일 목록
+- 각 파일에서 수행할 작업 (인터페이스, 타입, 함수 시그니처 등)
+- 에러 처리·엣지 케이스·성능·보안 고려사항
+
+먼저 작업 디렉토리를 생성한다. `{주제}`는 작업 내용을 간결하게 요약한 한글 또는 영문 키워드다:
+
+```bash
+PLAN_DIR=".Codex/plans/tiki-taka/$(date +%Y-%m-%d)-{주제}"
+mkdir -p "$PLAN_DIR"
+```
+
+계획서 작성 후 저장한다:
+
+```bash
+cat > "$PLAN_DIR/plan.md" << 'PLAN_EOF'
+[계획서 내용]
+PLAN_EOF
+```
+
+완료 후 Phase 2로 자동 진입한다.
+
+---
+
+## Phase 2: 티키타카 리뷰 루프 (최대 3라운드)
+
+### 라운드 시작 전 준비
+
+매 라운드 시작 시 `$PLAN_DIR/plan.md`의 최신 내용을 확인한다.
+
+### Round 1
+
+**Step 1 — Codex 리뷰 요청:**
+
+아래 내용으로 `$PLAN_DIR/prompt-1.md`를 작성한다:
+
+```
+You are reviewing an implementation plan for a Next.js TypeScript monorepo (pin-plate project).
+Conventions: Server Components by default, React 19 patterns (useActionState, useTransition,
+useFormStatus), hooks ordered useState → useRef/useContext → custom hooks → useMemo/useCallback
+→ useEffect, Vanilla Extract for styling, Jotai for global state, TanStack Query for server state.
+
+Task: [요청 내용]
+
+Proposed implementation plan:
+[$PLAN_DIR/plan.md 내용]
+
+Review for:
+- Architectural soundness and correctness
+- Alignment with project conventions (Server vs Client Components, hook ordering, etc.)
+- Missing edge cases or error handling concerns
+- TypeScript type safety (avoid any, use unknown + narrowing)
+- Performance and security implications
+- Better alternatives worth considering
+
+Be specific — reference file names and plan sections.
+
+End your response with exactly one of these two lines:
+VERDICT: LGTM
+VERDICT: NEEDS_CHANGES
+```
+
+그런 다음 실행한다:
+```bash
+codex exec -o "$PLAN_DIR/codex-1.md" < "$PLAN_DIR/prompt-1.md"
+```
+
+**Step 2 — Codex 의견 확인 및 Codex 응답:**
+
+`$PLAN_DIR/codex-1.md`를 읽고 Codex의 의견을 분석한다.
+
+- 타당한 지적 → 계획서를 수정하고 `$PLAN_DIR/plan.md` 업데이트 + 동의 의견 작성
+- 불필요하거나 틀린 지적 → 명확한 근거로 반박
+
+Codex 응답 마지막에 반드시 다음 중 하나를 명시한다:
+```
+VERDICT: LGTM
+```
+또는
+```
+VERDICT: NEEDS_CHANGES
+```
+
+**Step 3 — 판정 확인:**
+
+- Codex 출력의 마지막 `VERDICT:` 라인 파싱
+- Codex 자신의 verdict 확인
+- **양측 모두 LGTM이면 → Phase 3으로 이동**
+- 하나라도 NEEDS_CHANGES이면 → Round 2로 진행
+
+---
+
+### Round 2
+
+아래 내용으로 `$PLAN_DIR/prompt-2.md`를 작성한다:
+
+```
+[Round 2] Tiki-taka plan review continuation.
+
+Task: [요청 내용]
+
+Current plan (may be revised since Round 1):
+[최신 $PLAN_DIR/plan.md 내용]
+
+Previous rounds:
+---
+Round 1 - Codex:
+[$PLAN_DIR/codex-1.md 내용]
+
+Round 1 - Codex:
+[Codex의 Round 1 응답 내용]
+---
+
+Re-examine the plan. Either confirm all issues are resolved (LGTM) or point out remaining concerns.
+
+End your response with exactly one of these two lines:
+VERDICT: LGTM
+VERDICT: NEEDS_CHANGES
+```
+
+```bash
+codex exec -o "$PLAN_DIR/codex-2.md" < "$PLAN_DIR/prompt-2.md"
+```
+
+Round 1과 동일하게 Codex 의견 확인 → Codex 응답 → 판정 확인.  
+양측 LGTM이면 Phase 3, 아니면 Round 3.
+
+---
+
+### Round 3 (최대)
+
+Round 2와 동일하게 진행한다 (프롬프트에 Round 1, 2 히스토리 모두 포함).
+
+3라운드 후에도 합의 불발 시:
+```
+## ⚠️ 최대 라운드 도달 — 미합의
+
+아직 해결되지 않은 이슈:
+- [각 AI의 마지막 NEEDS_CHANGES 이유 목록]
+
+사용자가 직접 판단해주세요.
+```
+
+---
+
+## Phase 3: 구현
+
+양측 모두 LGTM 판정 후 다음을 출력한다:
+
+```
+## ✅ 설계 리뷰 완료 (N라운드) — 구현 시작
+
+### 최종 확정 설계
+[승인된 계획서 전문]
+
+### Codex 최종 의견
+[Codex 마지막 라운드 핵심 내용]
+VERDICT: LGTM
+
+### Codex 최종 의견
+[Codex 마지막 라운드 핵심 내용]
+VERDICT: LGTM
+
+**결론**: 양측 LGTM ✓ — 아래 설계대로 구현합니다.
+```
+
+이후 승인된 설계대로 코드를 구현한다.
