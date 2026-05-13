@@ -1,8 +1,8 @@
 import type { GuestPost } from '../types/guestPost';
 
-const GUEST_POSTS_KEY = 'guest_posts';
+export const GUEST_POSTS_KEY = 'guest_posts';
 
-const isValidGuestPost = (v: unknown): v is GuestPost =>
+export const isValidGuestPost = (v: unknown): v is GuestPost =>
   typeof v === 'object' &&
   v !== null &&
   typeof (v as GuestPost).id === 'string' &&
@@ -19,14 +19,19 @@ const isValidGuestPost = (v: unknown): v is GuestPost =>
   Array.isArray((v as GuestPost).tags) &&
   (v as GuestPost).tags.every((t) => typeof t === 'string');
 
+export const parseGuestPosts = (value: unknown): GuestPost[] => {
+  if (!Array.isArray(value)) return [];
+
+  return value.filter(isValidGuestPost);
+};
+
 export const loadGuestPosts = (): GuestPost[] => {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(GUEST_POSTS_KEY);
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isValidGuestPost);
+    return parseGuestPosts(parsed);
   } catch {
     return [];
   }

@@ -5,7 +5,6 @@ import { createPost } from '@/features/post/api/createPost';
 import { postKeys } from '@/features/post/postKeys';
 import { placeKeys } from '@/features/place/placeKeys';
 import { useGuestPosts } from './useGuestPosts';
-import * as guestPostStorage from '../storage/guestPostStorage';
 
 export interface SyncGuestPostsResult {
   successCount: number;
@@ -14,7 +13,7 @@ export interface SyncGuestPostsResult {
 
 export const useSyncGuestPosts = () => {
   const queryClient = useQueryClient();
-  const { removeGuestPost } = useGuestPosts();
+  const { guestPosts, removeGuestPost } = useGuestPosts();
 
   const { mutateAsync: syncGuestPosts, isPending: isSyncing } = useMutation<
     SyncGuestPostsResult,
@@ -22,7 +21,7 @@ export const useSyncGuestPosts = () => {
     string
   >({
     mutationFn: async (userId: string) => {
-      const snapshot = guestPostStorage.loadGuestPosts();
+      const snapshot = [...guestPosts];
       let successCount = 0;
       let failedCount = 0;
 
