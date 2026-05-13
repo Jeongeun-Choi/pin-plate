@@ -30,7 +30,9 @@
   },
   "pnpm": {
     "overrides": {
-      "eslint-config-next": "15.1.0"
+      "eslint-config-next": "15.1.0",
+      "postcss": "8.5.10",
+      "@xmldom/xmldom": "0.8.13"
     },
     "supportedArchitectures": {
       "os": ["linux", "current"],
