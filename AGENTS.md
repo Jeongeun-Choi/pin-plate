@@ -1,4 +1,4 @@
-# CLAUDE.md — Coding Standards for pin-plate
+# AGENTS.md — Coding Standards for pin-plate
 
 ## Product Intent Guardrails
 
@@ -142,7 +142,7 @@ const isDetectingMonorepo = useIsFetching(...) > 0;
 
 ## Opus-Sonnet Skill
 
-**구현·설계·기능 개발** 요청이 오면 반드시 `.claude/skills/opus-sonnet/SKILL.md`를
+**구현·설계·기능 개발** 요청이 오면 반드시 `.Codex/skills/opus-sonnet/SKILL.md`를
 읽고 그 지침을 따른다. 코드를 먼저 작성하지 않는다.
 
 ---

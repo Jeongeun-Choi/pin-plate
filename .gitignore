@@ -33,3 +33,4 @@ web-build/
 
 # Claude plans (tiki-taka design records)
 .claude/plans/
+.gstack/
