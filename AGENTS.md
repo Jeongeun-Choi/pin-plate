@@ -10,6 +10,15 @@
 - 영구 저장, 기기 간 동기화, 계정 귀속, 장기 보존은 가입/로그인 이후 기능으로 구분한다.
 - 상세 제품 정책은 `PRODUCT_PLAN.md`의 “제품 의도: 비로그인 작성과 업로드”를 기준으로 삼는다.
 
+## Guest Post Product Model
+
+- 게스트 글은 “다른 종류의 글”이 아니라 일반 게시글과 같은 제품 엔티티다. 차이는 저장 위치와 동기화 범위뿐이다.
+- 비로그인 글은 현재 브라우저/기기의 `localStorage`에만 남고, 로그인 글은 서버 DB에 저장되어 다른 기기에서도 보인다.
+- 사용자에게 보이는 URL, 지도 마커, 상세 화면, 리스트 흐름에서 `guest`, `guest-post` 같은 소스 구분을 드러내지 않는다.
+- `/post/:id` 상세 화면은 먼저 `localStorage`의 `guest_posts`에서 같은 raw id를 찾고, 없을 때 서버 게시글 조회로 fallback한다.
+- 게스트 글 id는 `crypto.randomUUID()` 기반 문자열로 생성한다. 서버 게시글 숫자 id와 구분하기 위해 URL prefix를 붙이지 않는다.
+- `guest_posts` 저장/상태 로직을 수정할 때는 localStorage 로드만 보지 말고 지도 마커 렌더링, 마커 클릭 라우팅, 상세 모달 렌더링까지 end-to-end로 검증한다.
+
 ## React 19 Best Practices
 
 ### Server vs Client Components (Next.js App Router)
