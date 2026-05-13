@@ -1,15 +1,15 @@
 'use client';
 
-import { Suspense, useMemo } from 'react';
+import { Suspense, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, Spinner } from '@pin-plate/ui';
 import { usePostDetailModal } from '../hooks/usePostDetailModal';
 import type { Post } from '../types/post';
+import type { CreatePostPayload } from '../types/post';
 import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
 import { loadGuestPosts } from '@/features/guest/storage/guestPostStorage';
 import type { GuestPost } from '@/features/guest/types/guestPost';
 import EditPostContent from './EditPostContent';
-import PostDetailContent from './PostDetailContent';
 import { ReviewCard } from './ReviewCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import * as styles from './styles/PostDetailModal.styles.css';
@@ -107,7 +107,61 @@ const SavedPostDetailInner = ({ id }: { id: string }) => {
 };
 
 const GuestPostDetailInner = ({ guestPost }: { guestPost: GuestPost }) => {
+  const [editingGuestPost, setEditingGuestPost] = useState<GuestPost | null>(
+    null,
+  );
+
+  const router = useRouter();
+  const { removeGuestPost, updateGuestPost } = useGuestPosts();
+
   const post = toGuestDetailPost(guestPost);
+
+  const handleDeleteGuestPost = useCallback(() => {
+    if (!confirm('정말로 삭제하시겠습니까?')) return;
+
+    removeGuestPost(guestPost.id);
+    router.back();
+  }, [guestPost.id, removeGuestPost, router]);
+
+  const handleEditGuestPost = useCallback(() => {
+    setEditingGuestPost(guestPost);
+  }, [guestPost]);
+
+  const handleCancelGuestPostEdit = useCallback(() => {
+    setEditingGuestPost(null);
+  }, []);
+
+  const handleSaveGuestPost = useCallback(
+    (currentGuestPost: GuestPost, payload: CreatePostPayload) => {
+      updateGuestPost({
+        ...currentGuestPost,
+        content: payload.content,
+        rating: payload.rating,
+        image_urls: payload.image_urls,
+        place_name: payload.place_name,
+        address: payload.address,
+        lat: payload.lat,
+        lng: payload.lng,
+        kakao_place_id: payload.kakao_place_id,
+        tags: payload.tags,
+      });
+      setEditingGuestPost(null);
+    },
+    [updateGuestPost],
+  );
+
+  if (editingGuestPost) {
+    return (
+      <GuestPostDetailEditView
+        guestPost={editingGuestPost}
+        onCancel={handleCancelGuestPostEdit}
+        onSuccess={handleCancelGuestPostEdit}
+        onSubmitOverride={(payload) =>
+          handleSaveGuestPost(editingGuestPost, payload)
+        }
+      />
+    );
+  }
 
   return (
     <>
@@ -118,16 +172,36 @@ const GuestPostDetailInner = ({ guestPost }: { guestPost: GuestPost }) => {
 
       <Modal.Body>
         <div className={styles.scrollContainer}>
-          <section data-post-id={guestPost.id} className={styles.reviewPanel}>
-            <div className={styles.reviewPanelInner}>
-              <PostDetailContent post={post} />
-            </div>
-          </section>
+          <ReviewCard
+            post={post}
+            onEdit={handleEditGuestPost}
+            onDelete={handleDeleteGuestPost}
+            sectionRef={() => {}}
+          />
         </div>
       </Modal.Body>
     </>
   );
 };
+
+const GuestPostDetailEditView = ({
+  guestPost,
+  onCancel,
+  onSuccess,
+  onSubmitOverride,
+}: {
+  guestPost: GuestPost;
+  onCancel: () => void;
+  onSuccess: () => void;
+  onSubmitOverride: (payload: CreatePostPayload) => Promise<void> | void;
+}) => (
+  <PostDetailEditView
+    post={toGuestDetailPost(guestPost)}
+    onCancel={onCancel}
+    onSuccess={onSuccess}
+    onSubmitOverride={onSubmitOverride}
+  />
+);
 
 const PostDetailInner = ({ id }: { id: string }) => {
   const { guestPosts } = useGuestPosts();
@@ -149,10 +223,12 @@ const PostDetailEditView = ({
   post,
   onCancel,
   onSuccess,
+  onSubmitOverride,
 }: {
   post: Post;
   onCancel: () => void;
   onSuccess: () => void;
+  onSubmitOverride?: (payload: CreatePostPayload) => Promise<void> | void;
 }) => (
   <>
     <Modal.Header>
@@ -161,7 +237,11 @@ const PostDetailEditView = ({
     </Modal.Header>
     <Modal.Body>
       <div className={styles.editScreenBody}>
-        <EditPostContent post={post} onSuccess={onSuccess} />
+        <EditPostContent
+          post={post}
+          onSuccess={onSuccess}
+          onSubmitOverride={onSubmitOverride}
+        />
       </div>
     </Modal.Body>
     <Modal.Footer>

@@ -1,9 +1,10 @@
 'use client';
 
-import { ChangeEvent, useRef, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import Image from 'next/image';
 import * as styles from './styles/EditPostContent.styles.css';
-import { Post } from '../types/post';
+import type { CreatePostPayload, Post } from '../types/post';
 import { Rate, Textarea, IcSearch, TagChip } from '@pin-plate/ui';
 import RatingBadge from '@/components/common/RatingBadge';
 import AddPhotoButton from '@/components/common/AddPhotoButton';
@@ -17,10 +18,23 @@ import { getTagLabel } from '../constants/tags';
 interface Props {
   post: Post;
   onSuccess: () => void;
+  onSubmitOverride?: (payload: CreatePostPayload) => Promise<void> | void;
 }
 
-export default function EditPostContent({ post, onSuccess }: Props) {
-  const { formState, handlers, submit } = useEditPostForm(post, onSuccess);
+export default function EditPostContent({
+  post,
+  onSuccess,
+  onSubmitOverride,
+}: Props) {
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isTagPickerOpen, setIsTagPickerOpen] = useState(false);
+  const [tagPickerOpenKey, setTagPickerOpenKey] = useState(0);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { formState, handlers, submit } = useEditPostForm(post, onSuccess, {
+    onSubmitOverride,
+  });
   const { content, rating, photos, tags, selectedPlace, currentLocation } =
     formState;
   const {
@@ -33,16 +47,10 @@ export default function EditPostContent({ post, onSuccess }: Props) {
     fetchCurrentLocation,
   } = handlers;
 
-  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-  const [isTagPickerOpen, setIsTagPickerOpen] = useState(false);
-  const [tagPickerOpenKey, setTagPickerOpenKey] = useState(0);
-
   const handleOpenTagPicker = () => {
     setTagPickerOpenKey((k) => k + 1);
     setIsTagPickerOpen(true);
   };
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoAddClick = () => {
     if (photos.length >= 5) {

@@ -20,6 +20,15 @@ export const useGuestPosts = () => {
     [setGuestPosts],
   );
 
+  const updateGuestPost = useCallback(
+    (nextPost: GuestPost) => {
+      setGuestPosts((prev) =>
+        prev.map((post) => (post.id === nextPost.id ? nextPost : post)),
+      );
+    },
+    [setGuestPosts],
+  );
+
   const clearGuestPosts = useCallback(() => {
     setGuestPosts([]);
   }, [setGuestPosts]);
@@ -29,6 +38,7 @@ export const useGuestPosts = () => {
     guestPostCount: guestPosts.length,
     addGuestPost,
     removeGuestPost,
+    updateGuestPost,
     clearGuestPosts,
   };
 };

@@ -1,12 +1,20 @@
 import { useState } from 'react';
 import { useUpdatePost } from './useUpdatePost';
-import { Place } from '../types/search';
-import { Post } from '../types/post';
+import type { Place } from '../types/search';
+import type { CreatePostPayload, Post } from '../types/post';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
 import { sanitizeTags } from '../constants/tags';
 
-export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
+interface UseEditPostFormOptions {
+  onSubmitOverride?: (payload: CreatePostPayload) => Promise<void> | void;
+}
+
+export const useEditPostForm = (
+  initialData: Post,
+  onSuccess?: () => void,
+  options?: UseEditPostFormOptions,
+) => {
   const [content, setContent] = useState(initialData.content);
   const [rating, setRating] = useState(initialData.rating);
   const [photos, setPhotos] = useState<string[]>(initialData.image_urls || []);
@@ -119,21 +127,27 @@ export const useEditPostForm = (initialData: Post, onSuccess?: () => void) => {
     }
 
     try {
-      await updatePost({
-        id: initialData.id,
-        payload: {
-          content,
-          rating,
-          image_urls: photos,
-          place_name: selectedPlace.place_name,
-          address:
-            selectedPlace.road_address_name || selectedPlace.address_name,
-          lat: parseFloat(selectedPlace.y),
-          lng: parseFloat(selectedPlace.x),
-          kakao_place_id: selectedPlace.id,
-          tags: sanitizeTags(tags),
-        },
-      });
+      const payload: CreatePostPayload = {
+        content,
+        rating,
+        image_urls: photos,
+        place_name: selectedPlace.place_name,
+        address: selectedPlace.road_address_name || selectedPlace.address_name,
+        lat: parseFloat(selectedPlace.y),
+        lng: parseFloat(selectedPlace.x),
+        kakao_place_id: selectedPlace.id,
+        user_id: initialData.user_id,
+        tags: sanitizeTags(tags),
+      };
+
+      if (options?.onSubmitOverride) {
+        await options.onSubmitOverride(payload);
+      } else {
+        await updatePost({
+          id: initialData.id,
+          payload,
+        });
+      }
 
       alert('게시글이 수정되었습니다!');
       onSuccess?.();
