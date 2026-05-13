@@ -17,6 +17,8 @@
 - 사용자에게 보이는 URL, 지도 마커, 상세 화면, 리스트 흐름에서 `guest`, `guest-post` 같은 소스 구분을 드러내지 않는다.
 - `/post/:id` 상세 화면은 먼저 `localStorage`의 `guest_posts`에서 같은 raw id를 찾고, 없을 때 서버 게시글 조회로 fallback한다.
 - 게스트 글 id는 `crypto.randomUUID()` 기반 문자열로 생성한다. 서버 게시글 숫자 id와 구분하기 위해 URL prefix를 붙이지 않는다.
+- 비로그인 글도 로그인 글과 같은 사용자 행동을 지원해야 한다. 상세 보기, 지도 마커 클릭, 수정, 삭제 흐름은 동일하게 제공하고 저장소만 `localStorage`와 서버 DB로 갈라진다.
+- 게스트 글 수정 화면도 로그인 글 수정 화면과 같은 `EditPostContent` 경로를 재사용한다. 별도 게스트 수정 UI를 만들지 말고 저장 함수만 `localStorage` 갱신으로 override한다.
 - `guest_posts` 저장/상태 로직을 수정할 때는 localStorage 로드만 보지 말고 지도 마커 렌더링, 마커 클릭 라우팅, 상세 모달 렌더링까지 end-to-end로 검증한다.
 
 ## React 19 Best Practices
