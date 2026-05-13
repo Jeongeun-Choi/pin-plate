@@ -1,11 +1,15 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, Spinner } from '@pin-plate/ui';
 import { usePostDetailModal } from '../hooks/usePostDetailModal';
 import type { Post } from '../types/post';
+import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
+import { loadGuestPosts } from '@/features/guest/storage/guestPostStorage';
+import type { GuestPost } from '@/features/guest/types/guestPost';
 import EditPostContent from './EditPostContent';
+import PostDetailContent from './PostDetailContent';
 import { ReviewCard } from './ReviewCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import * as styles from './styles/PostDetailModal.styles.css';
@@ -15,7 +19,23 @@ interface PostDetailModalProps {
   isIntercepted?: boolean;
 }
 
-const PostDetailInner = ({ id }: { id: string }) => {
+const toGuestDetailPost = (guestPost: GuestPost): Post => ({
+  id: 0,
+  place_id: undefined,
+  content: guestPost.content,
+  rating: guestPost.rating,
+  image_urls: guestPost.image_urls,
+  place_name: guestPost.place_name,
+  address: guestPost.address,
+  lat: guestPost.lat,
+  lng: guestPost.lng,
+  kakao_place_id: guestPost.kakao_place_id,
+  user_id: 'guest',
+  tags: guestPost.tags,
+  created_at: guestPost.created_at,
+});
+
+const SavedPostDetailInner = ({ id }: { id: string }) => {
   const {
     placeName,
     visitCount,
@@ -84,6 +104,45 @@ const PostDetailInner = ({ id }: { id: string }) => {
       </Modal.Body>
     </>
   );
+};
+
+const GuestPostDetailInner = ({ guestPost }: { guestPost: GuestPost }) => {
+  const post = toGuestDetailPost(guestPost);
+
+  return (
+    <>
+      <Modal.Header>
+        <Modal.Title>{post.place_name}</Modal.Title>
+        <Modal.Close />
+      </Modal.Header>
+
+      <Modal.Body>
+        <div className={styles.scrollContainer}>
+          <section data-post-id={guestPost.id} className={styles.reviewPanel}>
+            <div className={styles.reviewPanelInner}>
+              <PostDetailContent post={post} />
+            </div>
+          </section>
+        </div>
+      </Modal.Body>
+    </>
+  );
+};
+
+const PostDetailInner = ({ id }: { id: string }) => {
+  const { guestPosts } = useGuestPosts();
+  const guestPost = useMemo(
+    () =>
+      guestPosts.find((post) => post.id === id) ??
+      loadGuestPosts().find((post) => post.id === id),
+    [guestPosts, id],
+  );
+
+  if (guestPost) {
+    return <GuestPostDetailInner guestPost={guestPost} />;
+  }
+
+  return <SavedPostDetailInner id={id} />;
 };
 
 const PostDetailEditView = ({
