@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import QueryProvider from '@/providers/QueryProvider';
 import MapProvider from '@/providers/MapProvider';
+import { GuestPostsProvider } from '@/features/guest/providers/GuestPostsProvider';
 import '@pin-plate/ui/reset'; // UI 패키지의 Reset CSS 적용
 
 export const dynamic = 'force-dynamic';
@@ -25,8 +26,10 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           <MapProvider>
-            {children}
-            {modal}
+            <GuestPostsProvider>
+              {children}
+              {modal}
+            </GuestPostsProvider>
           </MapProvider>
         </QueryProvider>
       </body>

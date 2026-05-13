@@ -11,6 +11,8 @@ import { useMap } from '@vis.gl/react-google-maps';
 import { sanitizeTags } from '../constants/tags';
 import { getPlaceByKakaoId } from '@/features/place/api/getPlaceByKakaoId';
 import { createPlace } from '@/features/place/api/createPlace';
+import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
+import type { GuestPost } from '@/features/guest/types/guestPost';
 
 export const usePostForm = (
   onSuccess?: () => void,
@@ -30,6 +32,8 @@ export const usePostForm = (
   const { data: posts } = usePosts();
 
   const viewMode = useAtomValue(viewModeAtom);
+
+  const { addGuestPost } = useGuestPosts();
 
   const map = useMap();
 
@@ -93,18 +97,28 @@ export const usePostForm = (
 
       const uploadPromises = urls.map(
         async (
-          item: { originalName: string; fileName: string; url: string },
+          item: {
+            originalName: string;
+            fileName: string;
+            url: string;
+            fields: Record<string, string>;
+            objectUrl: string;
+          },
           index: number,
         ) => {
           const file = filesToUpload[index];
           try {
+            const formData = new FormData();
+            Object.entries(item.fields).forEach(([k, v]) =>
+              formData.append(k, v),
+            );
+            formData.append('file', file);
             const s3Res = await fetch(item.url, {
-              method: 'PUT',
-              body: file,
-              headers: { 'Content-Type': file.type },
+              method: 'POST',
+              body: formData,
             });
             if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
-            return item.url.split('?')[0];
+            return item.objectUrl;
           } catch (err) {
             console.error('S3 Upload Error:', err);
             throw new Error('S3 CORS or Network Error');
@@ -135,15 +149,31 @@ export const usePostForm = (
     try {
       const currentUser = await getCurrentUser();
 
-      if (!currentUser) {
-        alert('로그인이 필요합니다.');
-        return;
-      }
-
       const lat = parseFloat(selectedPlace.y);
       const lng = parseFloat(selectedPlace.x);
       const address =
         selectedPlace.road_address_name || selectedPlace.address_name;
+
+      if (!currentUser) {
+        const guestPost: GuestPost = {
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString(),
+          place_name: selectedPlace.place_name,
+          address,
+          lat,
+          lng,
+          kakao_place_id: selectedPlace.id,
+          content,
+          rating,
+          image_urls: photos,
+          tags: sanitizeTags(tags),
+        };
+        addGuestPost(guestPost);
+        alert('작성한 게시글이 저장됐습니다. 아직 계정에는 저장되지 않았어요.');
+        resetForm();
+        onSuccess?.();
+        return;
+      }
 
       let existingPlace = await getPlaceByKakaoId(
         currentUser.id,
@@ -197,6 +227,7 @@ export const usePostForm = (
     onSuccess,
     resetForm,
     map,
+    addGuestPost,
   ]);
 
   const handleRemovePhoto = useCallback((index: number) => {
