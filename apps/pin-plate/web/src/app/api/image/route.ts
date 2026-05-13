@@ -1,7 +1,6 @@
-// app/api/presigned/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { S3Client } from '@aws-sdk/client-s3';
+import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 
 const client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -10,6 +9,22 @@ const client = new S3Client({
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
   },
 });
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
+
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+const checkRateLimit = (ip: string): boolean => {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + 60_000 });
+    return true;
+  }
+  if (entry.count >= 20) return false;
+  entry.count++;
+  return true;
+};
 
 export async function POST(request: NextRequest) {
   if (
@@ -24,38 +39,65 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
-    // 프론트에서 { files: [{ filename: "a.jpg", type: "image/jpeg" }, ...] } 형태로 보낸다고 가정
     const { files } = await request.json();
 
     if (!files || !Array.isArray(files)) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 });
     }
 
-    // Promise.all을 사용해 여러 개의 URL을 동시에 생성합니다 (속도 향상)
-    const presignedUrls = await Promise.all(
+    if (files.length > 5) {
+      return NextResponse.json(
+        { error: 'Too many files (max 5)' },
+        { status: 400 },
+      );
+    }
+
+    for (const file of files) {
+      if (!file.type?.startsWith('image/')) {
+        return NextResponse.json(
+          { error: 'Only image files allowed' },
+          { status: 400 },
+        );
+      }
+    }
+
+    const bucket = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
+    const region = process.env.NEXT_PUBLIC_AWS_REGION!;
+
+    const presignedItems = await Promise.all(
       files.map(async (file: { filename: string; type: string }) => {
-        const uniqueFileName = `${Date.now()}_${file.filename}`;
-
-        const command = new PutObjectCommand({
-          Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME,
-          Key: uniqueFileName,
-          ContentType: file.type,
+        const key = `${crypto.randomUUID()}_${file.filename}`;
+        const { url, fields } = await createPresignedPost(client, {
+          Bucket: bucket,
+          Key: key,
+          Conditions: [
+            ['content-length-range', 0, MAX_FILE_SIZE],
+            ['starts-with', '$Content-Type', 'image/'],
+          ],
+          Fields: { 'Content-Type': file.type },
+          Expires: 300,
         });
-
-        const url = await getSignedUrl(client, command, { expiresIn: 300 });
-
+        const objectUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
         return {
           originalName: file.filename,
-          fileName: uniqueFileName, // 실제 저장된 이름
-          url, // 업로드용 URL
+          fileName: key,
+          url,
+          fields,
+          objectUrl,
         };
       }),
     );
 
-    return NextResponse.json({ urls: presignedUrls });
+    return NextResponse.json({ urls: presignedItems });
   } catch (error: unknown) {
-    console.error('S3 Presigned URL Error:', error);
+    console.error('S3 Presigned Post Error:', error);
     return NextResponse.json(
       {
         error: 'Error creating urls',
