@@ -4,6 +4,7 @@ import {
   VALID_CUISINE_IDS,
   type CuisineId,
 } from '@/features/nearby-search/constants/cuisineTypes';
+import { checkGooglePlacesRateLimit } from '@/app/api/_utils/rateLimit';
 
 const FIELD_MASK = [
   'places.id',
@@ -96,6 +97,10 @@ export async function GET(request: Request) {
   const includedTypes = [
     ...new Set(validIds.flatMap((id) => [...CUISINE_TYPE_MAP[id]])),
   ];
+
+  if (!checkGooglePlacesRateLimit(request)) {
+    return Response.json({ error: 'too_many_requests' }, { status: 429 });
+  }
 
   try {
     const result = await fetch(

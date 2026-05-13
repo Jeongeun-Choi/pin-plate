@@ -73,7 +73,7 @@ export const AccountPopover = ({
     };
   }, [onClose]);
 
-  const content = (
+  const content = profile ? (
     <div
       className={styles.popoverContainer}
       ref={popoverRef}
@@ -81,10 +81,8 @@ export const AccountPopover = ({
     >
       <div className={styles.topSection}>
         <div className={styles.userInfo}>
-          <p className={styles.userName}>
-            {profile?.nickname || profile?.name}
-          </p>
-          <p className={styles.userEmail}>{profile?.email}</p>
+          <p className={styles.userName}>{profile.nickname || profile.name}</p>
+          <p className={styles.userEmail}>{profile.email}</p>
         </div>
       </div>
       <div className={styles.bottomSection}>
@@ -99,6 +97,39 @@ export const AccountPopover = ({
             <IcLogout width={20} height={20} color="currentColor" />
           </div>
           <span className={styles.logoutMenuText}>로그아웃</span>
+        </button>
+      </div>
+    </div>
+  ) : (
+    <div
+      className={styles.popoverContainer}
+      ref={popoverRef}
+      style={positionStyle}
+    >
+      <div className={styles.bottomSection}>
+        <button
+          className={styles.menuItem}
+          onClick={() => {
+            onClose();
+            router.push('/sign-in');
+          }}
+        >
+          <div className={styles.standardMenuIcon}>
+            <IcSetting width={20} height={20} />
+          </div>
+          <span className={styles.standardMenuText}>로그인하기</span>
+        </button>
+        <button
+          className={styles.menuItem}
+          onClick={() => {
+            onClose();
+            router.push('/sign-up');
+          }}
+        >
+          <div className={styles.standardMenuIcon}>
+            <IcSetting width={20} height={20} />
+          </div>
+          <span className={styles.standardMenuText}>회원가입</span>
         </button>
       </div>
     </div>

@@ -1,5 +1,15 @@
 # CLAUDE.md — Coding Standards for pin-plate
 
+## Product Intent Guardrails
+
+- Pin Plate는 **비로그인 사용자도 글 작성과 사진 업로드가 가능해야 하는 제품**이다.
+- 보안 보완 시 비로그인 업로드 위험을 단순히 로그인 필수로 막지 않는다.
+- 비로그인 업로드 보호는 게스트 세션, 브라우저/기기 기준 임시 식별자, 업로드 개수/용량 제한, rate limit, 만료 시간, 파일 타입 검증, 악성 파일 검증, 사후 정리 정책을 우선 검토한다.
+- 웹은 서버 발급 HttpOnly 게스트 업로드 세션 쿠키를 우선 사용하고, 모바일 네이티브 업로드는 서버 발급 게스트 세션 토큰을 secure storage에 저장한 뒤 요청 헤더로 보내는 방식을 사용한다.
+- 게스트 업로드 세션은 클라이언트가 임의로 만들 수 없는 서버 서명 토큰이어야 하며, 웹과 모바일 모두 같은 서버 검증 로직을 공유한다.
+- 영구 저장, 기기 간 동기화, 계정 귀속, 장기 보존은 가입/로그인 이후 기능으로 구분한다.
+- 상세 제품 정책은 `PRODUCT_PLAN.md`의 “제품 의도: 비로그인 작성과 업로드”를 기준으로 삼는다.
+
 ## React 19 Best Practices
 
 ### Server vs Client Components (Next.js App Router)
@@ -168,3 +178,5 @@ pnpm tsc
 - Keep components small and focused on one responsibility
 - No commented-out code in commits
 - No `console.log` in production code — use structured logging utilities if needed
+- 전체적으로 deprecated 된 api나 함수는 쓰지마.
+- 기능 추가 및 수정시 발생할 수 있는 엣지 케이스를 생각하고 구현해줘.

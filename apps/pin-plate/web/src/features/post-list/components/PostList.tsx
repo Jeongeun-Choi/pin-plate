@@ -6,7 +6,7 @@ import { getImageProps } from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Card, IcClock, IcNavigation, IcOutlinestar } from '@pin-plate/ui';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { getPlaces } from '../../place/api/getPlaces';
 import { placeKeys } from '../../place/placeKeys';
 import { PlaceStatusBadge } from '../../place/components/PlaceStatusBadge';
@@ -17,6 +17,8 @@ import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { searchQueryAtom } from '@/app/atoms';
 import { currentLocationAtom, statusFilterAtom } from '@/features/map/atoms';
 import { calcDistanceMeters } from '@/utils/distance';
+import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
+import type { User } from '@supabase/supabase-js';
 
 type SortType = 'latest' | 'rating' | 'distance';
 
@@ -31,7 +33,54 @@ const getCardImageProps = (imageUrl: string) => {
   return { srcSet: props.srcSet, sizes: props.sizes };
 };
 
-export const PostList = () => {
+const GuestPostList = () => {
+  const { guestPosts } = useGuestPosts();
+
+  if (guestPosts.length === 0) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.contentWrapper}>
+          <p className={styles.emptyMessage}>
+            로그인하고 나만의 맛집을 기록해보세요!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.contentWrapper}>
+        <div className={styles.grid}>
+          {guestPosts.map((post) => (
+            <Card
+              key={post.id}
+              title={post.place_name}
+              rating={post.rating.toFixed(1)}
+              location={post.address}
+              description=""
+              date={new Date(post.created_at).toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+              imageUrl={post.image_urls[0] ?? undefined}
+              {...(post.image_urls[0]
+                ? getCardImageProps(post.image_urls[0])
+                : {})}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface AuthenticatedPostListProps {
+  user: User;
+}
+
+const AuthenticatedPostList = ({ user }: AuthenticatedPostListProps) => {
   const [sortBy, setSortBy] = useState<SortType>('latest');
   const statusFilter = useAtomValue(statusFilterAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
@@ -41,14 +90,9 @@ export const PostList = () => {
 
   const { fetchLocation } = useCurrentLocation();
 
-  const { data: user } = useSuspenseQuery({
-    queryKey: ['auth', 'user'],
-    queryFn: getCurrentUser,
-  });
-
   const { data: places } = useSuspenseQuery<PlaceWithStats[]>({
-    queryKey: placeKeys.lists(user?.id),
-    queryFn: () => getPlaces(user!.id),
+    queryKey: placeKeys.lists(user.id),
+    queryFn: () => getPlaces(user.id),
   });
 
   const searchFilteredPlaces = useMemo(() => {
@@ -209,4 +253,17 @@ export const PostList = () => {
       </div>
     </div>
   );
+};
+
+export const PostList = () => {
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['auth', 'user'],
+    queryFn: getCurrentUser,
+  });
+
+  if (isLoading) return null;
+
+  if (!user) return <GuestPostList />;
+
+  return <AuthenticatedPostList user={user} />;
 };

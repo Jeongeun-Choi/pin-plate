@@ -16,6 +16,7 @@ import { AccountPopover } from './AccountPopover';
 import { useQueryClient } from '@tanstack/react-query';
 import { myPageKeys, getMyProfile } from '@/features/my-page';
 import { useSearchPlaces } from '@/features/map/hooks/useSearchPlaces';
+import { GuestSyncBanner } from '@/features/guest/components/GuestSyncBanner';
 
 export const Header = () => {
   const [viewMode, setViewMode] = useAtom(viewModeAtom);
@@ -70,89 +71,95 @@ export const Header = () => {
   };
 
   return (
-    <header className={styles.container}>
-      {/* Left: Logo & Search */}
-      <div className={styles.leftSection}>
-        <div className={styles.logoContainer} onClick={() => router.push('/')}>
-          <span className={styles.logoText}>Pin-plate</span>
-        </div>
-
-        <div className={styles.searchContainer}>
-          <button
-            type="button"
-            className={styles.searchButton}
-            onClick={handleSearch}
-            aria-label="검색"
+    <>
+      <header className={styles.container}>
+        {/* Left: Logo & Search */}
+        <div className={styles.leftSection}>
+          <div
+            className={styles.logoContainer}
+            onClick={() => router.push('/')}
           >
-            <IcSearch width={16} height={16} />
-          </button>
-          <input
-            type="search"
-            enterKeyHint="search"
-            className={styles.searchInput}
-            placeholder="음식점 이름으로 검색"
-            value={searchInputValue}
-            onChange={(e) => setSearchInputValue(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-          />
-          {searchInputValue && (
+            <span className={styles.logoText}>Pin-plate</span>
+          </div>
+
+          <div className={styles.searchContainer}>
             <button
               type="button"
-              className={styles.clearButton}
-              onClick={handleClearSearch}
-              aria-label="검색어 초기화"
+              className={styles.searchButton}
+              onClick={handleSearch}
+              aria-label="검색"
             >
-              <IcDismiss width={14} height={14} />
+              <IcSearch width={16} height={16} />
             </button>
-          )}
-        </div>
-      </div>
-
-      <div className={styles.rightSection}>
-        {/* Toggle */}
-        <div className={styles.toggleContainer}>
-          <button
-            className={`${styles.toggleButton} ${viewMode === 'map' ? styles.activeToggleButton : ''}`}
-            onClick={() => setViewMode('map')}
-          >
-            <IcMap width={14} height={14} color="currentColor" />
-            <span>지도</span>
-          </button>
-          <button
-            className={`${styles.toggleButton} ${viewMode === 'list' ? styles.activeToggleButton : ''}`}
-            onClick={() => setViewMode('list')}
-          >
-            <IcList width={14} height={14} color="currentColor" />
-            <span>리스트</span>
-          </button>
-        </div>
-
-        {/* Write Button */}
-        <button
-          className={styles.writeButton}
-          onClick={() => setIsPostModalOpen(true)}
-        >
-          <IcPlus width={16} height={16} color="currentColor" />
-          <span className={styles.writeButtonText}>작성하기</span>
-        </button>
-
-        {/* Profile Icon */}
-        <div style={{ position: 'relative' }}>
-          <div
-            className={styles.profileIcon}
-            onClick={togglePopover}
-            onMouseEnter={handleProfileHover}
-          >
-            <IcUser width={20} height={20} color="currentColor" />
-          </div>
-          {isPopoverOpen && (
-            <AccountPopover
-              onClose={handlePopoverClose}
-              anchorElement={anchorEl}
+            <input
+              type="search"
+              enterKeyHint="search"
+              className={styles.searchInput}
+              placeholder="음식점 이름으로 검색"
+              value={searchInputValue}
+              onChange={(e) => setSearchInputValue(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
             />
-          )}
+            {searchInputValue && (
+              <button
+                type="button"
+                className={styles.clearButton}
+                onClick={handleClearSearch}
+                aria-label="검색어 초기화"
+              >
+                <IcDismiss width={14} height={14} />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+
+        <div className={styles.rightSection}>
+          {/* Toggle */}
+          <div className={styles.toggleContainer}>
+            <button
+              className={`${styles.toggleButton} ${viewMode === 'map' ? styles.activeToggleButton : ''}`}
+              onClick={() => setViewMode('map')}
+            >
+              <IcMap width={14} height={14} color="currentColor" />
+              <span>지도</span>
+            </button>
+            <button
+              className={`${styles.toggleButton} ${viewMode === 'list' ? styles.activeToggleButton : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              <IcList width={14} height={14} color="currentColor" />
+              <span>리스트</span>
+            </button>
+          </div>
+
+          {/* Write Button */}
+          <button
+            className={styles.writeButton}
+            onClick={() => setIsPostModalOpen(true)}
+          >
+            <IcPlus width={16} height={16} color="currentColor" />
+            <span className={styles.writeButtonText}>작성하기</span>
+          </button>
+
+          {/* Profile Icon */}
+          <div style={{ position: 'relative' }}>
+            <div
+              className={styles.profileIcon}
+              onClick={togglePopover}
+              onMouseEnter={handleProfileHover}
+            >
+              <IcUser width={20} height={20} color="currentColor" />
+            </div>
+            {isPopoverOpen && (
+              <AccountPopover
+                onClose={handlePopoverClose}
+                anchorElement={anchorEl}
+              />
+            )}
+          </div>
+        </div>
+      </header>
+      <GuestSyncBanner />
+    </>
   );
 };

@@ -43,12 +43,6 @@ export async function updateSession(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user && !isPublicPath) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/sign-in';
-      return NextResponse.redirect(url);
-    }
-
     if (user && !isPublicPath) {
       const { data: profile } = await supabase
         .from('profiles')
@@ -120,13 +114,6 @@ export async function updateSession(request: NextRequest) {
 
     return supabaseResponse;
   } catch {
-    // Supabase 연결 실패 등 예기치 못한 에러 → fail-closed
-    // 공개 경로는 통과, 보호 경로는 /sign-in으로 리다이렉트
-    if (isPublicPath) {
-      return NextResponse.next({ request });
-    }
-    const url = request.nextUrl.clone();
-    url.pathname = '/sign-in';
-    return NextResponse.redirect(url);
+    return NextResponse.next({ request });
   }
 }

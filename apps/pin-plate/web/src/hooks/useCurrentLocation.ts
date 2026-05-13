@@ -71,7 +71,6 @@ export const useCurrentLocation = () => {
             resolve(newLoc);
           },
           (error) => {
-            console.error('Error getting location', error);
             reject(error);
           },
         );

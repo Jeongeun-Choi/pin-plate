@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Map as GoogleMap,
   AdvancedMarker,
@@ -13,6 +13,8 @@ import * as styles from './Map.styles.css';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import type { PlaceWithStats } from '@/features/place/types/place';
 import type { Place } from '@/features/post/types/search';
+import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
+import type { GuestPost } from '@/features/guest/types/guestPost';
 import {
   getStatusPinColor,
   getCurrentLocationIcon,
@@ -29,12 +31,40 @@ import {
 } from '../atoms';
 import { getClientPosition } from '../utils/event';
 import CustomMarker from './CustomMarker';
-import { vars } from '@pin-plate/ui';
+import { Spinner, vars } from '@pin-plate/ui';
 
 const SEOUL_DEFAULT: google.maps.LatLngLiteral = {
   lat: 37.3595704,
   lng: 127.105399,
 };
+
+const GUEST_PLACE_USER_ID = 'guest';
+
+const toGuestPlace = (guestPost: GuestPost): PlaceWithStats => ({
+  id: guestPost.id,
+  user_id: GUEST_PLACE_USER_ID,
+  kakao_place_id: guestPost.kakao_place_id,
+  place_name: guestPost.place_name,
+  address: guestPost.address,
+  lat: guestPost.lat,
+  lng: guestPost.lng,
+  status: 'visited',
+  tags: guestPost.tags,
+  created_at: guestPost.created_at,
+  updated_at: guestPost.created_at,
+  posts: [
+    {
+      id: 0,
+      rating: guestPost.rating,
+      image_urls: guestPost.image_urls,
+      created_at: guestPost.created_at,
+    },
+  ],
+  visit_count: 1,
+  avg_rating: guestPost.rating,
+  last_visited_at: guestPost.created_at,
+  first_image: guestPost.image_urls[0] ?? null,
+});
 
 interface MapEffectsProps {
   searchPlaces: Place[];
@@ -84,6 +114,15 @@ export const Map = () => {
     lat: number;
     lng: number;
   } | null>(null);
+  const [initialCenter, setInitialCenter] =
+    useState<google.maps.LatLngLiteral | null>(() =>
+      window.nativeLocation
+        ? {
+            lat: window.nativeLocation.coords.latitude,
+            lng: window.nativeLocation.coords.longitude,
+          }
+        : null,
+    );
 
   const router = useRouter();
   const setClickedMapInfo = useSetAtom(clickedMapInfoAtom);
@@ -95,15 +134,27 @@ export const Map = () => {
   const statusFilter = useAtomValue(statusFilterAtom);
 
   const { data: places } = usePlaces();
+  const { guestPosts } = useGuestPosts();
+
+  const guestPlaces = useMemo(
+    () =>
+      guestPosts
+        .filter(
+          (post) => Number.isFinite(post.lat) && Number.isFinite(post.lng),
+        )
+        .map(toGuestPlace),
+    [guestPosts],
+  );
 
   const searchFilteredPlaces = useMemo(() => {
-    if (!places) return [];
+    const savedPlaces = places ?? [];
+    const displayPlaces = [...savedPlaces, ...guestPlaces];
     const query = searchQuery.trim().toLowerCase();
-    return places.filter(
+    return displayPlaces.filter(
       (place: PlaceWithStats) =>
         !query || place.place_name.toLowerCase().includes(query),
     );
-  }, [places, searchQuery]);
+  }, [guestPlaces, places, searchQuery]);
 
   const visiblePlaces = useMemo(() => {
     return searchFilteredPlaces.filter(
@@ -115,7 +166,14 @@ export const Map = () => {
     const updateLocation = (lat: number, lng: number) => {
       const loc = { lat, lng };
       setLocalCurrentLocation(loc);
+      setInitialCenter(loc);
       setCurrentLocation(loc);
+    };
+
+    const setFallbackLocation = () => {
+      setInitialCenter(
+        (currentInitialCenter) => currentInitialCenter ?? SEOUL_DEFAULT,
+      );
     };
 
     const handleMessage = (event: MessageEvent) => {
@@ -148,7 +206,9 @@ export const Map = () => {
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         updateLocation(position.coords.latitude, position.coords.longitude);
-      });
+      }, setFallbackLocation);
+    } else {
+      setFallbackLocation();
     }
 
     window.addEventListener('message', handleMessage);
@@ -166,13 +226,6 @@ export const Map = () => {
     };
   }, [setCurrentLocation]);
 
-  const initialCenter: google.maps.LatLngLiteral = window.nativeLocation
-    ? {
-        lat: window.nativeLocation.coords.latitude,
-        lng: window.nativeLocation.coords.longitude,
-      }
-    : SEOUL_DEFAULT;
-
   const handleMapClick = (e: MapMouseEvent) => {
     if (!e.detail.latLng || !e.domEvent) return;
     const { clientX, clientY } = getClientPosition(
@@ -188,160 +241,173 @@ export const Map = () => {
 
   return (
     <div className={styles.mapWrapper}>
-      <GoogleMap
-        mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
-        defaultCenter={initialCenter}
-        defaultZoom={15}
-        disableDefaultUI
-        clickableIcons={false}
-        className={styles.mapContainer}
-        onClick={handleMapClick}
-      >
-        <MapEffects
-          searchPlaces={searchPlaces}
-          nearbyPlaces={nearbyPlaces}
-          currentLocation={localCurrentLocation}
-        />
+      {initialCenter ? (
+        <GoogleMap
+          mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
+          defaultCenter={initialCenter}
+          defaultZoom={15}
+          disableDefaultUI
+          clickableIcons={false}
+          className={styles.mapContainer}
+          onClick={handleMapClick}
+        >
+          <MapEffects
+            searchPlaces={searchPlaces}
+            nearbyPlaces={nearbyPlaces}
+            currentLocation={localCurrentLocation}
+          />
 
-        {visiblePlaces.map((place) => {
-          const pinWidth = 40;
-          const pinHeight = pinWidth * 2;
-          const pinColor = getStatusPinColor(place.status, place.avg_rating);
-          const latestPostId = [...place.posts]
-            .sort(
-              (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime(),
-            )
-            .at(0)?.id;
+          {visiblePlaces.map((place) => {
+            const pinWidth = 40;
+            const pinHeight = pinWidth * 2;
+            const pinColor = getStatusPinColor(place.status, place.avg_rating);
+            const latestPostId = [...place.posts]
+              .sort(
+                (a, b) =>
+                  new Date(b.created_at).getTime() -
+                  new Date(a.created_at).getTime(),
+              )
+              .at(0)?.id;
 
-          const handlePlaceMarkerClick = (e: google.maps.MapMouseEvent) => {
-            if (latestPostId) {
-              router.push(`/post/${latestPostId}`);
-              return;
-            }
-            if (!e.domEvent) return;
-            const { clientX, clientY } = getClientPosition(
-              e.domEvent as MouseEvent | TouchEvent,
+            const handlePlaceMarkerClick = (e: google.maps.MapMouseEvent) => {
+              const isGuestPlace = place.user_id === GUEST_PLACE_USER_ID;
+
+              if (isGuestPlace) {
+                router.push(`/post/${place.id}`);
+                return;
+              }
+
+              if (latestPostId && !isGuestPlace) {
+                router.push(`/post/${latestPostId}`);
+                return;
+              }
+              if (!e.domEvent) return;
+              const { clientX, clientY } = getClientPosition(
+                e.domEvent as MouseEvent | TouchEvent,
+              );
+              setSelectedSearchPlace({
+                id: place.kakao_place_id,
+                place_name: place.place_name,
+                category_name: '',
+                category_group_code: '',
+                category_group_name: '',
+                phone: '',
+                address_name: place.address,
+                road_address_name: place.address,
+                x: String(place.lng),
+                y: String(place.lat),
+                place_url: '',
+                distance: '',
+              });
+              setClickedMapInfo({
+                lat: place.lat,
+                lng: place.lng,
+                clientX,
+                clientY,
+              });
+            };
+
+            return (
+              <AdvancedMarker
+                key={place.id}
+                position={{ lat: place.lat, lng: place.lng }}
+                onClick={handlePlaceMarkerClick}
+              >
+                <CustomMarker
+                  width={pinWidth}
+                  height={pinHeight}
+                  color={pinColor}
+                  icon={place.status === 'wish' ? 'bookmark' : undefined}
+                  rating={
+                    place.status !== 'wish' && place.avg_rating != null
+                      ? Math.round(place.avg_rating * 10) / 10
+                      : undefined
+                  }
+                />
+              </AdvancedMarker>
             );
-            setSelectedSearchPlace({
-              id: place.kakao_place_id,
-              place_name: place.place_name,
-              category_name: '',
-              category_group_code: '',
-              category_group_name: '',
-              phone: '',
-              address_name: place.address,
-              road_address_name: place.address,
-              x: String(place.lng),
-              y: String(place.lat),
-              place_url: '',
-              distance: '',
-            });
-            setClickedMapInfo({
-              lat: place.lat,
-              lng: place.lng,
-              clientX,
-              clientY,
-            });
-          };
+          })}
 
-          return (
-            <AdvancedMarker
-              key={place.id}
-              position={{ lat: place.lat, lng: place.lng }}
-              onClick={handlePlaceMarkerClick}
-            >
-              <CustomMarker
-                width={pinWidth}
-                height={pinHeight}
-                color={pinColor}
-                icon={place.status === 'wish' ? 'bookmark' : undefined}
-                rating={
-                  place.status !== 'wish' && place.avg_rating != null
-                    ? Math.round(place.avg_rating * 10) / 10
-                    : undefined
-                }
+          {searchPlaces.map((place) => {
+            const pinWidth = 32;
+            const pinHeight = pinWidth * 2;
+            const lat = parseFloat(place.y);
+            const lng = parseFloat(place.x);
+
+            const handleSearchMarkerClick = (e: google.maps.MapMouseEvent) => {
+              if (!e.domEvent) return;
+              const { clientX, clientY } = getClientPosition(
+                e.domEvent as MouseEvent | TouchEvent,
+              );
+              setSelectedSearchPlace(place);
+              setClickedMapInfo({ lat, lng, clientX, clientY });
+            };
+
+            return (
+              <AdvancedMarker
+                key={place.id}
+                position={{ lat, lng }}
+                zIndex={50}
+                onClick={handleSearchMarkerClick}
+              >
+                <CustomMarker
+                  width={pinWidth}
+                  height={pinHeight}
+                  color={vars.colors.pin[0]}
+                />
+              </AdvancedMarker>
+            );
+          })}
+
+          {nearbyPlaces.map((place) => {
+            const pinWidth = 32;
+            const pinHeight = pinWidth * 2;
+            const lat = parseFloat(place.y);
+            const lng = parseFloat(place.x);
+            if (!isFinite(lat) || !isFinite(lng)) return null;
+
+            const handleNearbyMarkerClick = (e: google.maps.MapMouseEvent) => {
+              if (!e.domEvent) return;
+              const { clientX, clientY } = getClientPosition(
+                e.domEvent as MouseEvent | TouchEvent,
+              );
+              setSelectedSearchPlace(place);
+              setClickedMapInfo({ lat, lng, clientX, clientY });
+            };
+
+            return (
+              <AdvancedMarker
+                key={`nearby-${place.id}`}
+                position={{ lat, lng }}
+                zIndex={40}
+                onClick={handleNearbyMarkerClick}
+              >
+                <CustomMarker
+                  width={pinWidth}
+                  height={pinHeight}
+                  color={vars.colors.pin[0]}
+                />
+              </AdvancedMarker>
+            );
+          })}
+
+          {localCurrentLocation && (
+            <AdvancedMarker position={localCurrentLocation} zIndex={200}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={toDataUrl(getCurrentLocationIcon())}
+                width={24}
+                height={24}
+                alt=""
               />
             </AdvancedMarker>
-          );
-        })}
-
-        {searchPlaces.map((place) => {
-          const pinWidth = 32;
-          const pinHeight = pinWidth * 2;
-          const lat = parseFloat(place.y);
-          const lng = parseFloat(place.x);
-
-          const handleSearchMarkerClick = (e: google.maps.MapMouseEvent) => {
-            if (!e.domEvent) return;
-            const { clientX, clientY } = getClientPosition(
-              e.domEvent as MouseEvent | TouchEvent,
-            );
-            setSelectedSearchPlace(place);
-            setClickedMapInfo({ lat, lng, clientX, clientY });
-          };
-
-          return (
-            <AdvancedMarker
-              key={place.id}
-              position={{ lat, lng }}
-              zIndex={50}
-              onClick={handleSearchMarkerClick}
-            >
-              <CustomMarker
-                width={pinWidth}
-                height={pinHeight}
-                color={vars.colors.pin[0]}
-              />
-            </AdvancedMarker>
-          );
-        })}
-
-        {nearbyPlaces.map((place) => {
-          const pinWidth = 32;
-          const pinHeight = pinWidth * 2;
-          const lat = parseFloat(place.y);
-          const lng = parseFloat(place.x);
-          if (!isFinite(lat) || !isFinite(lng)) return null;
-
-          const handleNearbyMarkerClick = (e: google.maps.MapMouseEvent) => {
-            if (!e.domEvent) return;
-            const { clientX, clientY } = getClientPosition(
-              e.domEvent as MouseEvent | TouchEvent,
-            );
-            setSelectedSearchPlace(place);
-            setClickedMapInfo({ lat, lng, clientX, clientY });
-          };
-
-          return (
-            <AdvancedMarker
-              key={`nearby-${place.id}`}
-              position={{ lat, lng }}
-              zIndex={40}
-              onClick={handleNearbyMarkerClick}
-            >
-              <CustomMarker
-                width={pinWidth}
-                height={pinHeight}
-                color={vars.colors.pin[0]}
-              />
-            </AdvancedMarker>
-          );
-        })}
-
-        {localCurrentLocation && (
-          <AdvancedMarker position={localCurrentLocation} zIndex={200}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={toDataUrl(getCurrentLocationIcon())}
-              width={24}
-              height={24}
-              alt=""
-            />
-          </AdvancedMarker>
-        )}
-      </GoogleMap>
+          )}
+        </GoogleMap>
+      ) : (
+        <div className={styles.mapContainer}>
+          <Spinner />
+        </div>
+      )}
     </div>
   );
 };
