@@ -1,10 +1,15 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { GET } from './route';
 
-const makeRequest = (params: Record<string, string>) => {
+const makeRequest = (
+  params: Record<string, string>,
+  clientIp = '203.0.113.40',
+) => {
   const url = new URL('http://localhost/api/search/nearby');
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  return new Request(url.toString());
+  return new Request(url.toString(), {
+    headers: { 'x-real-ip': clientIp },
+  });
 };
 
 const mockFetch = (options: { ok: boolean; body?: unknown }) => {
@@ -113,5 +118,26 @@ describe('GET /api/search/nearby', () => {
     expect(data.documents).toHaveLength(1);
     expect(data.documents[0].id).toBe('abc123');
     expect(data.documents[0].place_name).toBe('테스트 식당');
+  });
+
+  it('rate limits repeated nearby searches from the same client', async () => {
+    vi.stubEnv('GOOGLE_MAPS_API_KEY', 'test-key');
+    mockFetch({ ok: true, body: { places: [] } });
+
+    for (let requestCount = 0; requestCount < 30; requestCount += 1) {
+      const res = await GET(
+        makeRequest({ x: '127.0', y: '37.5' }, '203.0.113.41'),
+      );
+      expect(res.status).toBe(200);
+    }
+
+    const res = await GET(
+      makeRequest({ x: '127.0', y: '37.5' }, '203.0.113.41'),
+    );
+    const data = await res.json();
+
+    expect(res.status).toBe(429);
+    expect(data.error).toBe('too_many_requests');
+    expect(global.fetch).toHaveBeenCalledTimes(30);
   });
 });
