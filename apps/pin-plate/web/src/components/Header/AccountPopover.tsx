@@ -107,6 +107,12 @@ export const AccountPopover = ({
       style={positionStyle}
     >
       <div className={styles.bottomSection}>
+        <button className={styles.menuItem} onClick={handleMyPageClick}>
+          <div className={styles.standardMenuIcon}>
+            <IcSetting width={20} height={20} />
+          </div>
+          <span className={styles.standardMenuText}>마이페이지</span>
+        </button>
         <button
           className={styles.menuItem}
           onClick={() => {
