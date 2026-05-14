@@ -1,7 +1,7 @@
 import { useRef, useState, KeyboardEvent } from 'react';
 import { Place, PlaceSearchResponse } from '../types/search';
 import * as styles from './styles/LocationSearch.css';
-import { IcSearch, IcMarker, Spinner } from '@pin-plate/ui';
+import { IcSearch, IcMarker, Input, Spinner } from '@pin-plate/ui';
 
 interface LocationSearchProps {
   currentLocation?: { lat: number; lng: number } | null;
@@ -50,7 +50,7 @@ const LocationSearch = ({
     <div className={styles.container}>
       <div className={styles.searchContainer}>
         <div className={styles.searchInputWrapper}>
-          <input
+          <Input
             ref={locationRef}
             className={styles.searchInput}
             placeholder="장소를 입력하세요"

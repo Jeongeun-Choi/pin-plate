@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Place } from '../types/search';
 import { useLocationSearch } from '../hooks/useLocationSearch';
 import * as styles from './styles/MobileLocationSearch.css';
-import { IcSearch, IcMarker, IcDismiss, Spinner } from '@pin-plate/ui';
+import { IcSearch, IcMarker, IcDismiss, Input, Spinner } from '@pin-plate/ui';
 
 interface MobileLocationSearchProps {
   currentLocation?: { lat: number; lng: number } | null;
@@ -50,7 +50,7 @@ const MobileLocationSearch = ({
 
       <div className={styles.searchContainer}>
         <div className={styles.searchInputWrapper}>
-          <input
+          <Input
             ref={inputRef}
             className={styles.searchInput}
             placeholder="장소명 또는 주소 입력"
