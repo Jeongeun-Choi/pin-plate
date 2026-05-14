@@ -1,6 +1,9 @@
+'use client';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSetAtom, useAtom } from 'jotai';
+import { Input } from '@pin-plate/ui';
 import {
   IcSearch,
   IcMap,
@@ -8,26 +11,41 @@ import {
   IcUser,
   IcList,
   IcDismiss,
+  IcShare,
 } from '@pin-plate/ui/icons';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { viewModeAtom, searchQueryAtom } from '@/app/atoms';
 import * as styles from './Header.css';
 import { isPostModalOpenAtom } from '@/features/post/atoms';
 import { AccountPopover } from './AccountPopover';
-import { useQueryClient } from '@tanstack/react-query';
 import { myPageKeys, getMyProfile } from '@/features/my-page';
 import { useSearchPlaces } from '@/features/map/hooks/useSearchPlaces';
 import { GuestSyncBanner } from '@/features/guest/components/GuestSyncBanner';
+import { usePlaces } from '@/features/place/hooks/usePlaces';
+import { ShareMapDialog } from '@/features/shared-map/components/ShareMapDialog';
+import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 
 export const Header = () => {
-  const [viewMode, setViewMode] = useAtom(viewModeAtom);
-  const setSearchQuery = useSetAtom(searchQueryAtom);
   const [searchInputValue, setSearchInputValue] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [isShareMapDialogOpen, setIsShareMapDialogOpen] = useState(false);
+
+  const [viewMode, setViewMode] = useAtom(viewModeAtom);
+  const setSearchQuery = useSetAtom(searchQueryAtom);
   const router = useRouter();
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
   const queryClient = useQueryClient();
   const { searchPlaces, clearSearchPlaces } = useSearchPlaces();
+  const { data: currentUser } = useQuery({
+    queryKey: ['auth', 'user'],
+    queryFn: getCurrentUser,
+  });
+
+  const isShareButtonDisabled = !currentUser;
+  const shareButtonTitle = isShareButtonDisabled
+    ? '로그인하면 내 장소 지도를 공유할 수 있어요.'
+    : '내 장소 지도를 공유해요.';
 
   const handleSearch = () => {
     const query = searchInputValue.trim();
@@ -70,6 +88,17 @@ export const Header = () => {
     setAnchorEl(null);
   };
 
+  const handleShareMapOpen = () => {
+    if (!currentUser) {
+      return;
+    }
+    setIsShareMapDialogOpen(true);
+  };
+
+  const handleShareMapClose = () => {
+    setIsShareMapDialogOpen(false);
+  };
+
   return (
     <>
       <header className={styles.container}>
@@ -91,7 +120,7 @@ export const Header = () => {
             >
               <IcSearch width={16} height={16} />
             </button>
-            <input
+            <Input
               type="search"
               enterKeyHint="search"
               className={styles.searchInput}
@@ -141,8 +170,20 @@ export const Header = () => {
             <span className={styles.writeButtonText}>작성하기</span>
           </button>
 
+          {/* Share Button */}
+          <button
+            type="button"
+            className={styles.shareButton}
+            onClick={handleShareMapOpen}
+            disabled={isShareButtonDisabled}
+            title={shareButtonTitle}
+          >
+            <IcShare width={16} height={16} color="currentColor" />
+            <span className={styles.shareButtonText}>공유하기</span>
+          </button>
+
           {/* Profile Icon */}
-          <div style={{ position: 'relative' }}>
+          <div className={styles.profileWrapper}>
             <div
               className={styles.profileIcon}
               onClick={togglePopover}
@@ -159,7 +200,34 @@ export const Header = () => {
           </div>
         </div>
       </header>
+      {currentUser && isShareMapDialogOpen && (
+        <ShareMapDialogLoader
+          ownerId={currentUser.id}
+          onClose={handleShareMapClose}
+        />
+      )}
       <GuestSyncBanner />
     </>
+  );
+};
+
+interface ShareMapDialogLoaderProps {
+  ownerId: string;
+  onClose: () => void;
+}
+
+const ShareMapDialogLoader = ({
+  ownerId,
+  onClose,
+}: ShareMapDialogLoaderProps) => {
+  const { data: savedPlaces = [] } = usePlaces();
+
+  return (
+    <ShareMapDialog
+      isOpen={true}
+      places={savedPlaces}
+      ownerId={ownerId}
+      onClose={onClose}
+    />
   );
 };

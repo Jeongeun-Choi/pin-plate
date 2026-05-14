@@ -233,6 +233,37 @@ export const writeButtonText = style({
   },
 });
 
+export const shareButton = style([
+  writeButton,
+  {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    color: vars.colors.common.white,
+    border: '1px solid rgba(255, 255, 255, 0.4)',
+    boxShadow: 'none',
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    ':disabled': {
+      opacity: 0.55,
+      cursor: 'not-allowed',
+      transform: 'none',
+    },
+  },
+]);
+
+export const shareButtonText = style({
+  display: 'none',
+  '@media': {
+    '(min-width: 960px)': {
+      display: 'inline',
+    },
+  },
+});
+
+export const profileWrapper = style({
+  position: 'relative',
+});
+
 export const profileIcon = style({
   width: 36,
   height: 36,
