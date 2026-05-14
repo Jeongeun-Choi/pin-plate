@@ -1,6 +1,16 @@
 import type { GuestPost } from '../types/guestPost';
 
 export const GUEST_POSTS_KEY = 'guest_posts';
+const VALID_GUEST_POST_STATUSES = [
+  'wish',
+  'visited',
+  'want_to_revisit',
+  'recommend',
+];
+
+const isValidGuestPostStatus = (status: unknown): boolean =>
+  typeof status === 'undefined' ||
+  (typeof status === 'string' && VALID_GUEST_POST_STATUSES.includes(status));
 
 export const isValidGuestPost = (v: unknown): v is GuestPost =>
   typeof v === 'object' &&
@@ -17,7 +27,10 @@ export const isValidGuestPost = (v: unknown): v is GuestPost =>
   Array.isArray((v as GuestPost).image_urls) &&
   (v as GuestPost).image_urls.every((u) => typeof u === 'string') &&
   Array.isArray((v as GuestPost).tags) &&
-  (v as GuestPost).tags.every((t) => typeof t === 'string');
+  (v as GuestPost).tags.every((t) => typeof t === 'string') &&
+  isValidGuestPostStatus((v as GuestPost).status) &&
+  (typeof (v as GuestPost).has_visit_record === 'undefined' ||
+    typeof (v as GuestPost).has_visit_record === 'boolean');
 
 export const parseGuestPosts = (value: unknown): GuestPost[] => {
   if (!Array.isArray(value)) return [];

@@ -73,4 +73,40 @@ describe('useSyncGuestPosts', () => {
     expect(guestPostStorage.loadGuestPosts()).toEqual([secondPost]);
     expect(mockCreatePlace).not.toHaveBeenCalled();
   });
+
+  it('공유 지도에서 저장한 가보고싶음 장소는 방문 기록을 만들지 않고 장소만 동기화한다', async () => {
+    const sharedWishPlace: GuestPost = {
+      ...createGuestPost('shared'),
+      content: '공유 지도에서 저장한 가보고 싶은 장소예요.',
+      rating: 0,
+      status: 'wish',
+      has_visit_record: false,
+    };
+
+    guestPostStorage.saveGuestPosts([sharedWishPlace]);
+    mockGetPlaceByKakaoId.mockResolvedValue(null);
+    mockCreatePlace.mockResolvedValue({ id: 'place-123' });
+
+    const { result } = renderHook(() => useSyncGuestPosts(), {
+      wrapper: createWrapper(),
+    });
+
+    let syncResult: SyncGuestPostsResult | undefined;
+    await act(async () => {
+      syncResult = await result.current.syncGuestPosts('user-123');
+    });
+
+    expect(syncResult).toEqual({ successCount: 1, failedCount: 0 });
+    expect(mockCreatePlace).toHaveBeenCalledWith('user-123', {
+      kakao_place_id: 'kakao-shared',
+      place_name: '테스트 맛집 shared',
+      address: '서울시 강남구',
+      lat: 37.5,
+      lng: 127,
+      status: 'wish',
+      tags: [],
+    });
+    expect(mockCreatePost).not.toHaveBeenCalled();
+    expect(guestPostStorage.loadGuestPosts()).toEqual([]);
+  });
 });
