@@ -44,13 +44,31 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'pin-plate.s3.dualstack.ap-northeast-2.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'pin-plate-image.s3.ap-northeast-2.amazonaws.com',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
+        hostname: 'pin-plate-image.s3.dualstack.ap-northeast-2.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'pin-plate-image.s3.ap-southeast-2.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pin-plate-image.s3.dualstack.ap-southeast-2.amazonaws.com',
         port: '',
         pathname: '/**',
       },
