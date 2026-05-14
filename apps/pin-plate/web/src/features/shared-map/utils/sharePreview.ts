@@ -1,3 +1,5 @@
+import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
+
 interface SharePreviewInput {
   title: string;
   description: string;
@@ -46,7 +48,12 @@ export const resolveSharePreviewImageUrl = async (
     return getDefaultOgImageUrl();
   }
 
-  const imageUrl = toAbsoluteUrl(coverImageUrl);
+  const imageUrl = getTrustedImageUrl(toAbsoluteUrl(coverImageUrl));
+
+  if (!imageUrl) {
+    return getDefaultOgImageUrl();
+  }
+
   const abortController = new AbortController();
   const timeoutId = setTimeout(
     () => abortController.abort(),

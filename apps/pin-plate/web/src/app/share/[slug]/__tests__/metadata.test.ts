@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { SharedMap } from '@/features/shared-map/types/sharedMap';
 import { getSharedMapBySlug } from '@/features/shared-map/api/getSharedMapBySlug';
 
+const TEST_IMAGE_ORIGIN = 'https://image.test';
+const TEST_COVER_IMAGE_URL = `${TEST_IMAGE_ORIGIN}/uploads/users/test-user/cover.jpg`;
+
 const sharedMapFixture: SharedMap = {
   id: 'map-1',
   owner_id: 'user-1',
@@ -11,7 +14,7 @@ const sharedMapFixture: SharedMap = {
   criteria_type: 'tag',
   criteria_value: '작업/공부',
   place_count: 2,
-  cover_image_url: 'https://example.com/cover.jpg',
+  cover_image_url: TEST_COVER_IMAGE_URL,
   created_at: '2026-05-13T00:00:00.000Z',
   shared_map_places: [],
 };
@@ -23,18 +26,25 @@ vi.mock('@/features/shared-map/api/getSharedMapBySlug', () => ({
 const mockedGetSharedMapBySlug = vi.mocked(getSharedMapBySlug);
 const { generateMetadata } = await import('../page');
 const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const originalImagePublicBaseUrl = process.env.IMAGE_PUBLIC_BASE_URL;
 
 describe('share page metadata', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     if (originalSiteUrl === undefined) {
       delete process.env.NEXT_PUBLIC_SITE_URL;
+    } else {
+      process.env.NEXT_PUBLIC_SITE_URL = originalSiteUrl;
+    }
+    if (originalImagePublicBaseUrl === undefined) {
+      delete process.env.IMAGE_PUBLIC_BASE_URL;
       return;
     }
-    process.env.NEXT_PUBLIC_SITE_URL = originalSiteUrl;
+    process.env.IMAGE_PUBLIC_BASE_URL = originalImagePublicBaseUrl;
   });
 
   it('returns Open Graph preview metadata without Twitter metadata', async () => {
+    process.env.IMAGE_PUBLIC_BASE_URL = TEST_IMAGE_ORIGIN;
     const fetchSharedMapCoverImage = vi.fn().mockResolvedValue(
       new Response(null, {
         headers: { 'content-type': 'image/jpeg' },
@@ -55,15 +65,19 @@ describe('share page metadata', () => {
       openGraph: {
         title: '성수 카페 지도 | Pin Plate',
         description: '추천 장소 2곳을 지도와 리스트로 확인해 보세요.',
-        images: [{ url: 'https://example.com/cover.jpg' }],
-        url: 'http://localhost:3000/share/seongsu-cafe',
+        images: [
+          {
+            url: TEST_COVER_IMAGE_URL,
+          },
+        ],
+        url: 'https://pinonplate.com/share/seongsu-cafe',
         siteName: 'Pin Plate',
         type: 'website',
       },
     });
     expect(metadata.twitter).toBeUndefined();
     expect(fetchSharedMapCoverImage).toHaveBeenCalledWith(
-      'https://example.com/cover.jpg',
+      TEST_COVER_IMAGE_URL,
       expect.objectContaining({ method: 'HEAD' }),
     );
   });
@@ -91,7 +105,7 @@ describe('share page metadata', () => {
     });
 
     expect(metadata.openGraph?.images).toEqual([
-      { url: 'http://localhost:3000/og-default.png' },
+      { url: 'https://pinonplate.com/og-default.png' },
     ]);
     expect(metadata.twitter).toBeUndefined();
     expect(fetchSharedMapCoverImage).not.toHaveBeenCalled();
@@ -120,6 +134,7 @@ describe('share page metadata', () => {
   });
 
   it('uses the fallback image when the cover image request fails', async () => {
+    process.env.IMAGE_PUBLIC_BASE_URL = TEST_IMAGE_ORIGIN;
     vi.stubGlobal(
       'fetch',
       vi.fn().mockRejectedValue(new Error('network down')),
@@ -131,12 +146,13 @@ describe('share page metadata', () => {
     });
 
     expect(metadata.openGraph?.images).toEqual([
-      { url: 'http://localhost:3000/og-default.png' },
+      { url: 'https://pinonplate.com/og-default.png' },
     ]);
     expect(metadata.twitter).toBeUndefined();
   });
 
   it('uses the fallback image when the cover image response is not ok', async () => {
+    process.env.IMAGE_PUBLIC_BASE_URL = TEST_IMAGE_ORIGIN;
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
@@ -148,12 +164,13 @@ describe('share page metadata', () => {
     });
 
     expect(metadata.openGraph?.images).toEqual([
-      { url: 'http://localhost:3000/og-default.png' },
+      { url: 'https://pinonplate.com/og-default.png' },
     ]);
     expect(metadata.twitter).toBeUndefined();
   });
 
   it('uses the fallback image when the cover image is not an image response', async () => {
+    process.env.IMAGE_PUBLIC_BASE_URL = TEST_IMAGE_ORIGIN;
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
@@ -170,8 +187,27 @@ describe('share page metadata', () => {
     });
 
     expect(metadata.openGraph?.images).toEqual([
-      { url: 'http://localhost:3000/og-default.png' },
+      { url: 'https://pinonplate.com/og-default.png' },
     ]);
     expect(metadata.twitter).toBeUndefined();
+  });
+
+  it('uses the fallback image without fetch when the cover image URL is not trusted', async () => {
+    process.env.IMAGE_PUBLIC_BASE_URL = TEST_IMAGE_ORIGIN;
+    const fetchSharedMapCoverImage = vi.fn();
+    vi.stubGlobal('fetch', fetchSharedMapCoverImage);
+    mockedGetSharedMapBySlug.mockResolvedValueOnce({
+      ...sharedMapFixture,
+      cover_image_url: 'https://evil.test/cover.jpg',
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ slug: 'seongsu-cafe' }),
+    });
+
+    expect(fetchSharedMapCoverImage).not.toHaveBeenCalled();
+    expect(metadata.openGraph?.images).toEqual([
+      { url: 'https://pinonplate.com/og-default.png' },
+    ]);
   });
 });

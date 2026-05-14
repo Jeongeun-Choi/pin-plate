@@ -15,7 +15,7 @@ describe('buildSharePreview', () => {
     ).toEqual({
       title: '성수 카페 지도 | Pin Plate',
       description: '추천 장소 3곳을 지도와 리스트로 확인해 보세요.',
-      imageUrl: 'http://localhost:3000/og-default.png',
+      imageUrl: 'https://pinonplate.com/og-default.png',
     });
   });
 
