@@ -48,21 +48,25 @@ const toGuestPlace = (guestPost: GuestPost): PlaceWithStats => ({
   address: guestPost.address,
   lat: guestPost.lat,
   lng: guestPost.lng,
-  status: 'visited',
+  status: guestPost.status ?? 'visited',
   tags: guestPost.tags,
   created_at: guestPost.created_at,
   updated_at: guestPost.created_at,
-  posts: [
-    {
-      id: 0,
-      rating: guestPost.rating,
-      image_urls: guestPost.image_urls,
-      created_at: guestPost.created_at,
-    },
-  ],
-  visit_count: 1,
-  avg_rating: guestPost.rating,
-  last_visited_at: guestPost.created_at,
+  posts:
+    guestPost.has_visit_record === false
+      ? []
+      : [
+          {
+            id: 0,
+            rating: guestPost.rating,
+            image_urls: guestPost.image_urls,
+            created_at: guestPost.created_at,
+          },
+        ],
+  visit_count: guestPost.has_visit_record === false ? 0 : 1,
+  avg_rating: guestPost.has_visit_record === false ? null : guestPost.rating,
+  last_visited_at:
+    guestPost.has_visit_record === false ? null : guestPost.created_at,
   first_image: guestPost.image_urls[0] ?? null,
 });
 

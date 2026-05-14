@@ -16,21 +16,40 @@ import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { searchQueryAtom } from '@/app/atoms';
 import { currentLocationAtom, statusFilterAtom } from '@/features/map/atoms';
+import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
 import { calcDistanceMeters } from '@/utils/distance';
 import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
 import type { User } from '@supabase/supabase-js';
 
 type SortType = 'latest' | 'rating' | 'distance';
 
-const getCardImageProps = (imageUrl: string) => {
+const CARD_IMAGE_WIDTH = 360;
+const CARD_IMAGE_HEIGHT = 240;
+const CARD_IMAGE_SIZES = '(min-width: 1024px) 320px, 100vw';
+
+const getOptimizedCardImageProps = (
+  imageUrl: string | null | undefined,
+  title: string,
+) => {
+  const trustedImageUrl = getTrustedImageUrl(imageUrl ?? null);
+
+  if (!trustedImageUrl) {
+    return { imageUrl: imageUrl ?? undefined };
+  }
+
   const { props } = getImageProps({
-    src: imageUrl,
-    alt: '',
-    width: 400,
-    height: 192,
-    sizes: '(min-width: 640px) 400px, 100vw',
+    src: trustedImageUrl,
+    alt: title,
+    width: CARD_IMAGE_WIDTH,
+    height: CARD_IMAGE_HEIGHT,
+    sizes: CARD_IMAGE_SIZES,
   });
-  return { srcSet: props.srcSet, sizes: props.sizes };
+
+  return {
+    imageUrl: props.src,
+    srcSet: props.srcSet,
+    sizes: props.sizes,
+  };
 };
 
 const GuestPostList = () => {
@@ -52,24 +71,28 @@ const GuestPostList = () => {
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
         <div className={styles.grid}>
-          {guestPosts.map((post) => (
-            <Card
-              key={post.id}
-              title={post.place_name}
-              rating={post.rating.toFixed(1)}
-              location={post.address}
-              description=""
-              date={new Date(post.created_at).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-              imageUrl={post.image_urls[0] ?? undefined}
-              {...(post.image_urls[0]
-                ? getCardImageProps(post.image_urls[0])
-                : {})}
-            />
-          ))}
+          {guestPosts.map((post) => {
+            const imageProps = getOptimizedCardImageProps(
+              post.image_urls[0],
+              post.place_name,
+            );
+
+            return (
+              <Card
+                key={post.id}
+                title={post.place_name}
+                rating={post.rating.toFixed(1)}
+                location={post.address}
+                description=""
+                date={new Date(post.created_at).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+                {...imageProps}
+              />
+            );
+          })}
         </div>
       </div>
     </div>
@@ -220,6 +243,10 @@ const AuthenticatedPostList = ({ user }: AuthenticatedPostListProps) => {
                 : place.visit_count > 1
                   ? `총 ${place.visit_count}번 방문`
                   : undefined;
+            const imageProps = getOptimizedCardImageProps(
+              place.first_image,
+              place.place_name,
+            );
 
             return (
               <div key={place.id} style={{ position: 'relative' }}>
@@ -241,10 +268,7 @@ const AuthenticatedPostList = ({ user }: AuthenticatedPostListProps) => {
                   location={place.address}
                   description={description ?? ''}
                   date={dateDisplay}
-                  imageUrl={place.first_image ?? undefined}
-                  {...(place.first_image
-                    ? getCardImageProps(place.first_image)
-                    : {})}
+                  {...imageProps}
                 />
               </div>
             );

@@ -71,8 +71,15 @@ describe('POST /api/image', () => {
     );
     expect(data.urls[0]).toMatchObject({
       originalName: 'dish.webp',
+      imageKey: expect.stringMatching(/^uploads\/guests\/.+\/.+\.webp$/),
       url: 'https://s3.example.com',
       fields: { key: 'value' },
+      objectUrl: expect.stringMatching(
+        /^https:\/\/test-bucket\.s3\.dualstack\.ap-northeast-2\.amazonaws\.com\/uploads\/guests\/.+\/.+\.webp$/,
+      ),
+      publicUrl: expect.stringMatching(
+        /^https:\/\/test-bucket\.s3\.dualstack\.ap-northeast-2\.amazonaws\.com\/uploads\/guests\/.+\/.+\.webp$/,
+      ),
     });
     expect(mockCreatePresignedPost).toHaveBeenCalledWith(
       expect.anything(),
@@ -100,8 +107,15 @@ describe('POST /api/image', () => {
     expect(res.status).toBe(200);
     expect(data.urls[0]).toMatchObject({
       originalName: 'dish.webp',
+      imageKey: expect.stringMatching(/^uploads\/users\/user-1\/.+\.webp$/),
       url: 'https://s3.example.com',
       fields: { key: 'value' },
+      objectUrl: expect.stringMatching(
+        /^https:\/\/test-bucket\.s3\.dualstack\.ap-northeast-2\.amazonaws\.com\/uploads\/users\/user-1\/.+\.webp$/,
+      ),
+      publicUrl: expect.stringMatching(
+        /^https:\/\/test-bucket\.s3\.dualstack\.ap-northeast-2\.amazonaws\.com\/uploads\/users\/user-1\/.+\.webp$/,
+      ),
     });
     expect(mockCreatePresignedPost).toHaveBeenCalledWith(
       expect.anything(),
@@ -109,6 +123,28 @@ describe('POST /api/image', () => {
         Key: expect.stringMatching(/^uploads\/users\/user-1\/.+\.webp$/),
       }),
     );
+  });
+
+  it('does not expose upload metadata as S3 POST form fields', async () => {
+    stubImageEnv();
+    mockAuthenticatedUser({ id: 'user-1' });
+    mockCreatePresignedPost.mockResolvedValue({
+      url: 'https://s3.example.com',
+      fields: {
+        key: 'value',
+        url: 'https://metadata.example.com/not-a-form-field',
+        publicUrl: 'https://metadata.example.com/public.webp',
+      },
+    } as never);
+
+    const res = await POST(
+      makeRequest({
+        files: [{ filename: 'dish.webp', type: 'image/webp' }],
+      }) as never,
+    );
+    const data = await res.json();
+
+    expect(data.urls[0].fields).toEqual({ key: 'value' });
   });
 
   it('rejects svg uploads even though they are image MIME types', async () => {

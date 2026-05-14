@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { Input } from '@pin-plate/ui';
 import * as styles from './LoginForm.styles.css';
 import { useGoogleLogin, useLogin } from '../hooks/useLogin';
 
@@ -46,7 +47,7 @@ export function LoginForm() {
             <label className={styles.label} htmlFor="email">
               이메일
             </label>
-            <input
+            <Input
               id="email"
               name="email"
               type="email"
@@ -61,7 +62,7 @@ export function LoginForm() {
             <label className={styles.label} htmlFor="password">
               비밀번호
             </label>
-            <input
+            <Input
               id="password"
               name="password"
               type="password"

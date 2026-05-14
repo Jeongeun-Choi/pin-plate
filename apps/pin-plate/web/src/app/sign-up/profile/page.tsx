@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { Button } from '@pin-plate/ui';
+import { Button, Input } from '@pin-plate/ui';
 import * as styles from './page.css';
 
 export default function ProfileSetupPage() {
@@ -98,7 +98,7 @@ export default function ProfileSetupPage() {
           <label htmlFor="name" className={styles.label}>
             이름
           </label>
-          <input
+          <Input
             id="name"
             type="text"
             className={styles.input}
@@ -111,7 +111,7 @@ export default function ProfileSetupPage() {
           <label htmlFor="email" className={styles.label}>
             이메일
           </label>
-          <input
+          <Input
             id="email"
             type="email"
             className={styles.input}
@@ -124,7 +124,7 @@ export default function ProfileSetupPage() {
           <label htmlFor="nickname" className={styles.label}>
             닉네임
           </label>
-          <input
+          <Input
             id="nickname"
             type="text"
             className={styles.input}

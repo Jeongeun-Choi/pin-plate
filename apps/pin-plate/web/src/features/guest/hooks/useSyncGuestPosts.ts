@@ -35,24 +35,27 @@ export const useSyncGuestPosts = () => {
               address: guestPost.address,
               lat: guestPost.lat,
               lng: guestPost.lng,
-              status: 'visited',
+              status: guestPost.status ?? 'visited',
               tags: guestPost.tags,
             });
           }
 
-          await createPost({
-            content: guestPost.content,
-            rating: guestPost.rating,
-            image_urls: guestPost.image_urls,
-            tags: guestPost.tags,
-            place_name: guestPost.place_name,
-            address: guestPost.address,
-            lat: guestPost.lat,
-            lng: guestPost.lng,
-            kakao_place_id: guestPost.kakao_place_id,
-            user_id: userId,
-            place_id: place.id,
-          });
+          if (guestPost.has_visit_record !== false) {
+            await createPost({
+              content: guestPost.content,
+              rating: guestPost.rating,
+              image_urls: guestPost.image_urls,
+              image_keys: guestPost.image_keys ?? [],
+              tags: guestPost.tags,
+              place_name: guestPost.place_name,
+              address: guestPost.address,
+              lat: guestPost.lat,
+              lng: guestPost.lng,
+              kakao_place_id: guestPost.kakao_place_id,
+              user_id: userId,
+              place_id: place.id,
+            });
+          }
 
           successCount += 1;
           removeGuestPost(guestPost.id);

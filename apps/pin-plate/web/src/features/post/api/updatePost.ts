@@ -1,4 +1,3 @@
-import { createClient } from '@/utils/supabase/client';
 import { CreatePostPayload, Post } from '../types/post';
 
 export interface UpdatePostParams {
@@ -10,14 +9,15 @@ export const updatePost = async ({
   id,
   payload,
 }: UpdatePostParams): Promise<Post> => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('posts')
-    .update(payload)
-    .eq('id', id)
-    .select()
-    .single();
+  const response = await fetch('/api/posts', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, payload }),
+  });
 
-  if (error) throw error;
-  return data as unknown as Post;
+  if (!response.ok) {
+    throw new Error('post_update_failed');
+  }
+
+  return response.json();
 };

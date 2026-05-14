@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac, randomUUID, timingSafeEqual } from 'crypto';
+import { randomUUID } from 'crypto';
 import { S3Client } from '@aws-sdk/client-s3';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { createClient } from '@/utils/supabase/server';
+import { buildPublicImageUrl } from '@/features/image/utils/imageReference';
+import {
+  GUEST_UPLOAD_COOKIE_MAX_AGE,
+  GUEST_UPLOAD_COOKIE_NAME,
+  createGuestSessionToken,
+  getVerifiedGuestId,
+  getVerifiedGuestIdFromRequest,
+} from '@/features/image/utils/guestUploadSession';
 
 const client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -14,9 +22,14 @@ const client = new S3Client({
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
 const MAX_FILES_PER_REQUEST = 5;
-const GUEST_UPLOAD_COOKIE_NAME = 'pin_plate_guest_upload_session';
-const GUEST_UPLOAD_HEADER_NAME = 'x-pin-plate-guest-session';
-const GUEST_UPLOAD_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+const UPLOAD_METADATA_FIELD_NAMES = new Set([
+  'url',
+  'objectUrl',
+  'publicUrl',
+  'imageKey',
+  'fileName',
+  'originalName',
+]);
 
 const ALLOWED_IMAGE_TYPES = {
   'image/jpeg': 'jpg',
@@ -51,39 +64,6 @@ const checkRateLimit = (ip: string): boolean => {
   return true;
 };
 
-const getSigningSecret = () =>
-  process.env.GUEST_UPLOAD_SECRET ?? process.env.S3_SECRET_ACCESS_KEY!;
-
-const signGuestId = (guestId: string) =>
-  createHmac('sha256', getSigningSecret()).update(guestId).digest('base64url');
-
-const createGuestSessionToken = (guestId = randomUUID()) =>
-  `${guestId}.${signGuestId(guestId)}`;
-
-const getVerifiedGuestId = (token: string | null) => {
-  if (!token) return null;
-
-  const [guestId, signature] = token.split('.');
-  if (!guestId || !signature) return null;
-
-  const expectedSignature = signGuestId(guestId);
-  const expectedBuffer = Buffer.from(expectedSignature);
-  const actualBuffer = Buffer.from(signature);
-
-  if (expectedBuffer.length !== actualBuffer.length) return null;
-
-  return timingSafeEqual(expectedBuffer, actualBuffer) ? guestId : null;
-};
-
-const getCookieValue = (cookieHeader: string | null, name: string) => {
-  if (!cookieHeader) return null;
-
-  const cookies = cookieHeader.split(';').map((cookie) => cookie.trim());
-  const cookie = cookies.find((item) => item.startsWith(`${name}=`));
-
-  return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : null;
-};
-
 const resolveUploadActor = async (
   request: NextRequest,
 ): Promise<UploadActor> => {
@@ -100,19 +80,12 @@ const resolveUploadActor = async (
     };
   }
 
-  const headerToken = request.headers.get(GUEST_UPLOAD_HEADER_NAME);
-  const cookieToken = getCookieValue(
-    request.headers.get('cookie'),
-    GUEST_UPLOAD_COOKIE_NAME,
-  );
-  const verifiedGuestId =
-    getVerifiedGuestId(headerToken) ?? getVerifiedGuestId(cookieToken);
+  const verifiedGuestId = getVerifiedGuestIdFromRequest(request);
 
   if (verifiedGuestId) {
     return {
       type: 'guest',
       id: verifiedGuestId,
-      guestSessionToken: headerToken ?? cookieToken ?? undefined,
       shouldSetGuestCookie: false,
     };
   }
@@ -146,6 +119,13 @@ const getUploadKey = (actor: UploadActor, file: UploadFile) => {
 
   return `uploads/${ownerPath}/${actor.id}/${randomUUID()}.${extension}`;
 };
+
+const getPresignedPostFields = (fields: Record<string, string>) =>
+  Object.fromEntries(
+    Object.entries(fields).filter(
+      ([fieldName]) => !UPLOAD_METADATA_FIELD_NAMES.has(fieldName),
+    ),
+  );
 
 export async function POST(request: NextRequest) {
   if (
@@ -190,7 +170,6 @@ export async function POST(request: NextRequest) {
     }
 
     const bucket = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
-    const region = process.env.NEXT_PUBLIC_AWS_REGION!;
 
     const presignedItems = await Promise.all(
       files.map(async (file: UploadFile) => {
@@ -205,13 +184,15 @@ export async function POST(request: NextRequest) {
           Fields: { 'Content-Type': file.type },
           Expires: 300,
         });
-        const objectUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+        const publicUrl = buildPublicImageUrl(key);
         return {
           originalName: file.filename,
           fileName: key,
+          imageKey: key,
           url,
-          fields,
-          objectUrl,
+          fields: getPresignedPostFields(fields),
+          objectUrl: publicUrl,
+          publicUrl,
         };
       }),
     );

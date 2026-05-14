@@ -3,6 +3,7 @@ export interface CreatePostPayload {
   content: string;
   rating: number;
   image_urls: string[];
+  image_keys?: string[];
   place_name: string;
   address: string;
   lat: number;

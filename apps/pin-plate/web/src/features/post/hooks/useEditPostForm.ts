@@ -1,14 +1,61 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useUpdatePost } from './useUpdatePost';
 import type { Place } from '../types/search';
 import type { CreatePostPayload, Post } from '../types/post';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
 import { sanitizeTags } from '../constants/tags';
+import { isTrustedImageKey } from '@/features/image/utils/imageReference';
+
+interface UploadedPhoto {
+  key: string | null;
+  url: string;
+}
+
+interface PresignedUploadItem {
+  originalName: string;
+  fileName: string;
+  imageKey?: string;
+  url: string;
+  fields: Record<string, string>;
+  objectUrl: string;
+  publicUrl?: string;
+}
+
+const UPLOAD_METADATA_FIELD_NAMES = new Set([
+  'url',
+  'objectUrl',
+  'publicUrl',
+  'imageKey',
+  'fileName',
+  'originalName',
+]);
 
 interface UseEditPostFormOptions {
   onSubmitOverride?: (payload: CreatePostPayload) => Promise<void> | void;
 }
+
+const getUploadedPhotoKey = (item: PresignedUploadItem): string | null => {
+  if (item.imageKey) return item.imageKey;
+  return isTrustedImageKey(item.fileName) ? item.fileName : null;
+};
+
+const getInitialPhotoReferences = (post: Post): UploadedPhoto[] =>
+  (post.image_urls || []).map((imageUrl, index) => ({
+    key: post.image_keys?.[index] ?? null,
+    url: imageUrl,
+  }));
+
+const appendPresignedPostFields = (
+  formData: FormData,
+  fields: Record<string, string>,
+) => {
+  Object.entries(fields).forEach(([key, value]) => {
+    if (!UPLOAD_METADATA_FIELD_NAMES.has(key)) {
+      formData.append(key, value);
+    }
+  });
+};
 
 export const useEditPostForm = (
   initialData: Post,
@@ -17,7 +64,9 @@ export const useEditPostForm = (
 ) => {
   const [content, setContent] = useState(initialData.content);
   const [rating, setRating] = useState(initialData.rating);
-  const [photos, setPhotos] = useState<string[]>(initialData.image_urls || []);
+  const [photoReferences, setPhotoReferences] = useState<UploadedPhoto[]>(() =>
+    getInitialPhotoReferences(initialData),
+  );
   const [tags, setTags] = useState<string[]>(initialData.tags ?? []);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>({
     id: initialData.kakao_place_id,
@@ -39,12 +88,24 @@ export const useEditPostForm = (
 
   const { mutateAsync: updatePost } = useUpdatePost();
 
+  const photoUrls = useMemo(
+    () => photoReferences.map((photoReference) => photoReference.url),
+    [photoReferences],
+  );
+  const photoKeys = useMemo(
+    () =>
+      photoReferences
+        .map((photoReference) => photoReference.key)
+        .filter((photoKey): photoKey is string => Boolean(photoKey)),
+    [photoReferences],
+  );
+
   const handlePlaceSelect = (place: Place | null) => {
     setSelectedPlace(place);
   };
 
   const handleUploadAndSetImages = async (fileList: File[]) => {
-    const remainingSlots = 5 - photos.length;
+    const remainingSlots = 5 - photoReferences.length;
     if (fileList.length > remainingSlots) {
       alert(`최대 ${remainingSlots}장까지만 더 추가할 수 있습니다.`);
       return;
@@ -84,19 +145,21 @@ export const useEditPostForm = (
 
     // 2. Upload to S3
     const uploadPromises = urls.map(
-      async (
-        item: { originalName: string; fileName: string; url: string },
-        index: number,
-      ) => {
+      async (item: PresignedUploadItem, index: number) => {
         const file = filesToUpload[index];
         try {
+          const formData = new FormData();
+          appendPresignedPostFields(formData, item.fields);
+          formData.append('file', file);
           const s3Res = await fetch(item.url, {
-            method: 'PUT',
-            body: file,
-            headers: { 'Content-Type': file.type },
+            method: 'POST',
+            body: formData,
           });
           if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
-          return item.url.split('?')[0];
+          return {
+            key: getUploadedPhotoKey(item),
+            url: item.publicUrl ?? item.objectUrl,
+          };
         } catch (err) {
           console.error('S3 Upload Error:', err);
           throw new Error('S3 CORS or Network Error');
@@ -105,15 +168,15 @@ export const useEditPostForm = (
     );
 
     try {
-      const s3Urls = await Promise.all(uploadPromises);
-      setPhotos((prev) => [...prev, ...s3Urls]);
+      const uploadedPhotos = await Promise.all(uploadPromises);
+      setPhotoReferences((prev) => [...prev, ...uploadedPhotos]);
     } catch (err) {
       console.error(err);
     }
   };
 
   const handleRemovePhoto = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotoReferences((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -130,7 +193,8 @@ export const useEditPostForm = (
       const payload: CreatePostPayload = {
         content,
         rating,
-        image_urls: photos,
+        image_urls: photoUrls,
+        image_keys: photoKeys,
         place_name: selectedPlace.place_name,
         address: selectedPlace.road_address_name || selectedPlace.address_name,
         lat: parseFloat(selectedPlace.y),
@@ -172,7 +236,7 @@ export const useEditPostForm = (
     formState: {
       content,
       rating,
-      photos,
+      photos: photoUrls,
       tags,
       selectedPlace,
       currentLocation,

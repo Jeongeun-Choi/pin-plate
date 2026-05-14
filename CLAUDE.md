@@ -180,3 +180,10 @@ pnpm tsc
 - No `console.log` in production code — use structured logging utilities if needed
 - 전체적으로 deprecated 된 api나 함수는 쓰지마.
 - 기능 추가 및 수정시 발생할 수 있는 엣지 케이스를 생각하고 구현해줘.
+
+## Design System
+
+Always read `DESIGN.md` before making any visual or UI decisions.
+All font choices, colors, spacing, and aesthetic direction are defined there.
+Do not deviate without explicit user approval.
+In QA mode, flag any code that doesn't match `DESIGN.md`.

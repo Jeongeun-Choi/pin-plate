@@ -8,7 +8,7 @@ import { useMyProfile } from '@/features/my-page';
 import type { ProfileWithEmail } from '@/features/my-page/api/getMyProfile';
 import { createClient } from '@/utils/supabase/client';
 import * as styles from './page.css';
-import { Button } from '@pin-plate/ui';
+import { Button, Input } from '@pin-plate/ui';
 
 export default function ProfileEditPage() {
   const { data: profile, isLoading } = useMyProfile();
@@ -66,7 +66,7 @@ function ProfileEditForm({ profile }: Props) {
 
         <div className={styles.inputGroup}>
           <label className={styles.inputLabel}>닉네임</label>
-          <input
+          <Input
             type="text"
             className={styles.inputField}
             value={nickname}
