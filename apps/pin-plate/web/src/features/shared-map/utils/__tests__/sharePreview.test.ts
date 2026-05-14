@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildSharePreview } from '../sharePreview';
 
@@ -30,5 +32,18 @@ describe('buildSharePreview', () => {
       description: '조용하고 맛있는 곳만 모았어요.',
       imageUrl: 'https://example.com/cover.jpg',
     });
+  });
+});
+
+describe('share preview deployment config', () => {
+  it('sets the production site URL for SST share metadata', () => {
+    const sstConfig = readFileSync(
+      resolve(process.cwd(), '../../../sst.config.ts'),
+      'utf8',
+    );
+
+    expect(sstConfig).toContain(
+      'NEXT_PUBLIC_SITE_URL: "https://pinonplate.com"',
+    );
   });
 });

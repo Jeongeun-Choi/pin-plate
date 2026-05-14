@@ -3,7 +3,12 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { getSharedMapBySlug } from '@/features/shared-map/api/getSharedMapBySlug';
 import { SharedMapView } from '@/features/shared-map/components/SharedMapView';
-import { buildSharePreview } from '@/features/shared-map/utils/sharePreview';
+import {
+  SHARE_PREVIEW_SITE_NAME,
+  buildSharePreviewUrl,
+  buildSharePreview,
+  resolveSharePreviewImageUrl,
+} from '@/features/shared-map/utils/sharePreview';
 import * as s from './page.css';
 
 interface Props {
@@ -30,6 +35,10 @@ export const generateMetadata = async ({
     placeCount: sharedMap.place_count,
     coverImageUrl: sharedMap.cover_image_url,
   });
+  const previewImageUrl = await resolveSharePreviewImageUrl(
+    sharedMap.cover_image_url,
+  );
+  const previewUrl = buildSharePreviewUrl(slug);
 
   return {
     title: preview.title,
@@ -37,14 +46,10 @@ export const generateMetadata = async ({
     openGraph: {
       title: preview.title,
       description: preview.description,
-      images: [{ url: preview.imageUrl }],
+      images: [{ url: previewImageUrl }],
+      url: previewUrl,
+      siteName: SHARE_PREVIEW_SITE_NAME,
       type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: preview.title,
-      description: preview.description,
-      images: [preview.imageUrl],
     },
   };
 };
