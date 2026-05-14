@@ -1,10 +1,15 @@
-import { createClient } from '@/utils/supabase/client';
 import { CreatePostPayload } from '../types/post';
 
 export const createPost = async (payload: CreatePostPayload) => {
-  const supabase = createClient();
-  const { data, error } = await supabase.from('posts').insert(payload).select();
+  const response = await fetch('/api/posts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
 
-  if (error) throw error;
-  return data;
+  if (!response.ok) {
+    throw new Error('post_create_failed');
+  }
+
+  return response.json();
 };
