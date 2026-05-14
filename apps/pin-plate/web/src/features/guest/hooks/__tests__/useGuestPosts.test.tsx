@@ -44,4 +44,21 @@ describe('useGuestPosts', () => {
     expect(result.current.guestPosts).toEqual([firstPost]);
     expect(result.current.guestPostCount).toBe(1);
   });
+
+  it('기존 image_keys가 없는 게스트 글도 읽는다', () => {
+    const legacyPost = createGuestPost('legacy');
+
+    expect(guestPostStorage.parseGuestPosts([legacyPost])).toEqual([
+      legacyPost,
+    ]);
+  });
+
+  it('URL 형태의 image_keys가 들어간 게스트 글은 무시한다', () => {
+    const unsafePost = {
+      ...createGuestPost('unsafe'),
+      image_keys: ['https://evil.test/photo.webp'],
+    };
+
+    expect(guestPostStorage.parseGuestPosts([unsafePost])).toEqual([]);
+  });
 });

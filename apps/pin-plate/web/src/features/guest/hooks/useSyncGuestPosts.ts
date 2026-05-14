@@ -45,6 +45,7 @@ export const useSyncGuestPosts = () => {
               content: guestPost.content,
               rating: guestPost.rating,
               image_urls: guestPost.image_urls,
+              image_keys: guestPost.image_keys ?? [],
               tags: guestPost.tags,
               place_name: guestPost.place_name,
               address: guestPost.address,

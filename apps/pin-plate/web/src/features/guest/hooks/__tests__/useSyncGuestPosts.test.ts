@@ -28,6 +28,8 @@ vi.mock('@/features/post/api/createPost', () => ({
   createPost: mockCreatePost,
 }));
 
+const TEST_IMAGE_ORIGIN = 'https://image.test';
+
 const createGuestPost = (id: string): GuestPost => ({
   id,
   created_at: '2026-05-13T00:00:00.000Z',
@@ -51,7 +53,11 @@ describe('useSyncGuestPosts', () => {
   });
 
   it('성공한 게스트 글만 로컬 저장소에서 제거하고 실패한 글은 남긴다', async () => {
-    const firstPost = createGuestPost('first');
+    const firstPost = {
+      ...createGuestPost('first'),
+      image_urls: [`${TEST_IMAGE_ORIGIN}/uploads/guests/guest-1/a.webp`],
+      image_keys: ['uploads/guests/guest-1/a.webp'],
+    };
     const secondPost = createGuestPost('second');
 
     guestPostStorage.saveGuestPosts([firstPost, secondPost]);
@@ -70,6 +76,12 @@ describe('useSyncGuestPosts', () => {
     });
 
     expect(syncResult).toEqual({ successCount: 1, failedCount: 1 });
+    expect(mockCreatePost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        image_urls: [`${TEST_IMAGE_ORIGIN}/uploads/guests/guest-1/a.webp`],
+        image_keys: ['uploads/guests/guest-1/a.webp'],
+      }),
+    );
     expect(guestPostStorage.loadGuestPosts()).toEqual([secondPost]);
     expect(mockCreatePlace).not.toHaveBeenCalled();
   });
