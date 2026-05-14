@@ -191,3 +191,14 @@ pnpm tsc
 - No `console.log` in production code — use structured logging utilities if needed
 - 전체적으로 deprecated 된 api나 함수는 쓰지마.
 - 기능 추가 및 수정시 발생할 수 있는 엣지 케이스를 생각하고 구현해줘.
+
+---
+
+## Code quality
+
+프로젝트의 유지보수를 생각하며 코드를 짠다.
+
+- 한 파일에 200줄 이상 넘어가지 않는다.
+- 의미있는 컴포넌트로 분리를 한다.
+- 모든 컴포넌트를 분리하진 않는다.
+- Nextjs를 사용하는만큼 최대한 활용한다.
