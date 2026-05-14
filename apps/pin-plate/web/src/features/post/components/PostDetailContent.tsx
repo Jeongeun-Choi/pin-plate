@@ -4,6 +4,7 @@ import * as styles from './styles/PostDetailModal.styles.css';
 import { Post } from '../types/post';
 import { IcFork, TagChip } from '@pin-plate/ui';
 import { getTagLabel } from '../constants/tags';
+import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
 
 interface IPostDetailContentProps {
   post: Post;
@@ -14,7 +15,10 @@ export default function PostDetailContent({
   post,
   metaSlot,
 }: IPostDetailContentProps) {
-  const hasImages = post.image_urls && post.image_urls.length > 0;
+  const firstImageUrl = post.image_urls[0] ?? '';
+  const detailImageUrl = firstImageUrl
+    ? (getTrustedImageUrl(firstImageUrl) ?? firstImageUrl)
+    : '';
 
   // Format date
   const formattedDate = new Date(post.created_at).toLocaleString('ko-KR', {
@@ -29,9 +33,9 @@ export default function PostDetailContent({
     <div className={styles.detailLayout}>
       {/* Image */}
       <div className={styles.imageContainer}>
-        {hasImages ? (
+        {detailImageUrl ? (
           <Image
-            src={post.image_urls[0]}
+            src={detailImageUrl}
             alt={post.place_name}
             fill
             sizes="(min-width: 768px) 450px, 100vw"

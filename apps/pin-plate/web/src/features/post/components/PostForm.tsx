@@ -10,6 +10,7 @@ import { Place } from '../types/search';
 import SelectedPlace from './SelectedPlace';
 import TagPickerSheet from './TagPickerSheet';
 import { getTagLabel } from '../constants/tags';
+import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
 
 interface Props {
   formState: {
@@ -196,7 +197,7 @@ const PostForm = ({ formState, handlers }: Props) => {
             {photos.map((image, index) => (
               <div key={index} style={{ position: 'relative' }}>
                 <Image
-                  src={image}
+                  src={getTrustedImageUrl(image) ?? image}
                   width={110}
                   height={110}
                   alt={`uploaded-${index}`}

@@ -13,6 +13,47 @@ import { getPlaceByKakaoId } from '@/features/place/api/getPlaceByKakaoId';
 import { createPlace } from '@/features/place/api/createPlace';
 import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
 import type { GuestPost } from '@/features/guest/types/guestPost';
+import { isTrustedImageKey } from '@/features/image/utils/imageReference';
+
+interface UploadedPhoto {
+  key: string | null;
+  url: string;
+}
+
+interface PresignedUploadItem {
+  originalName: string;
+  fileName: string;
+  imageKey?: string;
+  url: string;
+  fields: Record<string, string>;
+  objectUrl: string;
+  publicUrl?: string;
+}
+
+const UPLOAD_METADATA_FIELD_NAMES = new Set([
+  'url',
+  'objectUrl',
+  'publicUrl',
+  'imageKey',
+  'fileName',
+  'originalName',
+]);
+
+const getUploadedPhotoKey = (item: PresignedUploadItem): string | null => {
+  if (item.imageKey) return item.imageKey;
+  return isTrustedImageKey(item.fileName) ? item.fileName : null;
+};
+
+const appendPresignedPostFields = (
+  formData: FormData,
+  fields: Record<string, string>,
+) => {
+  Object.entries(fields).forEach(([key, value]) => {
+    if (!UPLOAD_METADATA_FIELD_NAMES.has(key)) {
+      formData.append(key, value);
+    }
+  });
+};
 
 export const usePostForm = (
   onSuccess?: () => void,
@@ -20,7 +61,7 @@ export const usePostForm = (
 ) => {
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(0);
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photoReferences, setPhotoReferences] = useState<UploadedPhoto[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(
     initialPlace ?? null,
@@ -43,6 +84,17 @@ export const usePostForm = (
     if (!selectedPlace || !posts) return [];
     return posts.filter((p) => p.kakao_place_id === selectedPlace.id);
   }, [selectedPlace, posts]);
+  const photoUrls = useMemo(
+    () => photoReferences.map((photoReference) => photoReference.url),
+    [photoReferences],
+  );
+  const photoKeys = useMemo(
+    () =>
+      photoReferences
+        .map((photoReference) => photoReference.key)
+        .filter((photoKey): photoKey is string => Boolean(photoKey)),
+    [photoReferences],
+  );
 
   const handlePlaceSelect = useCallback((place: Place | null) => {
     setSelectedPlace(place);
@@ -51,14 +103,14 @@ export const usePostForm = (
   const resetForm = useCallback(() => {
     setContent('');
     setRating(0);
-    setPhotos([]);
+    setPhotoReferences([]);
     setTags([]);
     setSelectedPlace(null);
   }, []);
 
   const handleUploadAndSetImages = useCallback(
     async (fileList: File[]) => {
-      const remainingSlots = 5 - photos.length;
+      const remainingSlots = 5 - photoReferences.length;
       if (fileList.length > remainingSlots) {
         alert(`최대 ${remainingSlots}장까지만 더 추가할 수 있습니다.`);
         return;
@@ -96,29 +148,21 @@ export const usePostForm = (
       const { urls } = await presignedRes.json();
 
       const uploadPromises = urls.map(
-        async (
-          item: {
-            originalName: string;
-            fileName: string;
-            url: string;
-            fields: Record<string, string>;
-            objectUrl: string;
-          },
-          index: number,
-        ) => {
+        async (item: PresignedUploadItem, index: number) => {
           const file = filesToUpload[index];
           try {
             const formData = new FormData();
-            Object.entries(item.fields).forEach(([k, v]) =>
-              formData.append(k, v),
-            );
+            appendPresignedPostFields(formData, item.fields);
             formData.append('file', file);
             const s3Res = await fetch(item.url, {
               method: 'POST',
               body: formData,
             });
             if (!s3Res.ok) throw new Error(`S3 Error: ${s3Res.status}`);
-            return item.objectUrl;
+            return {
+              key: getUploadedPhotoKey(item),
+              url: item.publicUrl ?? item.objectUrl,
+            };
           } catch (err) {
             console.error('S3 Upload Error:', err);
             throw new Error('S3 CORS or Network Error');
@@ -127,13 +171,13 @@ export const usePostForm = (
       );
 
       try {
-        const s3Urls = await Promise.all(uploadPromises);
-        setPhotos((prev) => [...prev, ...s3Urls]);
+        const uploadedPhotos = await Promise.all(uploadPromises);
+        setPhotoReferences((prev) => [...prev, ...uploadedPhotos]);
       } catch (err) {
         console.error(err);
       }
     },
-    [photos.length],
+    [photoReferences.length],
   );
 
   const handleSubmit = useCallback(async () => {
@@ -165,7 +209,8 @@ export const usePostForm = (
           kakao_place_id: selectedPlace.id,
           content,
           rating,
-          image_urls: photos,
+          image_urls: photoUrls,
+          image_keys: photoKeys,
           tags: sanitizeTags(tags),
         };
         addGuestPost(guestPost);
@@ -195,7 +240,8 @@ export const usePostForm = (
         place_id: existingPlace.id,
         content,
         rating,
-        image_urls: photos,
+        image_urls: photoUrls,
+        image_keys: photoKeys,
         place_name: selectedPlace.place_name,
         address,
         lat,
@@ -219,7 +265,8 @@ export const usePostForm = (
   }, [
     content,
     rating,
-    photos,
+    photoUrls,
+    photoKeys,
     tags,
     selectedPlace,
     viewMode,
@@ -231,7 +278,7 @@ export const usePostForm = (
   ]);
 
   const handleRemovePhoto = useCallback((index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotoReferences((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const handlers = useMemo(
@@ -258,7 +305,7 @@ export const usePostForm = (
     formState: {
       content,
       rating,
-      photos,
+      photos: photoUrls,
       tags,
       selectedPlace,
       currentLocation,

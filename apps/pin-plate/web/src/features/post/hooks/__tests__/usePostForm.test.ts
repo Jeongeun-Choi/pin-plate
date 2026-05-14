@@ -48,6 +48,7 @@ vi.mock('../../utils/compressImages', () => ({
 
 const mockFetch = vi.fn();
 const mockAlert = vi.fn();
+const TEST_IMAGE_ORIGIN = 'https://image.test';
 
 const createMockPlace = (overrides?: Partial<Place>): Place => ({
   id: '123',
@@ -166,7 +167,10 @@ describe('usePostForm', () => {
                 originalName: 'a.jpg',
                 fileName: 'a.jpg',
                 url: 'https://s3.example.com/a.jpg?token=x',
-                fields: {},
+                fields: {
+                  key: 'uploads/users/user-1/a.jpg',
+                  url: 'https://metadata.example.com/not-a-form-field',
+                },
                 objectUrl: 'https://cdn.example.com/a.jpg',
               },
               {
@@ -196,6 +200,9 @@ describe('usePostForm', () => {
     });
 
     expect(result.current.formState.photos).toHaveLength(2);
+    const firstUploadFormData = mockFetch.mock.calls[1][1]?.body as FormData;
+    expect(firstUploadFormData.get('url')).toBeNull();
+    expect(firstUploadFormData.get('key')).toBe('uploads/users/user-1/a.jpg');
 
     act(() => {
       result.current.handlers.handleRemovePhoto(0);
@@ -288,6 +295,25 @@ describe('usePostForm', () => {
     mockGetPlaceByKakaoId.mockResolvedValueOnce(null);
     mockCreatePlace.mockResolvedValueOnce({ id: 'place-456' });
     mockCreatePost.mockResolvedValueOnce({});
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            urls: [
+              {
+                originalName: 'dish.jpg',
+                fileName: 'uploads/users/user-123/dish.webp',
+                imageKey: 'uploads/users/user-123/dish.webp',
+                url: 'https://s3.example.com/dish.webp?token=x',
+                fields: {},
+                objectUrl: `${TEST_IMAGE_ORIGIN}/uploads/users/user-123/dish.webp`,
+                publicUrl: `${TEST_IMAGE_ORIGIN}/uploads/users/user-123/dish.webp`,
+              },
+            ],
+          }),
+      })
+      .mockResolvedValueOnce({ ok: true });
 
     const { result } = renderHook(() => usePostForm(mockOnSuccess), {
       wrapper: createWrapper(),
@@ -297,6 +323,12 @@ describe('usePostForm', () => {
       result.current.handlers.handlePlaceSelect(createMockPlace());
       result.current.handlers.setRating(4);
       result.current.handlers.setContent('맛있어요');
+    });
+
+    await act(async () => {
+      await result.current.handlers.handleUploadAndSetImages([
+        new File(['dish'], 'dish.jpg', { type: 'image/jpeg' }),
+      ]);
     });
 
     await act(async () => {
@@ -311,6 +343,8 @@ describe('usePostForm', () => {
         user_id: 'user-123',
         lat: 37.5,
         lng: 127.0,
+        image_urls: [`${TEST_IMAGE_ORIGIN}/uploads/users/user-123/dish.webp`],
+        image_keys: ['uploads/users/user-123/dish.webp'],
       }),
     );
     expect(mockAlert).toHaveBeenCalledWith('게시글이 등록되었습니다!');
