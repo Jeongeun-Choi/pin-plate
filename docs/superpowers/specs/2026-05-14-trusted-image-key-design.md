@@ -45,16 +45,17 @@ The canonical public URL is built from:
 IMAGE_PUBLIC_BASE_URL + "/" + imageKey
 ```
 
-For production, the preferred value is a CloudFront custom domain:
+For production, the preferred value is the configured CloudFront custom domain.
+Examples should use placeholder domains rather than real upload origins:
 
 ```txt
-IMAGE_PUBLIC_BASE_URL=https://images.pinonplate.com
+IMAGE_PUBLIC_BASE_URL=https://image.example.test
 ```
 
 Before CloudFront is ready, the S3 public origin can be used:
 
 ```txt
-IMAGE_PUBLIC_BASE_URL=https://<bucket>.s3.ap-northeast-2.amazonaws.com
+IMAGE_PUBLIC_BASE_URL=https://<bucket>.s3.<region>.amazonaws.com
 ```
 
 Open Graph metadata may still receive old `cover_image_url` data, so it should accept only URLs whose origin matches the configured public image base and whose path maps to a valid upload key. Everything else falls back to `/og-default.png` without a network request.

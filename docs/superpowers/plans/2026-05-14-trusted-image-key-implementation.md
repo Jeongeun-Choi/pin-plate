@@ -65,11 +65,11 @@ import {
 
 describe('imageReference', () => {
   it('builds a public URL from a trusted key', () => {
-    process.env.IMAGE_PUBLIC_BASE_URL = 'https://images.pinonplate.com/';
+    process.env.IMAGE_PUBLIC_BASE_URL = 'https://image.example.test/';
 
     expect(
       buildPublicImageUrl('uploads/users/user-1/photo.webp'),
-    ).toBe('https://images.pinonplate.com/uploads/users/user-1/photo.webp');
+    ).toBe('https://image.example.test/uploads/users/user-1/photo.webp');
   });
 
   it('accepts only keys for the current user prefix', () => {
@@ -85,13 +85,13 @@ describe('imageReference', () => {
   });
 
   it('trusts public URLs only when they map to an allowed upload key', () => {
-    process.env.IMAGE_PUBLIC_BASE_URL = 'https://images.pinonplate.com';
+    process.env.IMAGE_PUBLIC_BASE_URL = 'https://image.example.test';
 
     expect(
-      getTrustedImageUrl('https://images.pinonplate.com/uploads/users/user-1/photo.webp'),
-    ).toBe('https://images.pinonplate.com/uploads/users/user-1/photo.webp');
+      getTrustedImageUrl('https://image.example.test/uploads/users/user-1/photo.webp'),
+    ).toBe('https://image.example.test/uploads/users/user-1/photo.webp');
     expect(getTrustedImageUrl('https://evil.test/uploads/users/user-1/photo.webp')).toBeNull();
-    expect(getTrustedImageUrl('https://images.pinonplate.com/private/photo.webp')).toBeNull();
+    expect(getTrustedImageUrl('https://image.example.test/private/photo.webp')).toBeNull();
   });
 });
 ```
@@ -361,7 +361,7 @@ it('creates a post from trusted user image keys', async () => {
   expect(response.status).toBe(200);
   expect(mockSupabaseInsert).toHaveBeenCalledWith(
     expect.objectContaining({
-      image_urls: ['https://images.pinonplate.com/uploads/users/user-1/photo.webp'],
+      image_urls: ['https://image.example.test/uploads/users/user-1/photo.webp'],
       user_id: 'user-1',
     }),
   );
@@ -479,8 +479,8 @@ Change upload test fixtures to include both key and URL:
   imageKey: 'uploads/users/user-123/a.webp',
   url: 'https://s3.example.com/form',
   fields: {},
-  objectUrl: 'https://images.pinonplate.com/uploads/users/user-123/a.webp',
-  publicUrl: 'https://images.pinonplate.com/uploads/users/user-123/a.webp',
+  objectUrl: 'https://image.example.test/uploads/users/user-123/a.webp',
+  publicUrl: 'https://image.example.test/uploads/users/user-123/a.webp',
 }
 ```
 
@@ -569,7 +569,7 @@ Add `image_keys` to the guest post fixture and assert `createPost` receives it:
 ```ts
 expect(mockCreatePost).toHaveBeenCalledWith(
   expect.objectContaining({
-    image_urls: ['https://images.pinonplate.com/uploads/guests/guest-1/a.webp'],
+    image_urls: ['https://image.example.test/uploads/guests/guest-1/a.webp'],
     image_keys: ['uploads/guests/guest-1/a.webp'],
   }),
 );
