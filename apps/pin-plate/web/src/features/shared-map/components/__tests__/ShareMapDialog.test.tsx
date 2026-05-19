@@ -69,28 +69,122 @@ describe('ShareMapDialog', () => {
     vi.unstubAllGlobals();
   });
 
-  it('disables creation when selected tag criteria has no places', () => {
+  it('shows only tags used by saved places as selectable chips', () => {
     render(
       <ShareMapDialog
         isOpen={true}
-        places={[createPlace('1', '성수 카페', ['work'])]}
+        places={[
+          createPlace('1', '작업 카페', ['work']),
+          createPlace('2', '카페 투어', ['cafe']),
+        ]}
         ownerId="user-1"
         onClose={vi.fn()}
       />,
     );
 
     fireEvent.click(screen.getByRole('radio', { name: '태그' }));
-    fireEvent.click(screen.getByRole('button', { name: '혼밥' }));
-    fireEvent.click(screen.getByRole('option', { name: '데이트' }));
 
     expect(
-      screen.getByRole('button', { name: '공유 링크 만들기' }),
-    ).toBeDisabled();
-    expect(
-      screen.getByText(
-        '이 태그가 붙은 장소가 없어요. 다른 태그나 직접 선택을 써 보세요.',
-      ),
+      screen.getByRole('button', { name: '작업하기좋음 1개' }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '카페 1개' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: '혼밥 0개' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('keeps a long tag list compact behind a full tag picker', () => {
+    render(
+      <ShareMapDialog
+        isOpen={true}
+        places={[
+          createPlace('1', '혼밥집', ['solo']),
+          createPlace('2', '데이트집', ['date']),
+          createPlace('3', '친구모임집', ['friends']),
+          createPlace('4', '가족식사집', ['family']),
+          createPlace('5', '작업 카페', ['work']),
+          createPlace('6', '조용한 카페', ['quiet']),
+          createPlace('7', '힙한 식당', ['hip']),
+          createPlace('8', '아늑한 식당', ['cozy']),
+          createPlace('9', '뷰 좋은 식당', ['view']),
+        ]}
+        ownerId="user-1"
+        onClose={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('radio', { name: '태그' }));
+
+    expect(
+      screen.getByRole('button', { name: '태그 더 보기' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: '뷰좋은 1개' }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '태그 더 보기' }));
+
+    expect(
+      screen.getByRole('heading', { name: '공유할 태그 선택' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('searchbox', { name: '태그 검색' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '추천' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '목적' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '뷰좋은 1개' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '선택 완료' }),
+    ).toBeInTheDocument();
+  });
+
+  it('filters the full tag picker with search and returns after completion', () => {
+    render(
+      <ShareMapDialog
+        isOpen={true}
+        places={[
+          createPlace('1', '혼밥집', ['solo']),
+          createPlace('2', '혼밥 카페', ['solo']),
+          createPlace('3', '데이트집', ['date']),
+          createPlace('4', '친구모임집', ['friends']),
+          createPlace('5', '가족식사집', ['family']),
+          createPlace('6', '작업 카페', ['work']),
+          createPlace('7', '조용한 카페', ['quiet']),
+          createPlace('8', '힙한 식당', ['hip']),
+          createPlace('9', '아늑한 식당', ['cozy']),
+          createPlace('10', '뷰 좋은 식당', ['view']),
+        ]}
+        ownerId="user-1"
+        onClose={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('radio', { name: '태그' }));
+    fireEvent.click(screen.getByRole('button', { name: '태그 더 보기' }));
+    fireEvent.change(screen.getByRole('searchbox', { name: '태그 검색' }), {
+      target: { value: '뷰' },
+    });
+
+    expect(
+      screen.getByRole('heading', { name: '검색 결과' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: '목적' }),
+    ).not.toBeInTheDocument();
+
+    const viewTagButton = screen.getByRole('button', { name: '뷰좋은 1개' });
+    fireEvent.click(viewTagButton);
+
+    expect(viewTagButton).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: '선택 완료' }));
+
+    expect(screen.getByText('뷰좋은 장소 1개 중 1개 선택')).toBeInTheDocument();
   });
 
   it('updates status criteria through the dropdown option list', () => {
@@ -165,24 +259,23 @@ describe('ShareMapDialog', () => {
     await waitFor(() => expect(headerCloseButton).toHaveFocus());
   });
 
-  it('suggests another criteria when a tag has no matching places', () => {
+  it('disables creation when no saved places have tags', () => {
     render(
       <ShareMapDialog
         isOpen={true}
-        places={[createPlace('1', '성수 카페', ['work'])]}
+        places={[createPlace('1', '성수 카페', [])]}
         ownerId="user-1"
         onClose={vi.fn()}
       />,
     );
 
     fireEvent.click(screen.getByRole('radio', { name: '태그' }));
-    fireEvent.click(screen.getByRole('button', { name: '혼밥' }));
-    fireEvent.click(screen.getByRole('option', { name: '데이트' }));
 
     expect(
-      screen.getByText(
-        '이 태그가 붙은 장소가 없어요. 다른 태그나 직접 선택을 써 보세요.',
-      ),
+      screen.getByRole('button', { name: '공유 링크 만들기' }),
+    ).toBeDisabled();
+    expect(
+      screen.getByText('태그가 있는 장소가 없어요. 직접 선택을 써 보세요.'),
     ).toBeInTheDocument();
   });
 
@@ -259,6 +352,94 @@ describe('ShareMapDialog', () => {
     expect(screen.getByText('성수 추천 지도')).toBeInTheDocument();
     expect(screen.getByText('장소 1개')).toBeInTheDocument();
     expect(screen.getByText('성수 카페')).toBeInTheDocument();
+  });
+
+  it('lets users remove places matched by a tag before creating a snapshot', async () => {
+    mutateAsync.mockResolvedValueOnce(createSharedMapResponse());
+
+    render(
+      <ShareMapDialog
+        isOpen={true}
+        places={[
+          createPlace('1', '혼밥 카페', ['solo']),
+          createPlace('2', '혼밥 밥집', ['solo']),
+          createPlace('3', '데이트 식당', ['date']),
+        ]}
+        ownerId="user-1"
+        onClose={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('radio', { name: '태그' }));
+
+    expect(
+      screen.getByRole('button', { name: '혼밥 2개' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '데이트 1개' }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText('혼밥 장소 2개 중 2개 선택')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '장소 확인하기' }));
+
+    expect(
+      screen.getByRole('heading', { name: '공유할 장소 선택' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /혼밥 카페/ })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /혼밥 밥집/ })).toBeChecked();
+    expect(
+      screen.queryByRole('checkbox', { name: /데이트 식당/ }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /혼밥 카페/ }));
+    fireEvent.click(screen.getByRole('button', { name: '1개 선택 완료' }));
+
+    expect(screen.getByText('혼밥 장소 2개 중 1개 선택')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '공유 링크 만들기' }));
+
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: expect.objectContaining({
+            criteriaType: 'tag',
+            criteriaValue: 'solo',
+            places: [
+              expect.objectContaining({
+                id: '2',
+                place_name: '혼밥 밥집',
+              }),
+            ],
+          }),
+        }),
+      ),
+    );
+  });
+
+  it('does not expose place reorder controls in the selection sheet', () => {
+    render(
+      <ShareMapDialog
+        isOpen={true}
+        places={[
+          createPlace('1', '첫 번째 장소', ['solo']),
+          createPlace('2', '두 번째 장소', ['solo']),
+          createPlace('3', '세 번째 장소', ['solo']),
+        ]}
+        ownerId="user-1"
+        onClose={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('radio', { name: '태그' }));
+    fireEvent.click(screen.getByRole('button', { name: '장소 확인하기' }));
+
+    expect(
+      screen.queryByRole('button', { name: /위로 이동/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /아래로 이동/ }),
+    ).not.toBeInTheDocument();
   });
 
   it('changes the primary footer action to sharing after link creation', async () => {
