@@ -69,19 +69,10 @@ export const subheading = style({
 export const closeButton = style({
   width: 32,
   height: 32,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
   flexShrink: 0,
-  border: 'none',
+  padding: 0,
   borderRadius: vars.borderRadius.full,
-  backgroundColor: 'transparent',
   color: vars.colors.text.sub,
-  cursor: 'pointer',
-  ':hover': {
-    backgroundColor: vars.colors.primary.light,
-    color: vars.colors.text.primary,
-  },
 });
 
 export const body = style({
@@ -235,38 +226,6 @@ export const tagChipGrid = style({
   flexWrap: 'wrap',
   alignItems: 'center',
   gap: vars.spacing[2],
-});
-
-export const tagChip = style({
-  minHeight: 36,
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: vars.spacing[1],
-  padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
-  borderRadius: vars.borderRadius.full,
-  backgroundColor: vars.colors.common.white,
-  color: vars.colors.text.body,
-  fontSize: vars.fontSize.sm,
-  fontWeight: vars.fontWeight.bold,
-  lineHeight: vars.lineHeight.body,
-  cursor: 'pointer',
-  ':hover': {
-    backgroundColor: vars.colors.primary.light,
-  },
-});
-
-export const selectedTagChip = style({
-  borderColor: vars.colors.primary.default,
-  backgroundColor: vars.colors.primary.light,
-  color: vars.colors.text.primary,
-});
-
-export const tagChipCount = style({
-  color: vars.colors.text.sub,
-  fontSize: vars.fontSize.xs,
-  fontWeight: vars.fontWeight.regular,
 });
 
 export const emptyTagText = style({
@@ -550,39 +509,5 @@ export const footer = style({
       bottom: 0,
       padding: `${vars.spacing[4]} ${vars.spacing[4]} calc(${vars.spacing[4]} + env(safe-area-inset-bottom))`,
     },
-  },
-});
-
-export const secondaryButton = style({
-  minHeight: 40,
-  padding: `${vars.spacing[2]} ${vars.spacing[4]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
-  borderRadius: vars.borderRadius.full,
-  backgroundColor: vars.colors.common.white,
-  color: vars.colors.text.body,
-  fontSize: vars.fontSize.sm,
-  fontWeight: vars.fontWeight.bold,
-  cursor: 'pointer',
-  ':hover': {
-    backgroundColor: vars.colors.primary.light,
-  },
-});
-
-export const primaryButton = style({
-  minHeight: 40,
-  padding: `${vars.spacing[2]} ${vars.spacing[4]}`,
-  border: 'none',
-  borderRadius: vars.borderRadius.full,
-  backgroundColor: vars.colors.primary.default,
-  color: vars.colors.common.white,
-  fontSize: vars.fontSize.sm,
-  fontWeight: vars.fontWeight.bold,
-  cursor: 'pointer',
-  ':hover': {
-    backgroundColor: vars.colors.primary.hover,
-  },
-  ':disabled': {
-    opacity: 0.5,
-    cursor: 'not-allowed',
   },
 });

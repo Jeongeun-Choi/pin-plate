@@ -259,6 +259,34 @@ describe('ShareMapDialog', () => {
     await waitFor(() => expect(headerCloseButton).toHaveFocus());
   });
 
+  it('keeps region typing separate from the title field and preserves input focus', async () => {
+    render(
+      <ShareMapDialog
+        isOpen={true}
+        places={[createPlace('1', '성수 카페', ['work'])]}
+        ownerId="user-1"
+        onClose={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('radio', { name: '지역' }));
+
+    const titleInput = screen.getByRole('textbox', {
+      name: '공유 지도 제목',
+    });
+    const regionInput = screen.getByRole('textbox', {
+      name: '공유할 지역',
+    });
+
+    regionInput.focus();
+    fireEvent.change(regionInput, { target: { value: '성수동' } });
+
+    expect(regionInput).toHaveValue('성수동');
+    expect(titleInput).toHaveValue('');
+    expect(titleInput).toHaveAttribute('placeholder', '예: 성수 맛집 지도');
+    await waitFor(() => expect(regionInput).toHaveFocus());
+  });
+
   it('disables creation when no saved places have tags', () => {
     render(
       <ShareMapDialog
