@@ -15,6 +15,12 @@ const base = style({
   border: `1.5px solid ${vars.colors.secondary.border}`,
   backgroundColor: vars.colors.common.white,
   color: vars.colors.text.sub,
+  selectors: {
+    '&:disabled': {
+      cursor: 'not-allowed',
+      opacity: 0.45,
+    },
+  },
 });
 
 export const chip = base;
