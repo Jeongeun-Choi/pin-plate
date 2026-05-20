@@ -7,9 +7,12 @@ import {
   getCandidatePlaces,
   getInitialCriteriaValue,
   getSelectedPlaceIds,
+  getShareableStatusOptions,
   MAX_SELECTED_PLACES,
 } from './shareMapDialogLogic';
 import { getSelectionCopy } from './shareMapSelectionCopy';
+import { useShareMapPickerState } from './useShareMapPickerState';
+import { useShareMapRegionSelection } from './useShareMapRegionSelection';
 import { useShareMapTagSelection } from './useShareMapTagSelection';
 
 interface Props {
@@ -34,15 +37,22 @@ export const useShareMapSelection = ({ places, onSelectionChange }: Props) => {
   const [placeSelectionState, setPlaceSelectionState] = useState(
     createInitialPlaceSelectionState,
   );
-  const [isPlacePickerOpen, setIsPlacePickerOpen] = useState(false);
-  const [isTagPickerOpen, setIsTagPickerOpen] = useState(false);
-  const [tagSearchQuery, setTagSearchQuery] = useState('');
 
+  const pickerState = useShareMapPickerState();
   const tagSelection = useShareMapTagSelection({
     criteriaValue,
     places,
-    tagSearchQuery,
+    tagSearchQuery: pickerState.tagSearchQuery,
   });
+  const regionSelection = useShareMapRegionSelection({
+    criteriaValue,
+    places,
+    regionSearchQuery: pickerState.regionSearchQuery,
+  });
+  const shareableStatusOptions = useMemo(
+    () => getShareableStatusOptions(places),
+    [places],
+  );
 
   const candidatePlaces = useMemo(
     () => getCandidatePlaces(places, criteriaType, criteriaValue),
@@ -92,6 +102,7 @@ export const useShareMapSelection = ({ places, onSelectionChange }: Props) => {
     const nextCriteriaValue = getInitialCriteriaValue(
       nextCriteriaType,
       tagSelection.shareableTagOptions,
+      regionSelection.shareableRegionOptions,
     );
     setCriteriaType(nextCriteriaType);
     setCriteriaValue(nextCriteriaValue);
@@ -100,9 +111,7 @@ export const useShareMapSelection = ({ places, onSelectionChange }: Props) => {
       selectedPlaceIds: [],
       hasCustomSelection: false,
     });
-    setIsPlacePickerOpen(false);
-    setIsTagPickerOpen(false);
-    setTagSearchQuery('');
+    pickerState.resetPickerState();
     onSelectionChange();
   };
 
@@ -120,15 +129,6 @@ export const useShareMapSelection = ({ places, onSelectionChange }: Props) => {
     onSelectionChange();
   };
 
-  const handlePlacePickerOpen = () => {
-    setIsTagPickerOpen(false);
-    setIsPlacePickerOpen(true);
-  };
-
-  const handlePlacePickerClose = () => {
-    setIsPlacePickerOpen(false);
-  };
-
   const handleCriteriaValueChange = (nextCriteriaValue: string) => {
     setCriteriaValue(nextCriteriaValue);
     setPlaceSelectionState({
@@ -139,27 +139,6 @@ export const useShareMapSelection = ({ places, onSelectionChange }: Props) => {
     onSelectionChange();
   };
 
-  const handleTagPickerOpen = () => {
-    setIsPlacePickerOpen(false);
-    setTagSearchQuery('');
-    setIsTagPickerOpen(true);
-  };
-
-  const handleTagPickerClose = () => {
-    setIsTagPickerOpen(false);
-    setTagSearchQuery('');
-  };
-
-  const handleTagSearchQueryChange = (nextSearchQuery: string) => {
-    setTagSearchQuery(nextSearchQuery);
-  };
-
-  const resetPickerState = () => {
-    setIsPlacePickerOpen(false);
-    setIsTagPickerOpen(false);
-    setTagSearchQuery('');
-  };
-
   return {
     candidatePlaces,
     criteriaType,
@@ -167,25 +146,19 @@ export const useShareMapSelection = ({ places, onSelectionChange }: Props) => {
     emptySharePlacesMessage,
     handleCriteriaTypeChange,
     handleCriteriaValueChange,
-    handlePlacePickerClose,
-    handlePlacePickerOpen,
     handlePlaceToggle,
-    handleTagPickerClose,
-    handleTagPickerOpen,
-    handleTagSearchQueryChange,
     hasNoCandidatePlaces,
     hasNoShareablePlaces,
     isPlaceCountCapped,
-    isPlacePickerOpen,
-    isTagPickerOpen,
     limitedPlaces,
     placePickerButtonLabel,
-    resetPickerState,
     selectedPlaceIdSet,
     selectedSnapshotPlaceCount,
     selectionSummaryDescription,
     selectionSummaryTitle,
-    tagSearchQuery,
+    shareableStatusOptions,
+    ...pickerState,
+    ...regionSelection,
     ...tagSelection,
   };
 };

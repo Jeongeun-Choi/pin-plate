@@ -1,40 +1,51 @@
-import { Button, Dropdown, Input, Radio } from '@pin-plate/ui';
+import { Button, Radio } from '@pin-plate/ui';
 import type { SharedMapCriteriaType } from '../types/sharedMap';
-import type { ShareableTagOption } from './shareMapDialogTypes';
-import {
-  CRITERIA_OPTIONS,
-  SHAREABLE_STATUS_OPTIONS,
-} from './shareMapDialogLogic';
+import type {
+  ShareableRegionOption,
+  ShareableStatusOption,
+  ShareableTagOption,
+} from './shareMapDialogTypes';
+import { CRITERIA_OPTIONS } from './shareMapDialogLogic';
 import { ShareMapTagChips } from './ShareMapTagChips';
+import { ShareMapRegionChips } from './ShareMapRegionChips';
+import { ShareMapStatusChips } from './ShareMapStatusChips';
 import * as s from './ShareMapDialog.css';
 
 interface Props {
   criteriaType: SharedMapCriteriaType;
   criteriaValue: string;
   hasHiddenTagOptions: boolean;
+  hasHiddenRegionOptions: boolean;
   hasNoCandidatePlaces: boolean;
   placePickerButtonLabel: string;
+  previewRegionOptions: ShareableRegionOption[];
   previewTagOptions: ShareableTagOption[];
   selectionSummaryDescription: string;
   selectionSummaryTitle: string;
+  shareableStatusOptions: ShareableStatusOption[];
   onCriteriaTypeChange: (nextCriteriaType: SharedMapCriteriaType) => void;
   onCriteriaValueChange: (nextCriteriaValue: string) => void;
   onPlacePickerOpen: () => void;
+  onRegionPickerOpen: () => void;
   onTagPickerOpen: () => void;
 }
 
 export const ShareMapCriteriaControls = ({
   criteriaType,
   criteriaValue,
+  hasHiddenRegionOptions,
   hasHiddenTagOptions,
   hasNoCandidatePlaces,
   placePickerButtonLabel,
+  previewRegionOptions,
   previewTagOptions,
   selectionSummaryDescription,
   selectionSummaryTitle,
+  shareableStatusOptions,
   onCriteriaTypeChange,
   onCriteriaValueChange,
   onPlacePickerOpen,
+  onRegionPickerOpen,
   onTagPickerOpen,
 }: Props) => (
   <>
@@ -56,17 +67,11 @@ export const ShareMapCriteriaControls = ({
 
     <div className={s.criteriaControls}>
       {criteriaType === 'status' && (
-        <div className={s.fieldGroup}>
-          <label className={s.label} htmlFor="share-map-status">
-            공유할 상태
-          </label>
-          <Dropdown
-            id="share-map-status"
-            value={criteriaValue}
-            options={SHAREABLE_STATUS_OPTIONS}
-            onChange={onCriteriaValueChange}
-          />
-        </div>
+        <ShareMapStatusChips
+          selectedStatusValue={criteriaValue}
+          shareableStatusOptions={shareableStatusOptions}
+          onStatusSelect={onCriteriaValueChange}
+        />
       )}
 
       {criteriaType === 'tag' && (
@@ -80,18 +85,13 @@ export const ShareMapCriteriaControls = ({
       )}
 
       {criteriaType === 'region' && (
-        <div className={s.fieldGroup}>
-          <label className={s.label} htmlFor="share-map-region">
-            공유할 지역
-          </label>
-          <Input
-            id="share-map-region"
-            value={criteriaValue}
-            maxLength={80}
-            onChange={(event) => onCriteriaValueChange(event.target.value)}
-            placeholder="예: 성수동, 마포구"
-          />
-        </div>
+        <ShareMapRegionChips
+          selectedRegionValue={criteriaValue}
+          previewRegionOptions={previewRegionOptions}
+          hasHiddenRegionOptions={hasHiddenRegionOptions}
+          onRegionSelect={onCriteriaValueChange}
+          onRegionPickerOpen={onRegionPickerOpen}
+        />
       )}
 
       <div className={s.selectionSummary}>

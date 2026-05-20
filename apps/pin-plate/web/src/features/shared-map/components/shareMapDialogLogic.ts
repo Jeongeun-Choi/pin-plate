@@ -4,17 +4,23 @@ import type { PlaceWithStats, PlaceStatus } from '@/features/place/types/place';
 import type { SharedMapCriteriaType } from '../types/sharedMap';
 import type {
   PlaceSelectionState,
+  ShareableStatusOption,
   ShareableTagOption,
 } from './shareMapDialogTypes';
+import { doesPlaceMatchRegion } from './shareMapRegionLogic';
 
 export const MAX_SELECTED_PLACES = 100;
 
 const SHAREABLE_STATUSES: PlaceStatus[] = ['recommend', 'want_to_revisit'];
 
-export const SHAREABLE_STATUS_OPTIONS = SHAREABLE_STATUSES.map((status) => ({
-  value: status,
-  label: PLACE_STATUS_FILTER_LABEL[status],
-}));
+export const getShareableStatusOptions = (
+  places: PlaceWithStats[],
+): ShareableStatusOption[] =>
+  SHAREABLE_STATUSES.map((status) => ({
+    value: status,
+    label: PLACE_STATUS_FILTER_LABEL[status],
+    count: places.filter((place) => place.status === status).length,
+  }));
 
 export const CRITERIA_OPTIONS: {
   value: SharedMapCriteriaType;
@@ -40,12 +46,16 @@ export const createInitialPlaceSelectionState = (): PlaceSelectionState => ({
 export const getInitialCriteriaValue = (
   criteriaType: SharedMapCriteriaType,
   shareableTagOptions: ShareableTagOption[] = [],
+  shareableRegionOptions: { value: string }[] = [],
 ) => {
   if (criteriaType === 'status') {
     return 'recommend';
   }
   if (criteriaType === 'tag') {
     return shareableTagOptions[0]?.value ?? '';
+  }
+  if (criteriaType === 'region') {
+    return shareableRegionOptions[0]?.value ?? '';
   }
   return '';
 };
@@ -66,7 +76,9 @@ export const getCandidatePlaces = (
     if (!normalizedRegion) {
       return [];
     }
-    return places.filter((place) => place.address.includes(normalizedRegion));
+    return places.filter((place) =>
+      doesPlaceMatchRegion(place, normalizedRegion),
+    );
   }
   return places;
 };

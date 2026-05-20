@@ -34,19 +34,23 @@ export const ShareMapMainForm = ({
     handleCriteriaValueChange,
     handleDescriptionChange,
     handlePlacePickerOpen,
+    handleRegionPickerOpen,
     handleTagPickerOpen,
     handleTitleChange,
+    hasHiddenRegionOptions,
     hasHiddenTagOptions,
     hasNoCandidatePlaces,
     hasNoShareablePlaces,
     isPlaceCountCapped,
     limitedPlaces,
     placePickerButtonLabel,
+    previewRegionOptions,
     previewTagOptions,
     selectedSnapshotPlaceCount,
     selectionSummaryDescription,
     selectionSummaryTitle,
     shareFeedbackMessage,
+    shareableStatusOptions,
     shareMapTitle,
     shareUrl,
     title,
@@ -94,15 +98,19 @@ export const ShareMapMainForm = ({
         <ShareMapCriteriaControls
           criteriaType={criteriaType}
           criteriaValue={criteriaValue}
+          hasHiddenRegionOptions={hasHiddenRegionOptions}
           hasHiddenTagOptions={hasHiddenTagOptions}
           hasNoCandidatePlaces={hasNoCandidatePlaces}
           placePickerButtonLabel={placePickerButtonLabel}
+          previewRegionOptions={previewRegionOptions}
           previewTagOptions={previewTagOptions}
           selectionSummaryDescription={selectionSummaryDescription}
           selectionSummaryTitle={selectionSummaryTitle}
+          shareableStatusOptions={shareableStatusOptions}
           onCriteriaTypeChange={handleCriteriaTypeChange}
           onCriteriaValueChange={handleCriteriaValueChange}
           onPlacePickerOpen={handlePlacePickerOpen}
+          onRegionPickerOpen={handleRegionPickerOpen}
           onTagPickerOpen={handleTagPickerOpen}
         />
 

@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ShareMapDialog } from '../ShareMapDialog';
 import { useCreateSharedMap } from '../../hooks/useCreateSharedMap';
-import type { PlaceWithStats } from '@/features/place/types/place';
+import type { PlaceStatus, PlaceWithStats } from '@/features/place/types/place';
 import type { SharedMap } from '../../types/sharedMap';
 
 vi.mock('../../hooks/useCreateSharedMap', () => ({
@@ -15,15 +15,17 @@ const createPlace = (
   id: string,
   name: string,
   tags: string[],
+  address = '서울 성동구 성수동',
+  status: PlaceStatus = 'recommend',
 ): PlaceWithStats => ({
   id,
   user_id: 'user-1',
   kakao_place_id: `kakao-${id}`,
   place_name: name,
-  address: '서울 성동구 성수동',
+  address,
   lat: 37.5,
   lng: 127.1,
-  status: 'recommend',
+  status,
   tags,
   created_at: '2026-05-13T00:00:00.000Z',
   updated_at: '2026-05-13T00:00:00.000Z',
@@ -187,7 +189,44 @@ describe('ShareMapDialog', () => {
     expect(screen.getByText('뷰좋은 장소 1개 중 1개 선택')).toBeInTheDocument();
   });
 
-  it('updates status criteria through the dropdown option list', () => {
+  it('shows status criteria as chips with counts', () => {
+    render(
+      <ShareMapDialog
+        isOpen={true}
+        places={[
+          createPlace('1', '성수 카페', ['work']),
+          createPlace(
+            '2',
+            '다시 갈 식당',
+            ['date'],
+            '서울 성동구 서울숲',
+            'want_to_revisit',
+          ),
+        ]}
+        ownerId="user-1"
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '추천 1개' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '또 갈 곳 1개' }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '또 갈 곳 1개' }));
+
+    expect(
+      screen.getByText('또 갈 곳 장소 1개 중 1개 선택'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '공유 링크 만들기' }),
+    ).toBeEnabled();
+  });
+
+  it('disables empty status chips', () => {
     render(
       <ShareMapDialog
         isOpen={true}
@@ -197,24 +236,26 @@ describe('ShareMapDialog', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '추천' }));
-    fireEvent.click(screen.getByRole('option', { name: '또 갈 곳' }));
-
+    expect(screen.getByRole('button', { name: '또 갈 곳 0개' })).toBeDisabled();
     expect(
       screen.getByRole('button', { name: '공유 링크 만들기' }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(
-      screen.getByText(
+      screen.queryByText(
         '공유할 장소가 없어요. 다른 상태나 직접 선택을 써 보세요.',
       ),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
   });
 
-  it('disables creation when region criteria is blank', () => {
+  it('offers saved regions as chips instead of a free text field', () => {
     render(
       <ShareMapDialog
         isOpen={true}
-        places={[createPlace('1', '성수 카페', ['work'])]}
+        places={[
+          createPlace('1', '성수 카페', ['work'], '서울 성동구 성수동'),
+          createPlace('2', '연남 식당', ['date'], '서울 마포구 연남동'),
+          createPlace('3', '서울숲 카페', ['cafe'], '서울 성동구 서울숲'),
+        ]}
         ownerId="user-1"
         onClose={vi.fn()}
       />,
@@ -223,24 +264,97 @@ describe('ShareMapDialog', () => {
     fireEvent.click(screen.getByRole('radio', { name: '지역' }));
 
     expect(
-      screen.getByRole('button', { name: '공유 링크 만들기' }),
-    ).toBeDisabled();
+      screen.queryByRole('textbox', { name: '공유할 지역' }),
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByText('지역명을 입력하면 주소에 포함된 장소를 찾아요.'),
+      screen.getByRole('button', { name: '서울시 성동구 2개' }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '서울시 마포구 1개' }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '서울시 마포구 1개' }));
+
+    expect(
+      screen.getByText('서울시 마포구 장소 1개 중 1개 선택'),
+    ).toBeInTheDocument();
+  });
+
+  it('keeps a long region list compact behind a full region picker', () => {
+    render(
+      <ShareMapDialog
+        isOpen={true}
+        places={[
+          createPlace('1', '장소 1', [], '서울 성동구 성수동'),
+          createPlace('2', '장소 2', [], '서울 성동구 서울숲'),
+          createPlace('3', '장소 3', [], '서울 마포구 연남동'),
+          createPlace('4', '장소 4', [], '서울 마포구 망원동'),
+          createPlace('5', '장소 5', [], '서울 강남구 역삼동'),
+          createPlace('6', '장소 6', [], '서울 강남구 삼성동'),
+          createPlace('7', '장소 7', [], '서울 용산구 한남동'),
+          createPlace('8', '장소 8', [], '서울 용산구 이태원동'),
+          createPlace('9', '장소 9', [], '서울 종로구 계동'),
+          createPlace('10', '장소 10', [], '서울 종로구 삼청동'),
+          createPlace('11', '장소 11', [], '서울 서대문구 연희동'),
+          createPlace('12', '장소 12', [], '서울 서대문구 북가좌동'),
+          createPlace('13', '장소 13', [], '서울 송파구 잠실동'),
+          createPlace('14', '장소 14', [], '서울 송파구 송파동'),
+          createPlace('15', '장소 15', [], '서울 영등포구 여의도동'),
+          createPlace('16', '장소 16', [], '서울 영등포구 문래동'),
+          createPlace('17', '장소 17', [], '경기 성남시 분당구 정자동'),
+        ]}
+        ownerId="user-1"
+        onClose={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('radio', { name: '지역' }));
+
+    expect(
+      screen.getByRole('button', { name: '지역 더 보기' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: '성남시 분당구 1개' }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '지역 더 보기' }));
+
+    expect(
+      screen.getByRole('heading', { name: '공유할 지역 선택' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('searchbox', { name: '지역 검색' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '성남시 분당구 1개' }),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole('searchbox', { name: '지역 검색' }), {
+      target: { value: '정자동' },
+    });
+
+    expect(
+      screen.getByRole('heading', { name: '검색 결과' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '성남시 분당구 1개' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: '서울시 성동구 2개' }),
+    ).not.toBeInTheDocument();
   });
 
   it('wraps tab focus past a disabled create button', async () => {
     render(
       <ShareMapDialog
         isOpen={true}
-        places={[createPlace('1', '성수 카페', ['work'])]}
+        places={[createPlace('1', '성수 카페', [])]}
         ownerId="user-1"
         onClose={vi.fn()}
       />,
     );
 
-    fireEvent.click(screen.getByRole('radio', { name: '지역' }));
+    fireEvent.click(screen.getByRole('radio', { name: '태그' }));
 
     const disabledCreateButton = screen.getByRole('button', {
       name: '공유 링크 만들기',
@@ -259,7 +373,7 @@ describe('ShareMapDialog', () => {
     await waitFor(() => expect(headerCloseButton).toHaveFocus());
   });
 
-  it('keeps region typing separate from the title field and preserves input focus', async () => {
+  it('keeps region selection separate from the title field', () => {
     render(
       <ShareMapDialog
         isOpen={true}
@@ -274,17 +388,12 @@ describe('ShareMapDialog', () => {
     const titleInput = screen.getByRole('textbox', {
       name: '공유 지도 제목',
     });
-    const regionInput = screen.getByRole('textbox', {
-      name: '공유할 지역',
-    });
 
-    regionInput.focus();
-    fireEvent.change(regionInput, { target: { value: '성수동' } });
-
-    expect(regionInput).toHaveValue('성수동');
     expect(titleInput).toHaveValue('');
     expect(titleInput).toHaveAttribute('placeholder', '예: 성수 맛집 지도');
-    await waitFor(() => expect(regionInput).toHaveFocus());
+    expect(
+      screen.queryByRole('textbox', { name: '공유할 지역' }),
+    ).not.toBeInTheDocument();
   });
 
   it('disables creation when no saved places have tags', () => {

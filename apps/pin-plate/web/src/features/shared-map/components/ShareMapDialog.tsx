@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import type { PlaceWithStats } from '@/features/place/types/place';
 import { ShareMapMainForm } from './ShareMapMainForm';
 import { ShareMapPlacePicker } from './ShareMapPlacePicker';
+import { ShareMapRegionPicker } from './ShareMapRegionPicker';
 import { ShareMapTagPicker } from './ShareMapTagPicker';
 import { useDialogFocusTrap } from './useDialogFocusTrap';
 import { useShareMapDialogState } from './useShareMapDialogState';
@@ -20,12 +21,16 @@ interface Props {
 const getDialogTitleId = (
   isTagPickerOpen: boolean,
   isPlacePickerOpen: boolean,
+  isRegionPickerOpen: boolean,
 ) => {
   if (isTagPickerOpen) {
     return 'share-map-tag-picker-title';
   }
   if (isPlacePickerOpen) {
     return 'share-map-manual-picker-title';
+  }
+  if (isRegionPickerOpen) {
+    return 'share-map-region-picker-title';
   }
   return 'share-map-dialog-title';
 };
@@ -61,6 +66,7 @@ export const ShareMapDialog = ({ isOpen, places, ownerId, onClose }: Props) => {
         aria-labelledby={getDialogTitleId(
           dialogState.isTagPickerOpen,
           dialogState.isPlacePickerOpen,
+          dialogState.isRegionPickerOpen,
         )}
         tabIndex={-1}
       >
@@ -86,7 +92,26 @@ export const ShareMapDialog = ({ isOpen, places, ownerId, onClose }: Props) => {
             onPlaceToggle={dialogState.handlePlaceToggle}
           />
         )}
-        {!(dialogState.isTagPickerOpen || dialogState.isPlacePickerOpen) && (
+        {dialogState.isRegionPickerOpen && (
+          <ShareMapRegionPicker
+            regionSearchQuery={dialogState.regionSearchQuery}
+            selectedRegionValue={dialogState.criteriaValue}
+            recommendedRegionOptions={dialogState.recommendedRegionOptions}
+            searchedRegionOptions={dialogState.searchedRegionOptions}
+            shareableRegionOptions={dialogState.shareableRegionOptions}
+            hasRegionSearchQuery={dialogState.hasRegionSearchQuery}
+            onClose={dialogState.handleRegionPickerClose}
+            onRegionSearchQueryChange={
+              dialogState.handleRegionSearchQueryChange
+            }
+            onRegionSelect={dialogState.handleCriteriaValueChange}
+          />
+        )}
+        {!(
+          dialogState.isTagPickerOpen ||
+          dialogState.isPlacePickerOpen ||
+          dialogState.isRegionPickerOpen
+        ) && (
           <ShareMapMainForm
             canCreateShareMap={canCreateShareMap}
             dialogState={dialogState}
