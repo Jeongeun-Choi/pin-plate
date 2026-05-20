@@ -11,6 +11,7 @@ export const inputRecipe = style({
   fontSize: vars.fontSize.xs,
   fontWeight: vars.fontWeight.medium,
   transition: 'all 0.2s ease',
+  height: 40,
 
   '::placeholder': {
     color: vars.colors.text.sub,
