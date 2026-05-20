@@ -16,6 +16,28 @@ const toCamelCaseAttr = (str) => {
   return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
 };
 
+const writeFileIfChanged = ({
+  filePath,
+  content,
+  createdMessage,
+  updatedMessage,
+  unchangedMessage,
+}) => {
+  const hasExistingFile = fs.existsSync(filePath);
+
+  if (hasExistingFile) {
+    const existingContent = fs.readFileSync(filePath, 'utf8');
+
+    if (existingContent === content) {
+      console.log(unchangedMessage);
+      return;
+    }
+  }
+
+  fs.writeFileSync(filePath, content);
+  console.log(hasExistingFile ? updatedMessage : createdMessage);
+};
+
 // Main process
 const generateIcons = () => {
   if (!fs.existsSync(OUTPUT_DIR)) {
@@ -35,14 +57,6 @@ const generateIcons = () => {
       : `Ic${toPascalCase(fileName)}`;
 
     const componentFilePath = path.join(OUTPUT_DIR, `${componentName}.tsx`);
-
-    // Check if the component already exists
-    if (fs.existsSync(componentFilePath)) {
-      console.log(`Skipped existing icon: ${componentName}`);
-      exportStatements.push(`export * from './${componentName}';`);
-      return;
-    }
-
     const filePath = path.join(ASSETS_DIR, file);
     let svgContent = fs.readFileSync(filePath, 'utf8');
 
@@ -96,19 +110,24 @@ export const ${componentName} = (props: SVGProps<SVGSVGElement>) => {
 };
 `;
 
-    fs.writeFileSync(
-      path.join(OUTPUT_DIR, `${componentName}.tsx`),
-      componentContent,
-    );
+    writeFileIfChanged({
+      filePath: componentFilePath,
+      content: componentContent,
+      createdMessage: `Generated: ${componentName}`,
+      updatedMessage: `Updated: ${componentName}`,
+      unchangedMessage: `Unchanged: ${componentName}`,
+    });
     exportStatements.push(`export * from './${componentName}';`);
-    console.log(`Generated: ${componentName}`);
   });
 
   // Generate index.ts
-  fs.writeFileSync(
-    path.join(OUTPUT_DIR, 'index.ts'),
-    exportStatements.join('\n') + '\n',
-  );
+  writeFileIfChanged({
+    filePath: path.join(OUTPUT_DIR, 'index.ts'),
+    content: exportStatements.join('\n') + '\n',
+    createdMessage: 'Generated: index.ts',
+    updatedMessage: 'Updated: index.ts',
+    unchangedMessage: 'Unchanged: index.ts',
+  });
   console.log('Icon generation complete!');
 };
 

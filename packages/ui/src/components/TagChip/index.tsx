@@ -8,9 +8,17 @@ interface Props {
   onClick?: () => void
   onRemove?: () => void
   readonly?: boolean
+  disabled?: boolean
 }
 
-export const TagChip = ({ label, selected, onClick, onRemove, readonly }: Props) => {
+export const TagChip = ({
+  label,
+  selected,
+  onClick,
+  onRemove,
+  readonly,
+  disabled,
+}: Props) => {
   if (onClick && !readonly) {
     return (
       <button
@@ -18,6 +26,7 @@ export const TagChip = ({ label, selected, onClick, onRemove, readonly }: Props)
         className={selected ? s.chipSelected : s.chip}
         onClick={onClick}
         aria-pressed={selected}
+        disabled={disabled}
       >
         {label}
       </button>

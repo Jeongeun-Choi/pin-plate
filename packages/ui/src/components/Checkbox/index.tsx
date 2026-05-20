@@ -1,4 +1,5 @@
 import { InputHTMLAttributes, ReactNode, Ref } from 'react';
+import { IcCheck } from '../../icons';
 import * as s from './styles.css';
 
 interface Props extends Omit<
@@ -21,12 +22,17 @@ export const Checkbox = ({
   ...props
 }: Props) => (
   <label className={`${s.checkboxLabel} ${className || ''}`}>
-    <input
-      ref={ref}
-      className={`${s.checkboxInput} ${inputClassName || ''}`}
-      type="checkbox"
-      {...props}
-    />
+    <span className={s.checkboxControl}>
+      <input
+        ref={ref}
+        className={`${s.checkboxInput} ${inputClassName || ''}`}
+        type="checkbox"
+        {...props}
+      />
+      <span className={s.checkboxIndicator} aria-hidden="true">
+        <IcCheck width={14} height={14} />
+      </span>
+    </span>
     <span className={`${s.labelText} ${textClassName || ''}`}>{label}</span>
   </label>
 );

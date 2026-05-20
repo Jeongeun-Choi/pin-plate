@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GuestPost } from '@/features/guest/types/guestPost';
 import type { Post } from '@/features/post/types/post';
 import MyPage from '../page';
@@ -80,6 +80,8 @@ const createServerPost = (overrides: Partial<Post>): Post => ({
 
 describe('MyPage signed-out preview', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-13T12:00:00.000Z'));
     pushMock.mockClear();
     mockedUseMyProfile.mockReturnValue({
       data: null,
@@ -97,6 +99,10 @@ describe('MyPage signed-out preview', () => {
       data: [],
       isLoading: false,
     } as unknown as ReturnType<typeof usePosts>);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('shows the locked report preview copy to signed-out users', () => {

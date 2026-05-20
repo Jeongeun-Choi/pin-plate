@@ -69,19 +69,10 @@ export const subheading = style({
 export const closeButton = style({
   width: 32,
   height: 32,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
   flexShrink: 0,
-  border: 'none',
+  padding: 0,
   borderRadius: vars.borderRadius.full,
-  backgroundColor: 'transparent',
   color: vars.colors.text.sub,
-  cursor: 'pointer',
-  ':hover': {
-    backgroundColor: vars.colors.primary.light,
-    color: vars.colors.text.primary,
-  },
 });
 
 export const body = style({
@@ -212,7 +203,128 @@ export const criteriaControls = style({
   gap: vars.spacing[3],
 });
 
-export const manualSummary = style({
+export const tagFieldset = style({
+  minInlineSize: 0,
+  margin: 0,
+  padding: 0,
+  border: 'none',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[2],
+});
+
+export const tagLegend = style([
+  label,
+  {
+    padding: 0,
+    marginBottom: vars.spacing[1],
+  },
+]);
+
+export const tagChipGrid = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: vars.spacing[2],
+});
+
+export const emptyTagText = style({
+  margin: 0,
+  color: vars.colors.text.sub,
+  fontSize: vars.fontSize.sm,
+  lineHeight: vars.lineHeight.body,
+});
+
+export const tagGroupList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[5],
+});
+
+export const tagPickerSearch = style({
+  position: 'sticky',
+  top: 0,
+  zIndex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[2],
+  paddingBottom: vars.spacing[3],
+  backgroundColor: vars.colors.secondary.surface,
+});
+
+export const tagGroup = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[2],
+});
+
+export const tagGroupHeading = style({
+  margin: 0,
+  color: vars.colors.text.primary,
+  fontSize: vars.fontSize.sm,
+  fontWeight: vars.fontWeight.bold,
+  lineHeight: vars.lineHeight.body,
+});
+
+export const tagOptionList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[2],
+});
+
+export const tagOptionRow = style({
+  width: '100%',
+  minHeight: 48,
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr) auto auto',
+  alignItems: 'center',
+  gap: vars.spacing[2],
+  padding: `${vars.spacing[3]} ${vars.spacing[4]}`,
+  border: `1px solid ${vars.colors.secondary.border}`,
+  borderRadius: vars.borderRadius.xl,
+  backgroundColor: vars.colors.common.white,
+  color: vars.colors.text.body,
+  fontSize: vars.fontSize.sm,
+  textAlign: 'left',
+  cursor: 'pointer',
+  ':hover': {
+    backgroundColor: vars.colors.primary.light,
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.colors.primary.default}`,
+    outlineOffset: 2,
+  },
+});
+
+export const selectedTagOptionRow = style({
+  borderColor: vars.colors.primary.default,
+  backgroundColor: vars.colors.primary.light,
+  color: vars.colors.text.primary,
+});
+
+export const tagOptionName = style({
+  minWidth: 0,
+  overflow: 'hidden',
+  color: vars.colors.text.primary,
+  fontWeight: vars.fontWeight.bold,
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const tagOptionMeta = style({
+  color: vars.colors.text.sub,
+  fontSize: vars.fontSize.xs,
+  whiteSpace: 'nowrap',
+});
+
+export const tagOptionSelectedText = style({
+  color: vars.colors.primary.default,
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.bold,
+  whiteSpace: 'nowrap',
+});
+
+export const selectionSummary = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
@@ -229,21 +341,21 @@ export const manualSummary = style({
   },
 });
 
-export const manualSummaryText = style({
+export const selectionSummaryText = style({
   display: 'flex',
   minWidth: 0,
   flexDirection: 'column',
   gap: vars.spacing[1],
 });
 
-export const manualSummaryTitle = style({
+export const selectionSummaryTitle = style({
   color: vars.colors.text.primary,
   fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.bold,
   lineHeight: vars.lineHeight.body,
 });
 
-export const manualSummaryDescription = style({
+export const selectionSummaryDescription = style({
   color: vars.colors.text.sub,
   fontSize: vars.fontSize.xs,
   lineHeight: vars.lineHeight.body,
@@ -255,18 +367,24 @@ export const manualPickerList = style({
   gap: vars.spacing[2],
 });
 
+export const placePickerItem = style({
+  padding: vars.spacing[2],
+  borderRadius: vars.borderRadius.xl,
+  ':hover': {
+    backgroundColor: vars.colors.primary.light,
+  },
+});
+
 export const checkboxLabel = style({
   display: 'flex',
   alignItems: 'flex-start',
+  flex: 1,
   gap: vars.spacing[2],
-  padding: vars.spacing[2],
+  minWidth: 0,
   borderRadius: vars.borderRadius.xl,
   color: vars.colors.text.body,
   fontSize: vars.fontSize.sm,
   cursor: 'pointer',
-  ':hover': {
-    backgroundColor: vars.colors.primary.light,
-  },
 });
 
 export const placeText = style({
@@ -391,39 +509,5 @@ export const footer = style({
       bottom: 0,
       padding: `${vars.spacing[4]} ${vars.spacing[4]} calc(${vars.spacing[4]} + env(safe-area-inset-bottom))`,
     },
-  },
-});
-
-export const secondaryButton = style({
-  minHeight: 40,
-  padding: `${vars.spacing[2]} ${vars.spacing[4]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
-  borderRadius: vars.borderRadius.full,
-  backgroundColor: vars.colors.common.white,
-  color: vars.colors.text.body,
-  fontSize: vars.fontSize.sm,
-  fontWeight: vars.fontWeight.bold,
-  cursor: 'pointer',
-  ':hover': {
-    backgroundColor: vars.colors.primary.light,
-  },
-});
-
-export const primaryButton = style({
-  minHeight: 40,
-  padding: `${vars.spacing[2]} ${vars.spacing[4]}`,
-  border: 'none',
-  borderRadius: vars.borderRadius.full,
-  backgroundColor: vars.colors.primary.default,
-  color: vars.colors.common.white,
-  fontSize: vars.fontSize.sm,
-  fontWeight: vars.fontWeight.bold,
-  cursor: 'pointer',
-  ':hover': {
-    backgroundColor: vars.colors.primary.hover,
-  },
-  ':disabled': {
-    opacity: 0.5,
-    cursor: 'not-allowed',
   },
 });
