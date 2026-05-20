@@ -40,11 +40,14 @@ const RadioHarness = () => {
 
 describe('ui choice controls', () => {
   it('renders an accessible checkbox label and forwards checked changes', () => {
-    render(<CheckboxHarness />);
+    const { container } = render(<CheckboxHarness />);
 
     const checkbox = screen.getByRole('checkbox', { name: '성수 카페' });
 
     expect(checkbox).not.toBeChecked();
+    expect(
+      container.querySelector('[aria-hidden="true"] svg'),
+    ).toBeInTheDocument();
 
     fireEvent.click(checkbox);
 

@@ -18,33 +18,49 @@ export const checkboxLabel = style({
   },
 });
 
-export const checkboxInput = style({
+export const checkboxControl = style({
+  position: 'relative',
   width: 18,
   height: 18,
-  margin: 0,
   marginTop: 1,
   flexShrink: 0,
-  appearance: 'none',
+});
+
+export const checkboxInput = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  margin: 0,
+  opacity: 0,
+  cursor: 'pointer',
+});
+
+export const checkboxIndicator = style({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   border: `2px solid ${vars.colors.secondary.border}`,
   borderRadius: vars.spacing[1],
   backgroundColor: vars.colors.common.white,
+  color: 'transparent',
   cursor: 'pointer',
   transition:
-    'background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+    'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease',
+  pointerEvents: 'none',
   selectors: {
-    '&:checked': {
+    [`${checkboxInput}:checked + &`]: {
       borderColor: vars.colors.primary.default,
       backgroundColor: vars.colors.primary.default,
-      backgroundImage: `linear-gradient(45deg, transparent 52%, ${vars.colors.common.white} 52%, ${vars.colors.common.white} 64%, transparent 64%), linear-gradient(-45deg, transparent 46%, ${vars.colors.common.white} 46%, ${vars.colors.common.white} 58%, transparent 58%)`,
-      backgroundPosition: '3px 8px, 7px 8px',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: '6px 3px, 9px 3px',
+      color: vars.colors.common.white,
     },
-    '&:focus-visible': {
+    [`${checkboxInput}:focus-visible + &`]: {
       outline: `2px solid ${vars.colors.primary.default}`,
       outlineOffset: 2,
     },
-    '&:disabled': {
+    [`${checkboxInput}:disabled + &`]: {
       cursor: 'not-allowed',
     },
   },
