@@ -347,6 +347,13 @@ describe('usePostForm', () => {
         image_keys: ['uploads/users/user-123/dish.webp'],
       }),
     );
+    expect(mockGetPlaceByKakaoId).not.toHaveBeenCalled();
+    expect(mockCreatePlace).not.toHaveBeenCalled();
+    expect(mockCreatePost).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        place_id: expect.anything(),
+      }),
+    );
     expect(mockAlert).toHaveBeenCalledWith('게시글이 등록되었습니다!');
     expect(mockOnSuccess).toHaveBeenCalled();
     expect(result.current.formState.content).toBe('');
