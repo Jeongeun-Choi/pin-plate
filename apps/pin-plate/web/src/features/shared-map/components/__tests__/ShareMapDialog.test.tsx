@@ -58,6 +58,10 @@ const createSharedMapResponse = (
 
 const shareMapDialogCssPath = resolve(__dirname, '../ShareMapDialog.css.ts');
 
+const goToSelectionStep = () => {
+  fireEvent.click(screen.getByRole('button', { name: '다음' }));
+};
+
 describe('ShareMapDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -69,6 +73,28 @@ describe('ShareMapDialog', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it('starts from the compose step before showing sharing criteria', () => {
+    render(
+      <ShareMapDialog
+        isOpen={true}
+        places={[createPlace('1', '성수 카페', ['cafe'])]}
+        ownerId="user-1"
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('1 구성하기')).toBeInTheDocument();
+    expect(screen.getByLabelText('공유 지도 제목')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('radio', { name: '태그' }),
+    ).not.toBeInTheDocument();
+
+    goToSelectionStep();
+
+    expect(screen.getByText('2 지정하기')).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '태그' })).toBeInTheDocument();
   });
 
   it('shows only tags used by saved places as selectable chips', () => {
@@ -84,6 +110,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '태그' }));
 
     expect(
@@ -118,6 +145,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '태그' }));
 
     expect(
@@ -166,6 +194,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '태그' }));
     fireEvent.click(screen.getByRole('button', { name: '태그 더 보기' }));
     fireEvent.change(screen.getByRole('searchbox', { name: '태그 검색' }), {
@@ -208,6 +237,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: '추천 1개' }),
@@ -236,6 +266,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     expect(screen.getByRole('button', { name: '또 갈 곳 0개' })).toBeDisabled();
     expect(
       screen.getByRole('button', { name: '공유 링크 만들기' }),
@@ -261,6 +292,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '지역' }));
 
     expect(
@@ -308,6 +340,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '지역' }));
 
     expect(
@@ -354,20 +387,19 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '태그' }));
 
     const disabledCreateButton = screen.getByRole('button', {
       name: '공유 링크 만들기',
     });
-    const [headerCloseButton, footerCloseButton] = screen.getAllByRole(
-      'button',
-      { name: '닫기' },
-    );
+    const headerCloseButton = screen.getByRole('button', { name: '닫기' });
+    const footerBackButton = screen.getByRole('button', { name: '이전' });
 
     await waitFor(() => expect(headerCloseButton).toHaveFocus());
     expect(disabledCreateButton).toBeDisabled();
 
-    footerCloseButton.focus();
+    footerBackButton.focus();
     fireEvent.keyDown(window, { key: 'Tab', code: 'Tab', keyCode: 9 });
 
     await waitFor(() => expect(headerCloseButton).toHaveFocus());
@@ -383,7 +415,9 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '지역' }));
+    fireEvent.click(screen.getByRole('button', { name: '이전' }));
 
     const titleInput = screen.getByRole('textbox', {
       name: '공유 지도 제목',
@@ -406,6 +440,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '태그' }));
 
     expect(
@@ -431,6 +466,7 @@ describe('ShareMapDialog', () => {
     fireEvent.change(screen.getByLabelText('공유 지도 제목'), {
       target: { value: '성수 추천 지도' },
     });
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('button', { name: '공유 링크 만들기' }));
 
     const shareUrlInput = await screen.findByLabelText('공유 링크');
@@ -453,6 +489,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('button', { name: '공유 링크 만들기' }));
 
     await waitFor(() =>
@@ -481,6 +518,7 @@ describe('ShareMapDialog', () => {
     fireEvent.change(screen.getByLabelText('공유 지도 제목'), {
       target: { value: '성수 추천 지도' },
     });
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('button', { name: '공유 링크 만들기' }));
 
     expect(
@@ -507,6 +545,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '태그' }));
 
     expect(
@@ -568,6 +607,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '태그' }));
     fireEvent.click(screen.getByRole('button', { name: '장소 확인하기' }));
 
@@ -596,6 +636,7 @@ describe('ShareMapDialog', () => {
     fireEvent.change(screen.getByLabelText('공유 지도 제목'), {
       target: { value: '성수 추천 지도' },
     });
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('button', { name: '공유 링크 만들기' }));
 
     expect(
@@ -630,6 +671,7 @@ describe('ShareMapDialog', () => {
     fireEvent.change(screen.getByLabelText('공유 지도 제목'), {
       target: { value: '성수 추천 지도' },
     });
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('button', { name: '공유 링크 만들기' }));
     fireEvent.click(await screen.findByRole('button', { name: '공유하기' }));
 
@@ -655,6 +697,7 @@ describe('ShareMapDialog', () => {
     fireEvent.change(screen.getByLabelText('공유 지도 제목'), {
       target: { value: '성수 추천 지도' },
     });
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('button', { name: '공유 링크 만들기' }));
     await screen.findByLabelText('공유 링크');
     fireEvent.click(screen.getByRole('button', { name: '공유하기' }));
@@ -678,6 +721,7 @@ describe('ShareMapDialog', () => {
       />,
     );
 
+    goToSelectionStep();
     fireEvent.click(screen.getByRole('radio', { name: '직접 선택' }));
 
     expect(screen.getByText('직접 고른 장소 0개')).toBeInTheDocument();
