@@ -9,8 +9,6 @@ import { compressImages } from '../utils/compressImages';
 import { viewModeAtom } from '@/app/atoms';
 import { useMap } from '@vis.gl/react-google-maps';
 import { sanitizeTags } from '../constants/tags';
-import { getPlaceByKakaoId } from '@/features/place/api/getPlaceByKakaoId';
-import { createPlace } from '@/features/place/api/createPlace';
 import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
 import type { GuestPost } from '@/features/guest/types/guestPost';
 import { isTrustedImageKey } from '@/features/image/utils/imageReference';
@@ -220,24 +218,7 @@ export const usePostForm = (
         return;
       }
 
-      let existingPlace = await getPlaceByKakaoId(
-        currentUser.id,
-        selectedPlace.id,
-      );
-      if (!existingPlace) {
-        existingPlace = await createPlace(currentUser.id, {
-          kakao_place_id: selectedPlace.id,
-          place_name: selectedPlace.place_name,
-          address,
-          lat,
-          lng,
-          status: 'visited',
-          tags: sanitizeTags(tags),
-        });
-      }
-
       await createPost({
-        place_id: existingPlace.id,
         content,
         rating,
         image_urls: photoUrls,
