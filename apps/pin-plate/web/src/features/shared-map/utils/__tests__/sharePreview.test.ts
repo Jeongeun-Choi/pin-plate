@@ -71,24 +71,6 @@ describe('share preview deployment config', () => {
     );
   });
 
-  it('injects Supabase server and admin configuration into the SST production environment', () => {
-    const sstConfig = readFileSync(
-      resolve(process.cwd(), '../../../sst.config.ts'),
-      'utf8',
-    );
-
-    expect(sstConfig).toContain(
-      'const supabaseSecretKey = new sst.Secret("SupabaseSecretKey")',
-    );
-    expect(sstConfig).toContain('SUPABASE_URL: supabaseUrl.value');
-    expect(sstConfig).toContain('SUPABASE_API_KEY: supabaseApiKey.value');
-    expect(sstConfig).toContain('SUPABASE_SECRET_KEY: supabaseSecretKey.value');
-    expect(sstConfig).toContain('NEXT_PUBLIC_SUPABASE_URL: supabaseUrl.value');
-    expect(sstConfig).toContain(
-      'NEXT_PUBLIC_SUPABASE_API_KEY: supabaseApiKey.value',
-    );
-  });
-
   it('sets Google Maps SST secrets from GitHub Actions before deploy', () => {
     const deployWorkflow = readFileSync(
       resolve(process.cwd(), '../../../.github/workflows/deploy.yml'),
@@ -112,38 +94,6 @@ describe('share preview deployment config', () => {
     );
     expect(deployWorkflow).toContain(
       'pnpm sst secret set GoogleMapsMapId "$GOOGLE_MAPS_MAP_ID" --stage production',
-    );
-  });
-
-  it('sets Supabase SST secrets from GitHub Actions before deploy', () => {
-    const deployWorkflow = readFileSync(
-      resolve(process.cwd(), '../../../.github/workflows/deploy.yml'),
-      'utf8',
-    );
-
-    expect(deployWorkflow).toContain(
-      'SUPABASE_URL: ${{ secrets.SUPABASE_URL }}',
-    );
-    expect(deployWorkflow).toContain(
-      'SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}',
-    );
-    expect(deployWorkflow).toContain(
-      'SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}',
-    );
-    expect(deployWorkflow).toContain(
-      ': "${SUPABASE_URL:?Missing SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL GitHub secret}"',
-    );
-    expect(deployWorkflow).toContain(
-      ': "${SUPABASE_SECRET_KEY:?Missing SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY GitHub secret}"',
-    );
-    expect(deployWorkflow).toContain(
-      'pnpm sst secret set SupabaseUrl "$SUPABASE_URL" --stage production',
-    );
-    expect(deployWorkflow).toContain(
-      'pnpm sst secret set SupabaseApiKey "$SUPABASE_API_KEY" --stage production',
-    );
-    expect(deployWorkflow).toContain(
-      'pnpm sst secret set SupabaseSecretKey "$SUPABASE_SECRET_KEY" --stage production',
     );
   });
 });

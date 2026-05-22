@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { cache } from 'react';
 import { getSharedMapBySlug } from '@/features/shared-map/api/getSharedMapBySlug';
 import { SharedMapView } from '@/features/shared-map/components/SharedMapView';
@@ -16,6 +16,25 @@ interface Props {
 }
 
 const getCachedSharedMapBySlug = cache(getSharedMapBySlug);
+
+const MissingSharedMap = () => (
+  <main className={s.page}>
+    <section className={s.missingState} aria-labelledby="missing-share-title">
+      <div className={s.missingContent}>
+        <p className={s.missingEyebrow}>Pin Plate</p>
+        <h1 id="missing-share-title" className={s.missingTitle}>
+          공유 지도를 찾을 수 없어요
+        </h1>
+        <p className={s.missingDescription}>
+          링크가 만료되었거나 공유 지도가 삭제되었을 수 있어요.
+        </p>
+        <Link className={s.homeLink} href="/">
+          홈으로 가기
+        </Link>
+      </div>
+    </section>
+  </main>
+);
 
 export const generateMetadata = async ({
   params,
@@ -58,7 +77,7 @@ export default async function SharePage({ params }: Props) {
   const { slug } = await params;
   const sharedMap = await getCachedSharedMapBySlug(slug);
 
-  if (!sharedMap) notFound();
+  if (!sharedMap) return <MissingSharedMap />;
 
   return (
     <main className={s.page}>

@@ -1,3 +1,4 @@
+import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { SharedMap } from '@/features/shared-map/types/sharedMap';
 import { getSharedMapBySlug } from '@/features/shared-map/api/getSharedMapBySlug';
@@ -23,8 +24,14 @@ vi.mock('@/features/shared-map/api/getSharedMapBySlug', () => ({
   getSharedMapBySlug: vi.fn(),
 }));
 
+vi.mock('next/navigation', () => ({
+  notFound: vi.fn(() => {
+    throw new Error('notFound called');
+  }),
+}));
+
 const mockedGetSharedMapBySlug = vi.mocked(getSharedMapBySlug);
-const { generateMetadata } = await import('../page');
+const { default: SharePage, generateMetadata } = await import('../page');
 const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 const originalImagePublicBaseUrl = process.env.IMAGE_PUBLIC_BASE_URL;
 
@@ -209,5 +216,25 @@ describe('share page metadata', () => {
     expect(metadata.openGraph?.images).toEqual([
       { url: 'https://pinonplate.com/og-default.png' },
     ]);
+  });
+});
+
+describe('share page missing state', () => {
+  it('renders a missing shared map page without calling notFound', async () => {
+    mockedGetSharedMapBySlug.mockResolvedValueOnce(null);
+
+    render(
+      await SharePage({
+        params: Promise.resolve({ slug: 'missing-map' }),
+      }),
+    );
+
+    expect(
+      screen.getByRole('heading', { name: '공유 지도를 찾을 수 없어요' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '홈으로 가기' })).toHaveAttribute(
+      'href',
+      '/',
+    );
   });
 });
