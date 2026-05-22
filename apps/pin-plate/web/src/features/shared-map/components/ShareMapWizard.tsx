@@ -6,8 +6,8 @@ import { ShareMapPlacePicker } from './ShareMapPlacePicker';
 import { ShareMapRegionPicker } from './ShareMapRegionPicker';
 import { ShareMapSelectionStep } from './ShareMapSelectionStep';
 import { ShareMapTagPicker } from './ShareMapTagPicker';
-import { useShareMapDialogState } from './useShareMapDialogState';
-import { useShareMapShareActions } from './useShareMapShareActions';
+import { useShareMapDialogState } from '../hooks/useShareMapDialogState';
+import { useShareMapShareActions } from '../hooks/useShareMapShareActions';
 
 interface Props {
   places: PlaceWithStats[];

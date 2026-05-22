@@ -1,5 +1,5 @@
 import type { PlaceWithStats } from '@/features/place/types/place';
-import type { ShareableRegionOption } from './shareMapDialogTypes';
+import type { ShareableRegionOption } from '../types/shareMapDialogTypes';
 
 export const REGION_CHIP_PREVIEW_LIMIT = 8;
 export const RECOMMENDED_REGION_LIMIT = 5;

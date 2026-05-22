@@ -9,8 +9,8 @@ import {
   getSelectedPlaceIds,
   getShareableStatusOptions,
   MAX_SELECTED_PLACES,
-} from './shareMapDialogLogic';
-import { getSelectionCopy } from './shareMapSelectionCopy';
+} from '../utils/shareMapDialogLogic';
+import { getSelectionCopy } from '../utils/shareMapSelectionCopy';
 import { useShareMapPickerState } from './useShareMapPickerState';
 import { useShareMapRegionSelection } from './useShareMapRegionSelection';
 import { useShareMapTagSelection } from './useShareMapTagSelection';

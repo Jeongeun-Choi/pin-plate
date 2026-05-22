@@ -1,5 +1,5 @@
 import { TagChip } from '@pin-plate/ui';
-import type { ShareableStatusOption } from './shareMapDialogTypes';
+import type { ShareableStatusOption } from '../types/shareMapDialogTypes';
 import * as s from './ShareMapDialog.css';
 
 interface Props {

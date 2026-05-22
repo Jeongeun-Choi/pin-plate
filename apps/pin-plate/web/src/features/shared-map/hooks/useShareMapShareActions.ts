@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useCreateSharedMap } from '../hooks/useCreateSharedMap';
+import { useCreateSharedMap } from './useCreateSharedMap';
 import type { ShareMapDialogState } from './useShareMapDialogState';
 
 interface Props {

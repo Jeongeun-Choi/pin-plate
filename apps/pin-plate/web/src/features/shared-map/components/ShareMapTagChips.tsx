@@ -1,5 +1,5 @@
 import { Button, TagChip } from '@pin-plate/ui';
-import type { ShareableTagOption } from './shareMapDialogTypes';
+import type { ShareableTagOption } from '../types/shareMapDialogTypes';
 import * as s from './ShareMapDialog.css';
 
 interface Props {

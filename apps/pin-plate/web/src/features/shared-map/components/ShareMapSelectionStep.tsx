@@ -1,6 +1,6 @@
 import { Button } from '@pin-plate/ui';
 import { IcDismiss } from '@pin-plate/ui/icons';
-import type { ShareMapDialogState } from './useShareMapDialogState';
+import type { ShareMapDialogState } from '../hooks/useShareMapDialogState';
 import { ShareMapCriteriaControls } from './ShareMapCriteriaControls';
 import { ShareMapStepIndicator } from './ShareMapStepIndicator';
 import * as s from './ShareMapDialog.css';

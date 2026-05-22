@@ -2,12 +2,12 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ShareMapDialog } from '../ShareMapDialog';
-import { useCreateSharedMap } from '../../hooks/useCreateSharedMap';
+import { ShareMapDialog } from '../components/ShareMapDialog';
+import { useCreateSharedMap } from '../hooks/useCreateSharedMap';
 import type { PlaceStatus, PlaceWithStats } from '@/features/place/types/place';
-import type { SharedMap } from '../../types/sharedMap';
+import type { SharedMap } from '../types/sharedMap';
 
-vi.mock('../../hooks/useCreateSharedMap', () => ({
+vi.mock('../hooks/useCreateSharedMap', () => ({
   useCreateSharedMap: vi.fn(),
 }));
 
@@ -56,7 +56,10 @@ const createSharedMapResponse = (
   ...overrides,
 });
 
-const shareMapDialogCssPath = resolve(__dirname, '../ShareMapDialog.css.ts');
+const shareMapDialogCssPath = resolve(
+  __dirname,
+  '../components/ShareMapDialog.css.ts',
+);
 
 const goToSelectionStep = () => {
   fireEvent.click(screen.getByRole('button', { name: '다음' }));

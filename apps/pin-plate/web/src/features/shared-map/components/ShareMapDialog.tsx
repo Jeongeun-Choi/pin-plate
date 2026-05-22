@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import type { PlaceWithStats } from '@/features/place/types/place';
 import { ShareMapWizard } from './ShareMapWizard';
-import { useDialogFocusTrap } from './useDialogFocusTrap';
+import { useDialogFocusTrap } from '../hooks/useDialogFocusTrap';
 import * as s from './ShareMapDialog.css';
 
 interface Props {

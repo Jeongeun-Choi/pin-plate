@@ -4,8 +4,8 @@ import type {
   ShareableRegionOption,
   ShareableStatusOption,
   ShareableTagOption,
-} from './shareMapDialogTypes';
-import { CRITERIA_OPTIONS } from './shareMapDialogLogic';
+} from '../types/shareMapDialogTypes';
+import { CRITERIA_OPTIONS } from '../utils/shareMapDialogLogic';
 import { ShareMapTagChips } from './ShareMapTagChips';
 import { ShareMapRegionChips } from './ShareMapRegionChips';
 import { ShareMapStatusChips } from './ShareMapStatusChips';
