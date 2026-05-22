@@ -27,10 +27,13 @@ export default $config({
     const githubOwner = new sst.Secret("GithubOwner");
     const githubRepo = new sst.Secret("GithubRepo");
     const cloudflareZoneId = new sst.Secret("CloudflareZoneId");
+    const googleMapsApiKey = new sst.Secret("GoogleMapsApiKey");
 
     // 클라이언트 사이드 Secrets (빌드 시 JS 번들에 포함)
     const kakaoAppKey = new sst.Secret("KakaoAppKey");
     const naverMapClientId = new sst.Secret("NaverMapClientId");
+    const googleMapsBrowserApiKey = new sst.Secret("GoogleMapsBrowserApiKey");
+    const googleMapsMapId = new sst.Secret("GoogleMapsMapId");
     const s3BucketName = new sst.Secret("S3BucketName");
 
     const web = new sst.aws.Nextjs("PinPlateWeb", {
@@ -53,9 +56,12 @@ export default $config({
         GITHUB_TOKEN: githubToken.value,
         GITHUB_OWNER: githubOwner.value,
         GITHUB_REPO: githubRepo.value,
+        GOOGLE_MAPS_API_KEY: googleMapsApiKey.value,
         // 클라이언트 사이드 (NEXT_PUBLIC_*)
         NEXT_PUBLIC_KAKAO_APP_KEY: kakaoAppKey.value,
         NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: naverMapClientId.value,
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: googleMapsBrowserApiKey.value,
+        NEXT_PUBLIC_GOOGLE_MAPS_ID: googleMapsMapId.value,
         NEXT_PUBLIC_AWS_S3_BUCKET_NAME: s3BucketName.value,
         NEXT_PUBLIC_AWS_REGION: "ap-northeast-2",
       },

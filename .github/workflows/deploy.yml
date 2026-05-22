@@ -71,8 +71,20 @@ jobs:
           AWS_DEFAULT_REGION: ap-northeast-2
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_DEFAULT_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_DEFAULT_ACCOUNT_ID }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_BROWSER_API_KEY: ${{ secrets.GOOGLE_MAPS_BROWSER_API_KEY }}
+          GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID }}
         run: |
-          pnpm sst secret set CloudflareZoneId ${{ secrets.CLOUDFLARE_ZONE_ID }} --stage production
+          : "${CLOUDFLARE_ZONE_ID:?Missing CLOUDFLARE_ZONE_ID GitHub secret}"
+          : "${GOOGLE_MAPS_API_KEY:?Missing GOOGLE_MAPS_API_KEY GitHub secret}"
+          : "${GOOGLE_MAPS_BROWSER_API_KEY:?Missing GOOGLE_MAPS_BROWSER_API_KEY GitHub secret}"
+          : "${GOOGLE_MAPS_MAP_ID:?Missing GOOGLE_MAPS_MAP_ID GitHub secret}"
+
+          pnpm sst secret set CloudflareZoneId "$CLOUDFLARE_ZONE_ID" --stage production
+          pnpm sst secret set GoogleMapsApiKey "$GOOGLE_MAPS_API_KEY" --stage production
+          pnpm sst secret set GoogleMapsBrowserApiKey "$GOOGLE_MAPS_BROWSER_API_KEY" --stage production
+          pnpm sst secret set GoogleMapsMapId "$GOOGLE_MAPS_MAP_ID" --stage production
 
       - name: Unlock SST (clear stale lock)
         env:

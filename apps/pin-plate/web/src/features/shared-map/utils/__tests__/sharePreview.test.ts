@@ -46,4 +46,54 @@ describe('share preview deployment config', () => {
       'NEXT_PUBLIC_SITE_URL: "https://pinonplate.com"',
     );
   });
+
+  it('injects Google Maps configuration into the SST production environment', () => {
+    const sstConfig = readFileSync(
+      resolve(process.cwd(), '../../../sst.config.ts'),
+      'utf8',
+    );
+
+    expect(sstConfig).toContain(
+      'const googleMapsApiKey = new sst.Secret("GoogleMapsApiKey")',
+    );
+    expect(sstConfig).toContain(
+      'const googleMapsBrowserApiKey = new sst.Secret("GoogleMapsBrowserApiKey")',
+    );
+    expect(sstConfig).toContain(
+      'const googleMapsMapId = new sst.Secret("GoogleMapsMapId")',
+    );
+    expect(sstConfig).toContain('GOOGLE_MAPS_API_KEY: googleMapsApiKey.value');
+    expect(sstConfig).toContain(
+      'NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: googleMapsBrowserApiKey.value',
+    );
+    expect(sstConfig).toContain(
+      'NEXT_PUBLIC_GOOGLE_MAPS_ID: googleMapsMapId.value',
+    );
+  });
+
+  it('sets Google Maps SST secrets from GitHub Actions before deploy', () => {
+    const deployWorkflow = readFileSync(
+      resolve(process.cwd(), '../../../.github/workflows/deploy.yml'),
+      'utf8',
+    );
+
+    expect(deployWorkflow).toContain(
+      'GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}',
+    );
+    expect(deployWorkflow).toContain(
+      'GOOGLE_MAPS_BROWSER_API_KEY: ${{ secrets.GOOGLE_MAPS_BROWSER_API_KEY }}',
+    );
+    expect(deployWorkflow).toContain(
+      'GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID }}',
+    );
+    expect(deployWorkflow).toContain(
+      'pnpm sst secret set GoogleMapsApiKey "$GOOGLE_MAPS_API_KEY" --stage production',
+    );
+    expect(deployWorkflow).toContain(
+      'pnpm sst secret set GoogleMapsBrowserApiKey "$GOOGLE_MAPS_BROWSER_API_KEY" --stage production',
+    );
+    expect(deployWorkflow).toContain(
+      'pnpm sst secret set GoogleMapsMapId "$GOOGLE_MAPS_MAP_ID" --stage production',
+    );
+  });
 });
