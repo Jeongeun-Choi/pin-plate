@@ -6,7 +6,7 @@ import {
   getShareableTagOptions,
   normalizeTagSearchQuery,
   RECOMMENDED_TAG_LIMIT,
-} from './shareMapTagLogic';
+} from '../utils/shareMapTagLogic';
 
 interface Props {
   criteriaValue: string;

@@ -6,7 +6,7 @@ import {
   getShareableRegionOptions,
   hasRegionSearchQuery,
   RECOMMENDED_REGION_LIMIT,
-} from './shareMapRegionLogic';
+} from '../utils/shareMapRegionLogic';
 
 interface Props {
   criteriaValue: string;

@@ -1,5 +1,5 @@
 import { Button } from '@pin-plate/ui';
-import type { ShareableRegionOption } from './shareMapDialogTypes';
+import type { ShareableRegionOption } from '../types/shareMapDialogTypes';
 import * as s from './ShareMapDialog.css';
 
 const getRegionOptionRowClassName = (isSelectedRegion: boolean) => {

@@ -1,6 +1,6 @@
 import { Button, Input } from '@pin-plate/ui';
 import { IcDismiss } from '@pin-plate/ui/icons';
-import type { ShareableRegionOption } from './shareMapDialogTypes';
+import type { ShareableRegionOption } from '../types/shareMapDialogTypes';
 import { ShareMapRegionPickerContent } from './ShareMapRegionPickerContent';
 import * as s from './ShareMapDialog.css';
 

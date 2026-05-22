@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { PlaceWithStats } from '@/features/place/types/place';
-import { getShareMapTitleSuggestion } from './shareMapDialogLogic';
+import { getShareMapTitleSuggestion } from '../utils/shareMapDialogLogic';
 import { useShareMapSelection } from './useShareMapSelection';
 
 interface Props {

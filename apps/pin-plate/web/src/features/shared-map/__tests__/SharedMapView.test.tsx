@@ -2,16 +2,16 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import type { SharedMap } from '../../types/sharedMap';
-import { SharedMapView } from '../SharedMapView';
+import type { SharedMap } from '../types/sharedMap';
+import { SharedMapView } from '../components/SharedMapView';
 
-vi.mock('../SharedMapCanvas', () => ({
+vi.mock('../components/SharedMapCanvas', () => ({
   SharedMapCanvas: ({ places }: { places: SharedMap['shared_map_places'] }) => (
     <div data-testid="shared-map-canvas">{places.length}개의 지도 핀</div>
   ),
 }));
 
-vi.mock('../SaveSharedPlaceButton', () => ({
+vi.mock('../components/SaveSharedPlaceButton', () => ({
   SaveSharedPlaceButton: () => <button type="button">저장</button>,
 }));
 
@@ -64,7 +64,10 @@ const sharedMap: SharedMap = {
   ],
 };
 
-const sharedMapViewCssPath = resolve(__dirname, '../SharedMapView.css.ts');
+const sharedMapViewCssPath = resolve(
+  __dirname,
+  '../components/SharedMapView.css.ts',
+);
 
 describe('SharedMapView', () => {
   it('presents the shared map as the primary region before the place list', () => {

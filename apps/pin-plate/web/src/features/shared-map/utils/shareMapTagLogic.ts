@@ -3,7 +3,7 @@ import type { PlaceWithStats } from '@/features/place/types/place';
 import type {
   ShareableTagOption,
   ShareableTagOptionWithOrder,
-} from './shareMapDialogTypes';
+} from '../types/shareMapDialogTypes';
 
 export const TAG_CHIP_PREVIEW_LIMIT = 8;
 export const RECOMMENDED_TAG_LIMIT = 5;

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useCreateSharedMap } from '../hooks/useCreateSharedMap';
+import { useCreateSharedMap } from './useCreateSharedMap';
 import type { ShareMapDialogState } from './useShareMapDialogState';
 
 interface Props {
@@ -32,7 +32,7 @@ export const useShareMapShareActions = ({ dialogState, ownerId }: Props) => {
   const handleCreateShareMap = useCallback(async () => {
     if (limitedPlaces.length === 0) {
       handleErrorMessageChange('공유할 장소가 없어요.');
-      return;
+      return false;
     }
 
     try {
@@ -50,11 +50,13 @@ export const useShareMapShareActions = ({ dialogState, ownerId }: Props) => {
       });
       const nextShareUrl = `${window.location.origin}/share/${sharedMap.slug}`;
       handleShareUrlCreated(nextShareUrl);
+      return true;
     } catch {
       handleShareFeedbackMessageChange('');
       handleErrorMessageChange(
         '공유 링크를 만들지 못했어요. 다시 시도해 주세요.',
       );
+      return false;
     }
   }, [
     createSharedMap,

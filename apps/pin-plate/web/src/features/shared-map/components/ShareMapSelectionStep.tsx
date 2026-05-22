@@ -1,42 +1,37 @@
 import { Button } from '@pin-plate/ui';
 import { IcDismiss } from '@pin-plate/ui/icons';
-import type { ShareMapDialogState } from './useShareMapDialogState';
+import type { ShareMapDialogState } from '../hooks/useShareMapDialogState';
 import { ShareMapCriteriaControls } from './ShareMapCriteriaControls';
-import { ShareMapFormFields } from './ShareMapFormFields';
-import { ShareMapShareResult } from './ShareMapShareResult';
-import { getShareMapPrimaryAction } from './shareMapPrimaryAction';
+import { ShareMapStepIndicator } from './ShareMapStepIndicator';
 import * as s from './ShareMapDialog.css';
 
 interface Props {
   canCreateShareMap: boolean;
   dialogState: ShareMapDialogState;
   isCreatingSharedMap: boolean;
+  onBack: () => void;
   onClose: () => void;
   onCreateShareMap: () => void;
-  onShareUrl: () => void;
 }
 
-export const ShareMapMainForm = ({
+export const ShareMapSelectionStep = ({
   canCreateShareMap,
   dialogState,
   isCreatingSharedMap,
+  onBack,
   onClose,
   onCreateShareMap,
-  onShareUrl,
 }: Props) => {
   const {
     criteriaType,
     criteriaValue,
-    description,
     emptySharePlacesMessage,
     errorMessage,
     handleCriteriaTypeChange,
     handleCriteriaValueChange,
-    handleDescriptionChange,
     handlePlacePickerOpen,
     handleRegionPickerOpen,
     handleTagPickerOpen,
-    handleTitleChange,
     hasHiddenRegionOptions,
     hasHiddenTagOptions,
     hasNoCandidatePlaces,
@@ -49,31 +44,17 @@ export const ShareMapMainForm = ({
     selectedSnapshotPlaceCount,
     selectionSummaryDescription,
     selectionSummaryTitle,
-    shareFeedbackMessage,
     shareableStatusOptions,
-    shareMapTitle,
-    shareUrl,
-    title,
   } = dialogState;
-
-  const primaryAction = getShareMapPrimaryAction({
-    canCreateShareMap,
-    isCreatingSharedMap,
-    shareUrl,
-    onCreateShareMap,
-    onShareUrl,
-  });
 
   return (
     <>
       <header className={s.header}>
         <div>
           <h2 id="share-map-dialog-title" className={s.heading}>
-            맛집 지도 공유하기
+            공유할 장소 지정하기
           </h2>
-          <p className={s.subheading}>
-            조건에 맞는 내 장소를 모아 공유 링크를 만들어요.
-          </p>
+          <p className={s.subheading}>기준을 고르고 공유될 장소를 확인해요.</p>
         </div>
         <Button
           type="button"
@@ -88,12 +69,7 @@ export const ShareMapMainForm = ({
       </header>
 
       <div className={s.body}>
-        <ShareMapFormFields
-          description={description}
-          title={title}
-          onDescriptionChange={handleDescriptionChange}
-          onTitleChange={handleTitleChange}
-        />
+        <ShareMapStepIndicator currentStep="selection" />
 
         <ShareMapCriteriaControls
           criteriaType={criteriaType}
@@ -130,36 +106,20 @@ export const ShareMapMainForm = ({
             {errorMessage}
           </p>
         )}
-
-        {shareFeedbackMessage && (
-          <p className={s.feedbackText} role="status">
-            {shareFeedbackMessage}
-          </p>
-        )}
-
-        {shareUrl && (
-          <ShareMapShareResult
-            description={description}
-            limitedPlaces={limitedPlaces}
-            shareMapTitle={shareMapTitle}
-            shareUrl={shareUrl}
-            onShareUrl={onShareUrl}
-          />
-        )}
       </div>
 
       <footer className={s.footer}>
-        <Button type="button" variant="outline" size="md" onClick={onClose}>
-          닫기
+        <Button type="button" variant="outline" size="md" onClick={onBack}>
+          이전
         </Button>
         <Button
           type="button"
           variant="solid"
           size="md"
-          onClick={primaryAction.onClick}
-          disabled={primaryAction.isDisabled}
+          onClick={onCreateShareMap}
+          disabled={!canCreateShareMap}
         >
-          {primaryAction.label}
+          {isCreatingSharedMap ? '만드는 중...' : '공유 링크 만들기'}
         </Button>
       </footer>
     </>

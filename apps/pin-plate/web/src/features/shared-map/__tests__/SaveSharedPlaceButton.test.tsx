@@ -5,8 +5,8 @@ import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
 import { getPlaceByKakaoId } from '@/features/place/api/getPlaceByKakaoId';
 import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
-import type { SharedMapPlace } from '../../types/sharedMap';
-import { SaveSharedPlaceButton } from '../SaveSharedPlaceButton';
+import type { SharedMapPlace } from '../types/sharedMap';
+import { SaveSharedPlaceButton } from '../components/SaveSharedPlaceButton';
 
 vi.mock('@/utils/supabase/getCurrentUser', () => ({
   getCurrentUser: vi.fn(),

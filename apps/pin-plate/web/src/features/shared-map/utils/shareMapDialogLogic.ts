@@ -6,7 +6,7 @@ import type {
   PlaceSelectionState,
   ShareableStatusOption,
   ShareableTagOption,
-} from './shareMapDialogTypes';
+} from '../types/shareMapDialogTypes';
 import { doesPlaceMatchRegion } from './shareMapRegionLogic';
 
 export const MAX_SELECTED_PLACES = 100;

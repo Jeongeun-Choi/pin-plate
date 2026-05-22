@@ -1,7 +1,7 @@
 import { Button } from '@pin-plate/ui';
 import { TAG_GROUPS } from '@/features/post/constants/tags';
 import type { TagGroup } from '@/features/post/constants/tags';
-import type { ShareableTagOption } from './shareMapDialogTypes';
+import type { ShareableTagOption } from '../types/shareMapDialogTypes';
 import * as s from './ShareMapDialog.css';
 
 const getTagOptionRowClassName = (isSelectedTag: boolean) => {

@@ -89,6 +89,35 @@ export const body = style({
   },
 });
 
+export const stepList = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+  gap: vars.spacing[2],
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+});
+
+export const stepItem = style({
+  minWidth: 0,
+  padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
+  border: `1px solid ${vars.colors.secondary.border}`,
+  borderRadius: vars.borderRadius.xl,
+  color: vars.colors.text.sub,
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.bold,
+  textAlign: 'center',
+});
+
+export const stepItemCurrent = style([
+  stepItem,
+  {
+    borderColor: vars.colors.primary.default,
+    backgroundColor: vars.colors.primary.light,
+    color: vars.colors.text.primary,
+  },
+]);
+
 export const fieldGroup = style({
   display: 'flex',
   flexDirection: 'column',
