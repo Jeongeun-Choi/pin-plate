@@ -22,6 +22,7 @@ export default $config({
     const awsSecretAccessKey = new sst.Secret("AwsSecretAccessKey");
     const supabaseUrl = new sst.Secret("SupabaseUrl");
     const supabaseApiKey = new sst.Secret("SupabaseApiKey");
+    const supabaseSecretKey = new sst.Secret("SupabaseSecretKey");
     const xaiApiKey = new sst.Secret("XaiApiKey");
     const githubToken = new sst.Secret("GithubToken");
     const githubOwner = new sst.Secret("GithubOwner");
@@ -50,6 +51,9 @@ export default $config({
         KAKAO_SEARCH_CLIENT_ID: kakaoSearchClientId.value,
         S3_ACCESS_KEY_ID: awsAccessKeyId.value,
         S3_SECRET_ACCESS_KEY: awsSecretAccessKey.value,
+        SUPABASE_URL: supabaseUrl.value,
+        SUPABASE_API_KEY: supabaseApiKey.value,
+        SUPABASE_SECRET_KEY: supabaseSecretKey.value,
         NEXT_PUBLIC_SUPABASE_URL: supabaseUrl.value,
         NEXT_PUBLIC_SUPABASE_API_KEY: supabaseApiKey.value,
         XAI_API_KEY: xaiApiKey.value,
