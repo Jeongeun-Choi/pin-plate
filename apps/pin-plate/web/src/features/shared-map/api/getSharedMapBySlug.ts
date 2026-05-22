@@ -1,10 +1,22 @@
-import { createAdminClient } from '@/utils/supabase/admin';
+import { createClient } from '@supabase/supabase-js';
 import type { SharedMap } from '../types/sharedMap';
+
+const createSharedMapPublicClient = () =>
+  createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_API_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    },
+  );
 
 export const getSharedMapBySlug = async (
   slug: string,
 ): Promise<SharedMap | null> => {
-  const supabase = createAdminClient();
+  const supabase = createSharedMapPublicClient();
   const { data: sharedMapRow, error } = await supabase
     .from('shared_maps')
     .select('*, shared_map_places(*)')

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createAdminClient } from '@/utils/supabase/admin';
+import { createClient } from '@supabase/supabase-js';
 import { getSharedMapBySlug } from '../getSharedMapBySlug';
 
-vi.mock('@/utils/supabase/admin', () => ({
-  createAdminClient: vi.fn(),
+vi.mock('@supabase/supabase-js', () => ({
+  createClient: vi.fn(),
 }));
 
 interface SharedMapFetchQuery {
@@ -12,7 +12,7 @@ interface SharedMapFetchQuery {
   single: ReturnType<typeof vi.fn>;
 }
 
-const mockCreateAdminClient = createAdminClient as unknown as ReturnType<
+const mockCreatePublicClient = createClient as unknown as ReturnType<
   typeof vi.fn
 >;
 
@@ -31,6 +31,9 @@ const createFetchQuery = (result: unknown): SharedMapFetchQuery => {
 describe('getSharedMapBySlug', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://supabase.test');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_API_KEY', 'anon-key');
+    vi.stubEnv('SUPABASE_SECRET_KEY', 'service-role-key');
   });
 
   it('returns null for a missing slug', async () => {
@@ -38,7 +41,7 @@ describe('getSharedMapBySlug', () => {
       data: null,
       error: { code: 'PGRST116', message: 'No rows found' },
     });
-    mockCreateAdminClient.mockReturnValue({ from: vi.fn(() => fetchQuery) });
+    mockCreatePublicClient.mockReturnValue({ from: vi.fn(() => fetchQuery) });
 
     await expect(getSharedMapBySlug('missing-map')).resolves.toBeNull();
   });
@@ -46,7 +49,7 @@ describe('getSharedMapBySlug', () => {
   it('propagates non-missing slug fetch errors', async () => {
     const fetchError = new Error('database unavailable');
     const fetchQuery = createFetchQuery({ data: null, error: fetchError });
-    mockCreateAdminClient.mockReturnValue({ from: vi.fn(() => fetchQuery) });
+    mockCreatePublicClient.mockReturnValue({ from: vi.fn(() => fetchQuery) });
 
     await expect(getSharedMapBySlug('broken-map')).rejects.toThrow(
       'database unavailable',
@@ -73,11 +76,25 @@ describe('getSharedMapBySlug', () => {
       },
       error: null,
     });
-    mockCreateAdminClient.mockReturnValue({ from: vi.fn(() => fetchQuery) });
+    mockCreatePublicClient.mockReturnValue({ from: vi.fn(() => fetchQuery) });
 
     const sharedMap = await getSharedMapBySlug('seongsu-kape-cuceon-12345678');
 
-    expect(createAdminClient).toHaveBeenCalled();
+    expect(createClient).toHaveBeenCalledWith(
+      'https://supabase.test',
+      'anon-key',
+      expect.objectContaining({
+        auth: expect.objectContaining({
+          autoRefreshToken: false,
+          persistSession: false,
+        }),
+      }),
+    );
+    expect(createClient).not.toHaveBeenCalledWith(
+      expect.any(String),
+      'service-role-key',
+      expect.anything(),
+    );
     expect(sharedMap?.shared_map_places.map((place) => place.id)).toEqual([
       'shared-place-1',
       'shared-place-2',
