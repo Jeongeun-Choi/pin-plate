@@ -50,6 +50,8 @@ export default $config({
         KAKAO_SEARCH_CLIENT_ID: kakaoSearchClientId.value,
         S3_ACCESS_KEY_ID: awsAccessKeyId.value,
         S3_SECRET_ACCESS_KEY: awsSecretAccessKey.value,
+        SUPABASE_URL: supabaseUrl.value,
+        SUPABASE_API_KEY: supabaseApiKey.value,
         NEXT_PUBLIC_SUPABASE_URL: supabaseUrl.value,
         NEXT_PUBLIC_SUPABASE_API_KEY: supabaseApiKey.value,
         XAI_API_KEY: xaiApiKey.value,

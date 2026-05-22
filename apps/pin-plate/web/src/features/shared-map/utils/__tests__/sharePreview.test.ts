@@ -71,6 +71,28 @@ describe('share preview deployment config', () => {
     );
   });
 
+  it('injects Supabase configuration into the SST production environment', () => {
+    const sstConfig = readFileSync(
+      resolve(process.cwd(), '../../../sst.config.ts'),
+      'utf8',
+    );
+
+    expect(sstConfig).toContain(
+      'const supabaseUrl = new sst.Secret("SupabaseUrl")',
+    );
+    expect(sstConfig).toContain(
+      'const supabaseApiKey = new sst.Secret("SupabaseApiKey")',
+    );
+    expect(sstConfig).toContain('NEXT_PUBLIC_SUPABASE_URL: supabaseUrl.value');
+    expect(sstConfig).toContain(
+      'NEXT_PUBLIC_SUPABASE_API_KEY: supabaseApiKey.value',
+    );
+    expect(sstConfig).toContain('\n        SUPABASE_URL: supabaseUrl.value,');
+    expect(sstConfig).toContain(
+      '\n        SUPABASE_API_KEY: supabaseApiKey.value,',
+    );
+  });
+
   it('sets Google Maps SST secrets from GitHub Actions before deploy', () => {
     const deployWorkflow = readFileSync(
       resolve(process.cwd(), '../../../.github/workflows/deploy.yml'),
@@ -95,5 +117,32 @@ describe('share preview deployment config', () => {
     expect(deployWorkflow).toContain(
       'pnpm sst secret set GoogleMapsMapId "$GOOGLE_MAPS_MAP_ID" --stage production',
     );
+  });
+
+  it('sets Supabase public SST secrets from GitHub Actions before deploy', () => {
+    const deployWorkflow = readFileSync(
+      resolve(process.cwd(), '../../../.github/workflows/deploy.yml'),
+      'utf8',
+    );
+
+    expect(deployWorkflow).toContain(
+      'NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}',
+    );
+    expect(deployWorkflow).toContain(
+      'NEXT_PUBLIC_SUPABASE_API_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_API_KEY }}',
+    );
+    expect(deployWorkflow).toContain(
+      ': "${SUPABASE_URL:?Missing SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL GitHub secret}"',
+    );
+    expect(deployWorkflow).toContain(
+      ': "${SUPABASE_API_KEY:?Missing SUPABASE_API_KEY or NEXT_PUBLIC_SUPABASE_API_KEY GitHub secret}"',
+    );
+    expect(deployWorkflow).toContain(
+      'pnpm sst secret set SupabaseUrl "$SUPABASE_URL" --stage production',
+    );
+    expect(deployWorkflow).toContain(
+      'pnpm sst secret set SupabaseApiKey "$SUPABASE_API_KEY" --stage production',
+    );
+    expect(deployWorkflow).not.toContain('SupabaseSecretKey');
   });
 });
