@@ -9,7 +9,7 @@ export default $config({
       home: "aws",
       providers: {
         aws: { region: "ap-northeast-2", version: "7.20.0" },
-        cloudflare: { version: "6.13.0" },
+        cloudflare: { version: "6.15.0" },
       },
     };
   },
