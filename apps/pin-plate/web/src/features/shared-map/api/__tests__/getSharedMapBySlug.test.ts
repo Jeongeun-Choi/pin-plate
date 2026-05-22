@@ -7,9 +7,7 @@ vi.mock('@supabase/supabase-js', () => ({
 }));
 
 interface SharedMapFetchQuery {
-  select: ReturnType<typeof vi.fn>;
-  eq: ReturnType<typeof vi.fn>;
-  single: ReturnType<typeof vi.fn>;
+  maybeSingle: ReturnType<typeof vi.fn>;
 }
 
 const mockCreatePublicClient = createClient as unknown as ReturnType<
@@ -18,12 +16,8 @@ const mockCreatePublicClient = createClient as unknown as ReturnType<
 
 const createFetchQuery = (result: unknown): SharedMapFetchQuery => {
   const fetchQuery: SharedMapFetchQuery = {
-    select: vi.fn(),
-    eq: vi.fn(),
-    single: vi.fn().mockResolvedValue(result),
+    maybeSingle: vi.fn().mockResolvedValue(result),
   };
-  fetchQuery.select.mockReturnValue(fetchQuery);
-  fetchQuery.eq.mockReturnValue(fetchQuery);
 
   return fetchQuery;
 };
@@ -39,9 +33,9 @@ describe('getSharedMapBySlug', () => {
   it('returns null for a missing slug', async () => {
     const fetchQuery = createFetchQuery({
       data: null,
-      error: { code: 'PGRST116', message: 'No rows found' },
+      error: null,
     });
-    mockCreatePublicClient.mockReturnValue({ from: vi.fn(() => fetchQuery) });
+    mockCreatePublicClient.mockReturnValue({ rpc: vi.fn(() => fetchQuery) });
 
     await expect(getSharedMapBySlug('missing-map')).resolves.toBeNull();
   });
@@ -49,7 +43,7 @@ describe('getSharedMapBySlug', () => {
   it('propagates non-missing slug fetch errors', async () => {
     const fetchError = new Error('database unavailable');
     const fetchQuery = createFetchQuery({ data: null, error: fetchError });
-    mockCreatePublicClient.mockReturnValue({ from: vi.fn(() => fetchQuery) });
+    mockCreatePublicClient.mockReturnValue({ rpc: vi.fn(() => fetchQuery) });
 
     await expect(getSharedMapBySlug('broken-map')).rejects.toThrow(
       'database unavailable',
@@ -76,7 +70,8 @@ describe('getSharedMapBySlug', () => {
       },
       error: null,
     });
-    mockCreatePublicClient.mockReturnValue({ from: vi.fn(() => fetchQuery) });
+    const rpc = vi.fn(() => fetchQuery);
+    mockCreatePublicClient.mockReturnValue({ rpc });
 
     const sharedMap = await getSharedMapBySlug('seongsu-kape-cuceon-12345678');
 
@@ -95,6 +90,9 @@ describe('getSharedMapBySlug', () => {
       'service-role-key',
       expect.anything(),
     );
+    expect(rpc).toHaveBeenCalledWith('get_shared_map_by_slug_public', {
+      p_slug: 'seongsu-kape-cuceon-12345678',
+    });
     expect(sharedMap?.shared_map_places.map((place) => place.id)).toEqual([
       'shared-place-1',
       'shared-place-2',
