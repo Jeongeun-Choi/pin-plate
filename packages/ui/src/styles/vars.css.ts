@@ -39,6 +39,7 @@ export const vars = createGlobalTheme(':root', {
       hover: '#ff8c69', // brand-primary-dark (Dark Peach Orange)
       light: '#fff4e6', // app-bg-light (Light Peach Background)
       text: '#8b4513', // text-primary (Chocolate Brown) - Contrast for primary button
+      textSoft: '#a65a1e', // Softer warm brown for small map pin rating text
     },
     secondary: {
       bg: '#fff8ed', // app-bg (Cream/Vanilla Background)
