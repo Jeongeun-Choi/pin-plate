@@ -6,6 +6,7 @@ import {
   Map as GoogleMap,
   useMap,
 } from '@vis.gl/react-google-maps';
+import { vars } from '@pin-plate/ui';
 import CustomMarker from '@/features/map/components/CustomMarker';
 import { getStatusPinColor } from '@/features/map/utils/marker';
 import type { SharedMapPlace } from '../types/sharedMap';
@@ -76,6 +77,11 @@ export const SharedMapCanvas = ({ places }: Props) => {
             height={pinHeight}
             color={getStatusPinColor(place.status, place.avg_rating)}
             icon={place.status === 'wish' ? 'bookmark' : undefined}
+            ratingTextColor={
+              place.status === 'visited' && place.avg_rating != null
+                ? vars.colors.primary.textSoft
+                : undefined
+            }
             rating={
               place.status !== 'wish' && place.avg_rating != null
                 ? Math.round(place.avg_rating * 10) / 10

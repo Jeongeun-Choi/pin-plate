@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { vars } from '@pin-plate/ui';
 import {
   getPinColor,
   getMarkerIcon,
@@ -68,6 +69,21 @@ describe('getPinIcon', () => {
     const result = getPinIcon('#FF6B00', 16, 80, 4);
     expect(result).toContain('<text');
     expect(result).toContain('>4</text>');
+  });
+
+  it('rating text 색상을 pin 색상과 별도로 적용한다', () => {
+    const result = getPinIcon(
+      '#FF6B00',
+      16,
+      80,
+      4,
+      vars.colors.primary.textSoft,
+    );
+
+    expect(result).toContain(
+      `<text x="50" y="48" text-anchor="middle" dominant-baseline="middle" font-size="32" font-weight="700" fill="${vars.colors.primary.textSoft}"`,
+    );
+    expect(result).toContain('stroke="#FF6B00"');
   });
 
   it('rating이 없으면 text 요소가 포함되지 않는다', () => {

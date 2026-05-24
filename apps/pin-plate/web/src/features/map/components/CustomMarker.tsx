@@ -1,16 +1,22 @@
+interface Props {
+  width: number;
+  height: number;
+  color: string;
+  rating?: number;
+  ratingTextColor?: string;
+  icon?: 'bookmark';
+}
+
 export default function CustomMarker({
   width,
   height,
   color,
   rating,
+  ratingTextColor,
   icon,
-}: {
-  width: number;
-  height: number;
-  color: string;
-  rating?: number;
-  icon?: 'bookmark';
-}) {
+}: Props) {
+  const resolvedRatingTextColor = ratingTextColor ?? color;
+
   return (
     <svg
       width={width}
@@ -51,7 +57,7 @@ export default function CustomMarker({
           dominantBaseline="middle"
           fontSize="32"
           fontWeight="700"
-          fill={color}
+          fill={resolvedRatingTextColor}
           fontFamily="Pretendard, sans-serif"
         >
           {rating}
