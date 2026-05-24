@@ -265,6 +265,10 @@ export const Map = () => {
             const pinWidth = 40;
             const pinHeight = pinWidth * 2;
             const pinColor = getStatusPinColor(place.status, place.avg_rating);
+            const visitedRatingTextColor =
+              place.status === 'visited' && place.avg_rating != null
+                ? vars.colors.primary.textSoft
+                : undefined;
             const latestPostId = [...place.posts]
               .sort(
                 (a, b) =>
@@ -322,6 +326,7 @@ export const Map = () => {
                   height={pinHeight}
                   color={pinColor}
                   icon={place.status === 'wish' ? 'bookmark' : undefined}
+                  ratingTextColor={visitedRatingTextColor}
                   rating={
                     place.status !== 'wish' && place.avg_rating != null
                       ? Math.round(place.avg_rating * 10) / 10
