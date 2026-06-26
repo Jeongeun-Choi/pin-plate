@@ -26,7 +26,7 @@ interface CreateSharedMapRpcPlace {
 }
 
 interface CreateSharedMapRpcParams {
-  p_owner_id: string;
+  p_owner_id: string | null;
   p_slug: string;
   p_title: string;
   p_description: string;
@@ -45,7 +45,7 @@ interface SupabaseRpcClient {
 }
 
 export const createSharedMap = async (
-  ownerId: string,
+  ownerId: string | null,
   payload: CreateSharedMapPayload,
 ): Promise<SharedMap> => {
   const selectedPlaces = payload.places.slice(0, MAX_SHARED_PLACES);

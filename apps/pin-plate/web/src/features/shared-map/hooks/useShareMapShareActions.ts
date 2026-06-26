@@ -4,7 +4,7 @@ import type { ShareMapDialogState } from './useShareMapDialogState';
 
 interface Props {
   dialogState: ShareMapDialogState;
-  ownerId: string;
+  ownerId: string | null;
 }
 
 const isAbortError = (error: unknown) =>

@@ -9,7 +9,7 @@ import * as s from './ShareMapDialog.css';
 interface Props {
   isOpen: boolean;
   places: PlaceWithStats[];
-  ownerId: string;
+  ownerId: string | null;
   onClose: () => void;
 }
 

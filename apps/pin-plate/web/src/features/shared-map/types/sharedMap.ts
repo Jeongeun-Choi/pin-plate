@@ -22,7 +22,7 @@ export interface SharedMapPlace {
 
 export interface SharedMap {
   id: string;
-  owner_id: string;
+  owner_id: string | null;
   slug: string;
   title: string;
   description: string;
