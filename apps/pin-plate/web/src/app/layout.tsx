@@ -3,7 +3,7 @@ import QueryProvider from '@/providers/QueryProvider';
 import MapProvider from '@/providers/MapProvider';
 import '@pin-plate/ui/reset'; // UI 패키지의 Reset CSS 적용
 
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Pin Plate',

@@ -3,7 +3,7 @@ import { vars } from '@pin-plate/ui';
 
 export const mainContent = style({
   width: '100%',
-  maxWidth: 600, // Reasonable max width for mobile view on desktop
+  maxWidth: 600,
   display: 'flex',
   flexDirection: 'column',
   gap: vars.spacing[4],

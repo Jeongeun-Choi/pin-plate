@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 import * as styles from './GuestSyncBanner.css';
 import { useMyProfile } from '@/features/my-page';
-import { useGuestPosts } from '../hooks/useGuestPosts';
+import { useRawLocalPosts } from '@/features/local-db/hooks/useLocalPosts';
 import { useSyncGuestPosts } from '../hooks/useSyncGuestPosts';
 import { isPostModalOpenAtom } from '@/features/post/atoms';
 import { clickedMapInfoAtom } from '@/features/map/atoms';
@@ -42,15 +42,16 @@ export const GuestSyncBanner = () => {
   const isPostModalOpen = useAtomValue(isPostModalOpenAtom);
   const clickedMapInfo = useAtomValue(clickedMapInfoAtom);
   const { data: profile } = useMyProfile();
-  const { guestPosts, guestPostCount } = useGuestPosts();
+  const { data: localPosts = [] } = useRawLocalPosts();
   const { syncGuestPosts, isSyncing } = useSyncGuestPosts();
 
   const isMapSheetOpen = !!clickedMapInfo;
-  const hasUndismissedGuestPost = guestPosts.some(
+  const localPostCount = localPosts.length;
+  const hasUndismissedLocalPost = localPosts.some(
     (post) => !dismissedGuestPostIds.includes(post.id),
   );
   const isVisible =
-    !!profile && hasUndismissedGuestPost && !isPostModalOpen && !isMapSheetOpen;
+    !!profile && hasUndismissedLocalPost && !isPostModalOpen && !isMapSheetOpen;
 
   if (!isVisible) return null;
 
@@ -67,17 +68,17 @@ export const GuestSyncBanner = () => {
   };
 
   const handleDismiss = () => {
-    const currentGuestPostIds = guestPosts.map((post) => post.id);
-    setDismissedGuestPostIds(currentGuestPostIds);
-    saveDismissedGuestPostIds(currentGuestPostIds);
+    const currentLocalPostIds = localPosts.map((post) => post.id);
+    setDismissedGuestPostIds(currentLocalPostIds);
+    saveDismissedGuestPostIds(currentLocalPostIds);
     setSyncResultMessage('');
   };
 
   const message =
     syncResultMessage ||
-    (guestPostCount === 1
+    (localPostCount === 1
       ? '작성해둔 게시글을 계정에 저장할까요?'
-      : `작성해둔 게시글 ${guestPostCount}개를 계정에 저장할까요?`);
+      : `작성해둔 게시글 ${localPostCount}개를 계정에 저장할까요?`);
 
   const syncButtonText = syncResultMessage
     ? '다시 시도'

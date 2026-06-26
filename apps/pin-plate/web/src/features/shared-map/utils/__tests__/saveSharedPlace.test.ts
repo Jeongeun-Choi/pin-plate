@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GuestPost } from '@/features/guest/types/guestPost';
+import type { LocalPlaceWithStats } from '@/features/local-db/types';
 import type { SharedMapPlace } from '../../types/sharedMap';
 import {
-  buildGuestPostFromSharedPlace,
-  getSharedPlaceGuestSaveStatus,
+  buildLocalPlaceFromSharedPlace,
+  getSharedPlaceLocalSaveStatus,
 } from '../saveSharedPlace';
 
 const sharedPlace: SharedMapPlace = {
@@ -24,59 +24,52 @@ const sharedPlace: SharedMapPlace = {
   created_at: '2026-05-13T00:00:00.000Z',
 };
 
-describe('shared place guest save utilities', () => {
+describe('shared place local save utilities', () => {
   beforeEach(() => {
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('guest-post-1');
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-13T00:00:00.000Z'));
   });
 
-  it('builds a wish guest place from a shared place without copying the sharer rating', () => {
-    const guestPost = buildGuestPostFromSharedPlace(sharedPlace);
+  it('builds a wish local place from a shared place without copying the sharer rating', () => {
+    const localPlace = buildLocalPlaceFromSharedPlace(sharedPlace);
 
-    expect(guestPost).toMatchObject({
-      id: 'guest-post-1',
-      place_name: '성수 카페',
+    expect(localPlace).toMatchObject({
       kakao_place_id: 'kakao-1',
-      content: '공유 지도에서 저장한 가보고 싶은 장소예요.',
-      rating: 0,
+      place_name: '성수 카페',
+      address: '서울 성동구',
       status: 'wish',
       tags: ['work'],
-      has_visit_record: false,
     });
   });
 
-  it('keeps shared places unrated even when the shared place has no average rating', () => {
-    const guestPost = buildGuestPostFromSharedPlace({
-      ...sharedPlace,
-      avg_rating: null,
-    });
-
-    expect(guestPost.rating).toBe(0);
-  });
-
-  it('detects guest duplicates by kakao place id', () => {
-    const existingGuestPost: GuestPost = {
-      id: 'existing-post',
-      created_at: '2026-05-13T00:00:00.000Z',
+  it('detects local duplicates by kakao place id', () => {
+    const existingLocalPlace: LocalPlaceWithStats = {
+      id: 'local-place-1',
+      kakao_place_id: 'kakao-1',
       place_name: '이미 저장한 카페',
       address: '서울 성동구',
       lat: 37.5,
       lng: 127.1,
-      kakao_place_id: 'kakao-1',
-      content: '기존 글',
-      rating: 4,
-      image_urls: [],
+      status: 'wish',
       tags: [],
+      created_at: '2026-05-13T00:00:00.000Z',
+      updated_at: '2026-05-13T00:00:00.000Z',
+      posts: [],
+      visit_count: 0,
+      avg_rating: null,
+      last_visited_at: null,
+      first_image: null,
     };
 
-    const result = getSharedPlaceGuestSaveStatus(sharedPlace, [
-      existingGuestPost,
+    const result = getSharedPlaceLocalSaveStatus(sharedPlace, [
+      existingLocalPlace,
     ]);
 
     expect(result).toBe('already_saved');
   });
 
-  it('returns saved when the shared place is not already in guest posts', () => {
-    const result = getSharedPlaceGuestSaveStatus(sharedPlace, []);
+  it('returns saved when the shared place is not already in local places', () => {
+    const result = getSharedPlaceLocalSaveStatus(sharedPlace, []);
 
     expect(result).toBe('saved');
   });

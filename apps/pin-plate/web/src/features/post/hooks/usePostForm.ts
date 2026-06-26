@@ -9,8 +9,8 @@ import { compressImages } from '../utils/compressImages';
 import { viewModeAtom } from '@/app/atoms';
 import { useMap } from '@vis.gl/react-google-maps';
 import { sanitizeTags } from '../constants/tags';
-import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
-import type { GuestPost } from '@/features/guest/types/guestPost';
+import { saveFilesToLocalDB } from '@/features/local-db/utils/imageProcessor';
+import { useLocalCreatePost } from '@/features/local-db/hooks/useLocalCreatePost';
 import { isTrustedImageKey } from '@/features/image/utils/imageReference';
 
 interface UploadedPhoto {
@@ -60,6 +60,9 @@ export const usePostForm = (
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(0);
   const [photoReferences, setPhotoReferences] = useState<UploadedPhoto[]>([]);
+  const [localPhotoRefs, setLocalPhotoRefs] = useState<
+    Array<{ id: string; previewUrl: string }>
+  >([]);
   const [tags, setTags] = useState<string[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(
     initialPlace ?? null,
@@ -72,11 +75,10 @@ export const usePostForm = (
 
   const viewMode = useAtomValue(viewModeAtom);
 
-  const { addGuestPost } = useGuestPosts();
-
   const map = useMap();
 
   const { mutateAsync: createPost } = useCreatePost();
+  const { mutateAsync: localCreatePost } = useLocalCreatePost();
 
   const existingReviewsForPlace = useMemo(() => {
     if (!selectedPlace || !posts) return [];
@@ -102,15 +104,29 @@ export const usePostForm = (
     setContent('');
     setRating(0);
     setPhotoReferences([]);
+    setLocalPhotoRefs([]);
     setTags([]);
     setSelectedPlace(null);
   }, []);
 
   const handleUploadAndSetImages = useCallback(
     async (fileList: File[]) => {
-      const remainingSlots = 5 - photoReferences.length;
+      const remainingSlots = 5 - photoReferences.length - localPhotoRefs.length;
       if (fileList.length > remainingSlots) {
         alert(`최대 ${remainingSlots}장까지만 더 추가할 수 있습니다.`);
+        return;
+      }
+
+      const currentUser = await getCurrentUser();
+
+      if (!currentUser) {
+        try {
+          const saved = await saveFilesToLocalDB(fileList);
+          setLocalPhotoRefs((prev) => [...prev, ...saved]);
+        } catch (err) {
+          console.error('Local image save error:', err);
+          alert('이미지 저장에 실패했습니다.');
+        }
         return;
       }
 
@@ -175,7 +191,7 @@ export const usePostForm = (
         console.error(err);
       }
     },
-    [photoReferences.length],
+    [photoReferences.length, localPhotoRefs.length],
   );
 
   const handleSubmit = useCallback(async () => {
@@ -197,22 +213,21 @@ export const usePostForm = (
         selectedPlace.road_address_name || selectedPlace.address_name;
 
       if (!currentUser) {
-        const guestPost: GuestPost = {
-          id: crypto.randomUUID(),
-          created_at: new Date().toISOString(),
-          place_name: selectedPlace.place_name,
-          address,
-          lat,
-          lng,
-          kakao_place_id: selectedPlace.id,
-          content,
-          rating,
-          image_urls: photoUrls,
-          image_keys: photoKeys,
-          tags: sanitizeTags(tags),
-        };
-        addGuestPost(guestPost);
-        alert('작성한 게시글이 저장됐습니다. 아직 계정에는 저장되지 않았어요.');
+        await localCreatePost({
+          place: {
+            kakao_place_id: selectedPlace.id,
+            place_name: selectedPlace.place_name,
+            address,
+            lat,
+            lng,
+          },
+          post: {
+            content,
+            rating,
+            tags: sanitizeTags(tags),
+          },
+          imageIds: localPhotoRefs.map((r) => r.id),
+        });
         resetForm();
         onSuccess?.();
         return;
@@ -248,19 +263,27 @@ export const usePostForm = (
     rating,
     photoUrls,
     photoKeys,
+    localPhotoRefs,
     tags,
     selectedPlace,
     viewMode,
     createPost,
+    localCreatePost,
     onSuccess,
     resetForm,
     map,
-    addGuestPost,
   ]);
 
-  const handleRemovePhoto = useCallback((index: number) => {
-    setPhotoReferences((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  const handleRemovePhoto = useCallback(
+    (index: number) => {
+      if (localPhotoRefs.length > 0) {
+        setLocalPhotoRefs((prev) => prev.filter((_, i) => i !== index));
+        return;
+      }
+      setPhotoReferences((prev) => prev.filter((_, i) => i !== index));
+    },
+    [localPhotoRefs.length],
+  );
 
   const handlers = useMemo(
     () => ({
@@ -286,7 +309,10 @@ export const usePostForm = (
     formState: {
       content,
       rating,
-      photos: photoUrls,
+      photos:
+        localPhotoRefs.length > 0
+          ? localPhotoRefs.map((r) => r.previewUrl)
+          : photoUrls,
       tags,
       selectedPlace,
       currentLocation,

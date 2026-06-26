@@ -6,6 +6,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { vars } from '@pin-plate/ui';
 import { GuestLocalPostsSection } from '@/features/guest/components/GuestLocalPostsSection';
 import { usePosts } from '@/features/post/hooks/usePosts';
+import { useLocalPosts } from '@/features/local-db/hooks/useLocalPosts';
 import {
   buildMyPageReportStats,
   type MyPageReportStats,
@@ -448,6 +449,13 @@ export const MyPageReportSection = () => {
   return <MyPageReportPreview stats={reportStats} isLoading={isPostsLoading} />;
 };
 
+export const GuestMyPageReportSection = () => {
+  const { data: posts = [], isLoading: isPostsLoading } = useLocalPosts();
+  const reportStats = useMemo(() => buildMyPageReportStats(posts), [posts]);
+
+  return <MyPageReportPreview stats={reportStats} isLoading={isPostsLoading} />;
+};
+
 export const GuestMyPagePreview = () => {
   const titleId = useId();
   const router = useRouter();
@@ -468,8 +476,8 @@ export const GuestMyPagePreview = () => {
             나의 맛집 기록
           </h1>
           <p className={s.description}>
-            지금은 이 기기에 임시로 저장돼요. 로그인하면 기록을 안전하게
-            보관하고 취향 리포트를 볼 수 있어요.
+            기록은 이 기기에 저장돼요. 로그인하면 여러 기기에서 동기화하고
+            안전하게 백업할 수 있어요.
           </p>
         </div>
 
@@ -479,7 +487,7 @@ export const GuestMyPagePreview = () => {
             className={s.primaryButton}
             onClick={handleLoginClick}
           >
-            로그인하고 리포트 보기
+            로그인하고 백업하기
           </button>
           <button
             type="button"
@@ -491,11 +499,7 @@ export const GuestMyPagePreview = () => {
         </div>
       </section>
 
-      <MyPageReportPreview
-        isLocked
-        stats={sampleReportStats}
-        onLoginClick={handleLoginClick}
-      />
+      <GuestMyPageReportSection />
 
       <GuestLocalPostsSection />
     </div>

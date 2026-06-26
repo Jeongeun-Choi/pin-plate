@@ -2,14 +2,15 @@
 
 import { useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
+import { useLocalPlacesWithStats } from '@/features/local-db/hooks/useLocalPlacesWithStats';
+import { useLocalCreatePlace } from '@/features/local-db/hooks/useLocalCreatePlace';
 import { getPlaceByKakaoId } from '@/features/place/api/getPlaceByKakaoId';
 import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import type { SharedMapPlace } from '../types/sharedMap';
 import {
-  buildGuestPostFromSharedPlace,
-  getSharedPlaceGuestSaveStatus,
+  buildLocalPlaceFromSharedPlace,
+  getSharedPlaceLocalSaveStatus,
   type SaveSharedPlaceResult,
 } from '../utils/saveSharedPlace';
 import * as s from './SharedMapView.css';
@@ -40,7 +41,10 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
   const { mutateAsync: createPlace, isPending: isCreatingPlace } =
     useCreatePlace();
 
-  const { guestPosts, addGuestPost } = useGuestPosts();
+  const { mutateAsync: createLocalPlace, isPending: isCreatingLocalPlace } =
+    useLocalCreatePlace();
+
+  const { data: localPlaces = [] } = useLocalPlacesWithStats();
 
   const { data: existingSavedPlace, isLoading: isExistingSavedPlaceLoading } =
     useQuery({
@@ -66,17 +70,17 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
 
     try {
       if (!currentUser) {
-        const guestSaveStatus = getSharedPlaceGuestSaveStatus(
+        const localSaveStatus = getSharedPlaceLocalSaveStatus(
           sharedPlace,
-          guestPosts,
+          localPlaces,
         );
 
-        if (guestSaveStatus === 'already_saved') {
+        if (localSaveStatus === 'already_saved') {
           setSaveButtonState('already_saved');
           return;
         }
 
-        addGuestPost(buildGuestPostFromSharedPlace(sharedPlace));
+        await createLocalPlace(buildLocalPlaceFromSharedPlace(sharedPlace));
         setSaveButtonState('saved');
         return;
       }
@@ -125,20 +129,20 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
       setIsSavingSharedPlace(false);
     }
   }, [
-    addGuestPost,
+    createLocalPlace,
     createPlace,
     currentUser,
     existingSavedPlace,
-    guestPosts,
     isSavingSharedPlace,
+    localPlaces,
     sharedPlace,
   ]);
 
-  const hasGuestSavedSharedPlace =
+  const hasLocalSavedSharedPlace =
     currentUser === null &&
-    getSharedPlaceGuestSaveStatus(sharedPlace, guestPosts) === 'already_saved';
+    getSharedPlaceLocalSaveStatus(sharedPlace, localPlaces) === 'already_saved';
   const displaySaveButtonState: SaveButtonState =
-    hasGuestSavedSharedPlace || existingSavedPlace
+    hasLocalSavedSharedPlace || existingSavedPlace
       ? 'already_saved'
       : saveButtonState;
   const isSaveComplete =
@@ -148,6 +152,7 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
     isCurrentUserLoading ||
     isExistingSavedPlaceLoading ||
     isCreatingPlace ||
+    isCreatingLocalPlace ||
     isSavingSharedPlace ||
     isSaveComplete;
   const buttonText = buttonTextByState[displaySaveButtonState];
@@ -162,6 +167,7 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
         isCurrentUserLoading ||
         isExistingSavedPlaceLoading ||
         isCreatingPlace ||
+        isCreatingLocalPlace ||
         isSavingSharedPlace
       }
       aria-live={displaySaveButtonState === 'idle' ? undefined : 'polite'}

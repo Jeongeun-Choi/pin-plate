@@ -13,8 +13,7 @@ import * as styles from './Map.styles.css';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import type { PlaceWithStats } from '@/features/place/types/place';
 import type { Place } from '@/features/post/types/search';
-import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
-import type { GuestPost } from '@/features/guest/types/guestPost';
+import { useLocalPlacesWithStats } from '@/features/local-db/hooks/useLocalPlacesWithStats';
 import {
   getStatusPinColor,
   getCurrentLocationIcon,
@@ -37,38 +36,6 @@ const SEOUL_DEFAULT: google.maps.LatLngLiteral = {
   lat: 37.3595704,
   lng: 127.105399,
 };
-
-const GUEST_PLACE_USER_ID = 'guest';
-
-const toGuestPlace = (guestPost: GuestPost): PlaceWithStats => ({
-  id: guestPost.id,
-  user_id: GUEST_PLACE_USER_ID,
-  kakao_place_id: guestPost.kakao_place_id,
-  place_name: guestPost.place_name,
-  address: guestPost.address,
-  lat: guestPost.lat,
-  lng: guestPost.lng,
-  status: guestPost.status ?? 'visited',
-  tags: guestPost.tags,
-  created_at: guestPost.created_at,
-  updated_at: guestPost.created_at,
-  posts:
-    guestPost.has_visit_record === false
-      ? []
-      : [
-          {
-            id: 0,
-            rating: guestPost.rating,
-            image_urls: guestPost.image_urls,
-            created_at: guestPost.created_at,
-          },
-        ],
-  visit_count: guestPost.has_visit_record === false ? 0 : 1,
-  avg_rating: guestPost.has_visit_record === false ? null : guestPost.rating,
-  last_visited_at:
-    guestPost.has_visit_record === false ? null : guestPost.created_at,
-  first_image: guestPost.image_urls[0] ?? null,
-});
 
 interface MapEffectsProps {
   searchPlaces: Place[];
@@ -138,27 +105,20 @@ export const Map = () => {
   const statusFilter = useAtomValue(statusFilterAtom);
 
   const { data: places } = usePlaces();
-  const { guestPosts } = useGuestPosts();
-
-  const guestPlaces = useMemo(
-    () =>
-      guestPosts
-        .filter(
-          (post) => Number.isFinite(post.lat) && Number.isFinite(post.lng),
-        )
-        .map(toGuestPlace),
-    [guestPosts],
-  );
+  const { data: localPlaces = [] } = useLocalPlacesWithStats();
 
   const searchFilteredPlaces = useMemo(() => {
     const savedPlaces = places ?? [];
-    const displayPlaces = [...savedPlaces, ...guestPlaces];
+    const displayPlaces = [
+      ...savedPlaces,
+      ...(localPlaces as unknown as PlaceWithStats[]),
+    ];
     const query = searchQuery.trim().toLowerCase();
     return displayPlaces.filter(
       (place: PlaceWithStats) =>
         !query || place.place_name.toLowerCase().includes(query),
     );
-  }, [guestPlaces, places, searchQuery]);
+  }, [localPlaces, places, searchQuery]);
 
   const visiblePlaces = useMemo(() => {
     return searchFilteredPlaces.filter(
@@ -278,14 +238,17 @@ export const Map = () => {
               .at(0)?.id;
 
             const handlePlaceMarkerClick = (e: google.maps.MapMouseEvent) => {
-              const isGuestPlace = place.user_id === GUEST_PLACE_USER_ID;
+              // 서버 places에 없으면 로컬 place로 간주
+              const isLocalPlace = !places?.find((p) => p.id === place.id);
 
-              if (isGuestPlace) {
-                router.push(`/post/${place.id}`);
+              if (isLocalPlace) {
+                if (latestPostId) {
+                  router.push(`/post/${latestPostId}`);
+                }
                 return;
               }
 
-              if (latestPostId && !isGuestPlace) {
+              if (latestPostId) {
                 router.push(`/post/${latestPostId}`);
                 return;
               }

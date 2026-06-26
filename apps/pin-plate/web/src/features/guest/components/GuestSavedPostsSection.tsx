@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import * as styles from './GuestSavedPostsSection.css';
-import { useGuestPosts } from '../hooks/useGuestPosts';
+import { useRawLocalPosts } from '@/features/local-db/hooks/useLocalPosts';
+import { localPostRepository } from '@/features/local-db/repositories/localPostRepository';
+import { localDbKeys } from '@/features/local-db/localDbKeys';
 import { useSyncGuestPosts } from '../hooks/useSyncGuestPosts';
 
 interface Props {
@@ -11,11 +14,15 @@ interface Props {
 
 export const GuestSavedPostsSection = ({ userId }: Props) => {
   const [resultMessage, setResultMessage] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const { guestPosts, guestPostCount, clearGuestPosts } = useGuestPosts();
+  const queryClient = useQueryClient();
+  const { data: localPosts = [] } = useRawLocalPosts();
   const { syncGuestPosts, isSyncing } = useSyncGuestPosts();
 
-  if (guestPostCount === 0) return null;
+  const localPostCount = localPosts.length;
+
+  if (localPostCount === 0) return null;
 
   const handleSync = async () => {
     setResultMessage('');
@@ -29,15 +36,21 @@ export const GuestSavedPostsSection = ({ userId }: Props) => {
     setResultMessage('작성해둔 글을 계정에 저장했어요.');
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     const shouldDelete = window.confirm(
       '작성해둔 글을 삭제할까요? 삭제하면 되돌릴 수 없습니다.',
     );
 
     if (!shouldDelete) return;
 
-    clearGuestPosts();
-    setResultMessage('');
+    setIsDeleting(true);
+    try {
+      await localPostRepository.clearAllLocalData();
+      await queryClient.invalidateQueries({ queryKey: localDbKeys.all });
+      setResultMessage('');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -51,11 +64,11 @@ export const GuestSavedPostsSection = ({ userId }: Props) => {
             아직 계정에 저장되지 않은 글이에요.
           </p>
         </div>
-        <span className={styles.countBadge}>{guestPostCount}개</span>
+        <span className={styles.countBadge}>{localPostCount}개</span>
       </div>
 
       <div className={styles.previewList}>
-        {guestPosts.slice(0, 3).map((post) => (
+        {localPosts.slice(0, 3).map((post) => (
           <div key={post.id} className={styles.previewItem}>
             <span className={styles.placeName}>{post.place_name}</span>
             <span className={styles.rating}>{post.rating.toFixed(1)}</span>
@@ -70,7 +83,7 @@ export const GuestSavedPostsSection = ({ userId }: Props) => {
           type="button"
           className={styles.syncButton}
           onClick={handleSync}
-          disabled={isSyncing}
+          disabled={isSyncing || isDeleting}
         >
           {isSyncing ? '저장 중...' : '계정에 저장'}
         </button>
@@ -78,9 +91,9 @@ export const GuestSavedPostsSection = ({ userId }: Props) => {
           type="button"
           className={styles.deleteButton}
           onClick={handleDelete}
-          disabled={isSyncing}
+          disabled={isSyncing || isDeleting}
         >
-          삭제
+          {isDeleting ? '삭제 중...' : '삭제'}
         </button>
       </div>
     </section>

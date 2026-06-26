@@ -17,6 +17,9 @@ import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
 import { useDeletePlace } from '@/features/place/hooks/useDeletePlace';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
+import { useLocalCreatePlace } from '@/features/local-db/hooks/useLocalCreatePlace';
+import { useLocalDeletePlace } from '@/features/local-db/hooks/useLocalDeletePlace';
+import { useLocalPlacesWithStats } from '@/features/local-db/hooks/useLocalPlacesWithStats';
 import * as s from './PlaceDetailSheet.css';
 
 export const PlaceDetailSheet = () => {
@@ -32,8 +35,13 @@ export const PlaceDetailSheet = () => {
     useCreatePlace();
   const { mutateAsync: removePlace, isPending: isRemovingWish } =
     useDeletePlace();
+  const { mutateAsync: createLocalPlace, isPending: isAddingLocalWish } =
+    useLocalCreatePlace();
+  const { mutateAsync: removeLocalPlace, isPending: isRemovingLocalWish } =
+    useLocalDeletePlace();
 
   const { data: places } = usePlaces();
+  const { data: localPlaces = [] } = useLocalPlacesWithStats();
 
   const isDirectPlace = !!selectedSearchPlace;
 
@@ -51,7 +59,11 @@ export const PlaceDetailSheet = () => {
     places?.find(
       (p) => p.kakao_place_id === closestPlace?.id && p.status === 'wish',
     ) ?? null;
-  const isAlreadySaved = !!savedPlace;
+  const localSavedPlace =
+    localPlaces.find(
+      (p) => p.kakao_place_id === closestPlace?.id && p.status === 'wish',
+    ) ?? null;
+  const isAlreadySaved = !!savedPlace || !!localSavedPlace;
 
   const handleClose = () => {
     if (Date.now() - openedAtRef.current < 300) return;
@@ -67,9 +79,12 @@ export const PlaceDetailSheet = () => {
   };
 
   const handleRemoveWish = async () => {
-    if (!savedPlace) return;
     try {
-      await removePlace(savedPlace.id);
+      if (savedPlace) {
+        await removePlace(savedPlace.id);
+      } else if (localSavedPlace) {
+        await removeLocalPlace(localSavedPlace.id);
+      }
     } catch {
       alert('삭제에 실패했습니다.');
     }
@@ -80,7 +95,19 @@ export const PlaceDetailSheet = () => {
     try {
       const currentUser = await getCurrentUser();
       if (!currentUser) {
-        alert('로그인이 필요합니다.');
+        // 비로그인: IndexedDB에 wish 저장
+        const now = new Date().toISOString();
+        await createLocalPlace({
+          kakao_place_id: closestPlace.id,
+          place_name: closestPlace.place_name,
+          address: closestPlace.road_address_name || closestPlace.address_name,
+          lat: parseFloat(closestPlace.y),
+          lng: parseFloat(closestPlace.x),
+          status: 'wish',
+          tags: [],
+          created_at: now,
+          updated_at: now,
+        });
         return;
       }
       await createPlace({
@@ -185,7 +212,12 @@ export const PlaceDetailSheet = () => {
                   size="full"
                   className={s.wishButton}
                   onClick={isAlreadySaved ? handleRemoveWish : handleAddWish}
-                  disabled={isAddingWish || isRemovingWish}
+                  disabled={
+                    isAddingWish ||
+                    isRemovingWish ||
+                    isAddingLocalWish ||
+                    isRemovingLocalWish
+                  }
                 >
                   {isAlreadySaved ? (
                     <IcFilledBookmark width={16} height={16} />

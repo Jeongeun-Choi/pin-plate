@@ -1,14 +1,15 @@
 'use client';
 
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, Spinner } from '@pin-plate/ui';
 import { usePostDetailModal } from '../hooks/usePostDetailModal';
 import type { Post } from '../types/post';
 import type { CreatePostPayload } from '../types/post';
-import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
-import { loadGuestPosts } from '@/features/guest/storage/guestPostStorage';
-import type { GuestPost } from '@/features/guest/types/guestPost';
+import { useLocalPost } from '@/features/local-db/hooks/useLocalPost';
+import { useLocalDeletePost } from '@/features/local-db/hooks/useLocalDeletePost';
+import { useLocalUpdatePost } from '@/features/local-db/hooks/useLocalUpdatePost';
+import type { LocalPostWithUrls } from '@/features/local-db/types';
 import EditPostContent from './EditPostContent';
 import { ReviewCard } from './ReviewCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
@@ -19,21 +20,21 @@ interface PostDetailModalProps {
   isIntercepted?: boolean;
 }
 
-const toGuestDetailPost = (guestPost: GuestPost): Post => ({
+const toLocalDetailPost = (localPost: LocalPostWithUrls): Post => ({
   id: 0,
-  place_id: undefined,
-  content: guestPost.content,
-  rating: guestPost.rating,
-  image_urls: guestPost.image_urls,
-  image_keys: guestPost.image_keys,
-  place_name: guestPost.place_name,
-  address: guestPost.address,
-  lat: guestPost.lat,
-  lng: guestPost.lng,
-  kakao_place_id: guestPost.kakao_place_id,
-  user_id: 'guest',
-  tags: guestPost.tags,
-  created_at: guestPost.created_at,
+  place_id: localPost.place_id,
+  content: localPost.content,
+  rating: localPost.rating,
+  image_urls: localPost.image_urls,
+  image_keys: localPost.legacy_image_keys,
+  place_name: localPost.place_name,
+  address: localPost.address,
+  lat: localPost.lat,
+  lng: localPost.lng,
+  kakao_place_id: localPost.kakao_place_id,
+  user_id: 'local',
+  tags: localPost.tags,
+  created_at: localPost.created_at,
 });
 
 const SavedPostDetailInner = ({ id }: { id: string }) => {
@@ -107,60 +108,62 @@ const SavedPostDetailInner = ({ id }: { id: string }) => {
   );
 };
 
-const GuestPostDetailInner = ({ guestPost }: { guestPost: GuestPost }) => {
-  const [editingGuestPost, setEditingGuestPost] = useState<GuestPost | null>(
-    null,
-  );
+const LocalPostDetailInner = ({
+  localPost,
+}: {
+  localPost: LocalPostWithUrls;
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
 
   const router = useRouter();
-  const { removeGuestPost, updateGuestPost } = useGuestPosts();
+  const { mutateAsync: deleteLocalPost } = useLocalDeletePost();
+  const { mutateAsync: updateLocalPost } = useLocalUpdatePost();
 
-  const post = toGuestDetailPost(guestPost);
+  const post = toLocalDetailPost(localPost);
 
-  const handleDeleteGuestPost = useCallback(() => {
+  const handleDeleteLocalPost = useCallback(() => {
     if (!confirm('정말로 삭제하시겠습니까?')) return;
 
-    removeGuestPost(guestPost.id);
-    router.back();
-  }, [guestPost.id, removeGuestPost, router]);
+    deleteLocalPost(localPost.id)
+      .then(() => router.back())
+      .catch(() => alert('삭제에 실패했습니다.'));
+  }, [localPost.id, deleteLocalPost, router]);
 
-  const handleEditGuestPost = useCallback(() => {
-    setEditingGuestPost(guestPost);
-  }, [guestPost]);
-
-  const handleCancelGuestPostEdit = useCallback(() => {
-    setEditingGuestPost(null);
+  const handleEditLocalPost = useCallback(() => {
+    setIsEditing(true);
   }, []);
 
-  const handleSaveGuestPost = useCallback(
-    (currentGuestPost: GuestPost, payload: CreatePostPayload) => {
-      updateGuestPost({
-        ...currentGuestPost,
-        content: payload.content,
-        rating: payload.rating,
-        image_urls: payload.image_urls,
-        image_keys: payload.image_keys,
-        place_name: payload.place_name,
-        address: payload.address,
-        lat: payload.lat,
-        lng: payload.lng,
-        kakao_place_id: payload.kakao_place_id,
-        tags: payload.tags,
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+  }, []);
+
+  const handleSaveLocalPost = useCallback(
+    async (payload: CreatePostPayload) => {
+      await updateLocalPost({
+        id: localPost.id,
+        updates: {
+          content: payload.content,
+          rating: payload.rating,
+          place_name: payload.place_name,
+          address: payload.address,
+          lat: payload.lat,
+          lng: payload.lng,
+          kakao_place_id: payload.kakao_place_id,
+          tags: payload.tags,
+        },
       });
-      setEditingGuestPost(null);
+      setIsEditing(false);
     },
-    [updateGuestPost],
+    [localPost.id, updateLocalPost],
   );
 
-  if (editingGuestPost) {
+  if (isEditing) {
     return (
-      <GuestPostDetailEditView
-        guestPost={editingGuestPost}
-        onCancel={handleCancelGuestPostEdit}
-        onSuccess={handleCancelGuestPostEdit}
-        onSubmitOverride={(payload) =>
-          handleSaveGuestPost(editingGuestPost, payload)
-        }
+      <PostDetailEditView
+        post={post}
+        onCancel={handleCancelEdit}
+        onSuccess={handleCancelEdit}
+        onSubmitOverride={handleSaveLocalPost}
       />
     );
   }
@@ -176,8 +179,8 @@ const GuestPostDetailInner = ({ guestPost }: { guestPost: GuestPost }) => {
         <div className={styles.scrollContainer}>
           <ReviewCard
             post={post}
-            onEdit={handleEditGuestPost}
-            onDelete={handleDeleteGuestPost}
+            onEdit={handleEditLocalPost}
+            onDelete={handleDeleteLocalPost}
             sectionRef={() => {}}
           />
         </div>
@@ -186,36 +189,20 @@ const GuestPostDetailInner = ({ guestPost }: { guestPost: GuestPost }) => {
   );
 };
 
-const GuestPostDetailEditView = ({
-  guestPost,
-  onCancel,
-  onSuccess,
-  onSubmitOverride,
-}: {
-  guestPost: GuestPost;
-  onCancel: () => void;
-  onSuccess: () => void;
-  onSubmitOverride: (payload: CreatePostPayload) => Promise<void> | void;
-}) => (
-  <PostDetailEditView
-    post={toGuestDetailPost(guestPost)}
-    onCancel={onCancel}
-    onSuccess={onSuccess}
-    onSubmitOverride={onSubmitOverride}
-  />
-);
-
 const PostDetailInner = ({ id }: { id: string }) => {
-  const { guestPosts } = useGuestPosts();
-  const guestPost = useMemo(
-    () =>
-      guestPosts.find((post) => post.id === id) ??
-      loadGuestPosts().find((post) => post.id === id),
-    [guestPosts, id],
-  );
+  // UUID면 로컬, 숫자면 Supabase
+  const isLocalPost = isNaN(Number(id));
+  const { data: localPost } = useLocalPost(id, isLocalPost);
 
-  if (guestPost) {
-    return <GuestPostDetailInner guestPost={guestPost} />;
+  if (isLocalPost) {
+    if (!localPost) {
+      return (
+        <Modal.Body>
+          <div className={styles.errorMessage}>기록을 찾을 수 없습니다.</div>
+        </Modal.Body>
+      );
+    }
+    return <LocalPostDetailInner localPost={localPost} />;
   }
 
   return <SavedPostDetailInner id={id} />;

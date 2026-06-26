@@ -1,7 +1,8 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { migrateGuestPostsFromLocalStorage } from '@/features/local-db/migration/migrateFromLocalStorage';
 
 export default function QueryProvider({
   children,
@@ -18,6 +19,10 @@ export default function QueryProvider({
         },
       }),
   );
+
+  useEffect(() => {
+    migrateGuestPostsFromLocalStorage().catch(console.error);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
