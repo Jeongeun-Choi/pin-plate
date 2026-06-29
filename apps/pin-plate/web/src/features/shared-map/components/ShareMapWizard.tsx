@@ -11,7 +11,7 @@ import { useShareMapShareActions } from '../hooks/useShareMapShareActions';
 
 interface Props {
   places: PlaceWithStats[];
-  ownerId: string | null;
+  ownerId: string;
   onClose: () => void;
 }
 

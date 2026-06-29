@@ -3,7 +3,7 @@ import { createSharedMap } from '../api/createSharedMap';
 import type { CreateSharedMapPayload } from '../types/sharedMap';
 
 interface CreateSharedMapVariables {
-  ownerId: string | null;
+  ownerId: string;
   payload: CreateSharedMapPayload;
 }
 

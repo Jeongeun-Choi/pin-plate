@@ -24,9 +24,6 @@ import { GuestSyncBanner } from '@/features/guest/components/GuestSyncBanner';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import { ShareMapDialog } from '@/features/shared-map/components/ShareMapDialog';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
-import { useLocalPlacesWithStats } from '@/features/local-db/hooks/useLocalPlacesWithStats';
-import type { LocalPlaceWithStats } from '@/features/local-db/types';
-import type { PlaceWithStats } from '@/features/place/types/place';
 
 export const Header = () => {
   const [searchInputValue, setSearchInputValue] = useState('');
@@ -45,7 +42,10 @@ export const Header = () => {
     queryFn: getCurrentUser,
   });
 
-  const shareButtonTitle = '내 장소 지도를 공유해요.';
+  const isShareButtonDisabled = !currentUser;
+  const shareButtonTitle = isShareButtonDisabled
+    ? '로그인하면 내 장소 지도를 공유할 수 있어요.'
+    : '내 장소 지도를 공유해요.';
 
   const handleSearch = () => {
     const query = searchInputValue.trim();
@@ -89,6 +89,9 @@ export const Header = () => {
   };
 
   const handleShareMapOpen = () => {
+    if (!currentUser) {
+      return;
+    }
     setIsShareMapDialogOpen(true);
   };
 
@@ -172,6 +175,7 @@ export const Header = () => {
             type="button"
             className={styles.shareButton}
             onClick={handleShareMapOpen}
+            disabled={isShareButtonDisabled}
             title={shareButtonTitle}
           >
             <IcShare width={16} height={16} color="currentColor" />
@@ -196,9 +200,9 @@ export const Header = () => {
           </div>
         </div>
       </header>
-      {isShareMapDialogOpen && (
+      {currentUser && isShareMapDialogOpen && (
         <ShareMapDialogLoader
-          ownerId={currentUser?.id ?? null}
+          ownerId={currentUser.id}
           onClose={handleShareMapClose}
         />
       )}
@@ -207,19 +211,8 @@ export const Header = () => {
   );
 };
 
-const toShareablePlaceWithStats = (
-  local: LocalPlaceWithStats,
-): PlaceWithStats => ({
-  ...local,
-  user_id: 'guest',
-  posts: local.posts.map((p) => ({ ...p, id: 0 })),
-  first_image: local.first_image?.startsWith('blob:')
-    ? null
-    : (local.first_image ?? null),
-});
-
 interface ShareMapDialogLoaderProps {
-  ownerId: string | null;
+  ownerId: string;
   onClose: () => void;
 }
 
@@ -228,16 +221,11 @@ const ShareMapDialogLoader = ({
   onClose,
 }: ShareMapDialogLoaderProps) => {
   const { data: savedPlaces = [] } = usePlaces();
-  const { data: localPlaces = [] } = useLocalPlacesWithStats();
-
-  const places = ownerId
-    ? savedPlaces
-    : localPlaces.map(toShareablePlaceWithStats);
 
   return (
     <ShareMapDialog
       isOpen={true}
-      places={places}
+      places={savedPlaces}
       ownerId={ownerId}
       onClose={onClose}
     />
