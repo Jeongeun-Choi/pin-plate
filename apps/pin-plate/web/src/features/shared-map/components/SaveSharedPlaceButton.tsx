@@ -2,30 +2,29 @@
 
 import { useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useLocalPlacesWithStats } from '@/features/local-db/hooks/useLocalPlacesWithStats';
-import { useLocalCreatePlace } from '@/features/local-db/hooks/useLocalCreatePlace';
 import { getPlaceByKakaoId } from '@/features/place/api/getPlaceByKakaoId';
 import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import type { SharedMapPlace } from '../types/sharedMap';
-import {
-  buildLocalPlaceFromSharedPlace,
-  getSharedPlaceLocalSaveStatus,
-  type SaveSharedPlaceResult,
-} from '../utils/saveSharedPlace';
 import * as s from './SharedMapView.css';
 
 interface Props {
   sharedPlace: SharedMapPlace;
 }
 
-type SaveButtonState = 'idle' | SaveSharedPlaceResult | 'failed';
+type SaveButtonState =
+  | 'idle'
+  | 'saved'
+  | 'already_saved'
+  | 'failed'
+  | 'login_required';
 
 const buttonTextByState: Record<SaveButtonState, string> = {
   idle: '내 지도에 저장',
   saved: '저장됐어요',
   already_saved: '이미 저장됐어요',
   failed: '저장하지 못했어요',
+  login_required: '로그인 후 저장 가능해요',
 };
 
 export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
@@ -40,11 +39,6 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
 
   const { mutateAsync: createPlace, isPending: isCreatingPlace } =
     useCreatePlace();
-
-  const { mutateAsync: createLocalPlace, isPending: isCreatingLocalPlace } =
-    useLocalCreatePlace();
-
-  const { data: localPlaces = [] } = useLocalPlacesWithStats();
 
   const { data: existingSavedPlace, isLoading: isExistingSavedPlaceLoading } =
     useQuery({
@@ -62,29 +56,13 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
     });
 
   const handleSaveClick = useCallback(async () => {
-    if (isSavingSharedPlace) {
+    if (isSavingSharedPlace || !currentUser) {
       return;
     }
 
     setIsSavingSharedPlace(true);
 
     try {
-      if (!currentUser) {
-        const localSaveStatus = getSharedPlaceLocalSaveStatus(
-          sharedPlace,
-          localPlaces,
-        );
-
-        if (localSaveStatus === 'already_saved') {
-          setSaveButtonState('already_saved');
-          return;
-        }
-
-        await createLocalPlace(buildLocalPlaceFromSharedPlace(sharedPlace));
-        setSaveButtonState('saved');
-        return;
-      }
-
       if (existingSavedPlace) {
         setSaveButtonState('already_saved');
         return;
@@ -129,20 +107,17 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
       setIsSavingSharedPlace(false);
     }
   }, [
-    createLocalPlace,
     createPlace,
     currentUser,
     existingSavedPlace,
     isSavingSharedPlace,
-    localPlaces,
     sharedPlace,
   ]);
 
-  const hasLocalSavedSharedPlace =
-    currentUser === null &&
-    getSharedPlaceLocalSaveStatus(sharedPlace, localPlaces) === 'already_saved';
-  const displaySaveButtonState: SaveButtonState =
-    hasLocalSavedSharedPlace || existingSavedPlace
+  const isLoginRequired = !isCurrentUserLoading && !currentUser;
+  const displaySaveButtonState: SaveButtonState = isLoginRequired
+    ? 'login_required'
+    : existingSavedPlace
       ? 'already_saved'
       : saveButtonState;
   const isSaveComplete =
@@ -152,9 +127,9 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
     isCurrentUserLoading ||
     isExistingSavedPlaceLoading ||
     isCreatingPlace ||
-    isCreatingLocalPlace ||
     isSavingSharedPlace ||
-    isSaveComplete;
+    isSaveComplete ||
+    isLoginRequired;
   const buttonText = buttonTextByState[displaySaveButtonState];
 
   return (
@@ -167,7 +142,6 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
         isCurrentUserLoading ||
         isExistingSavedPlaceLoading ||
         isCreatingPlace ||
-        isCreatingLocalPlace ||
         isSavingSharedPlace
       }
       aria-live={displaySaveButtonState === 'idle' ? undefined : 'polite'}
