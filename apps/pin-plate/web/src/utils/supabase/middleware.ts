@@ -5,7 +5,8 @@ export async function updateSession(request: NextRequest) {
   const isPublicPath =
     request.nextUrl.pathname.startsWith('/sign-in') ||
     request.nextUrl.pathname.startsWith('/sign-up') ||
-    request.nextUrl.pathname.startsWith('/auth');
+    request.nextUrl.pathname.startsWith('/auth') ||
+    request.nextUrl.pathname.startsWith('/share');
 
   try {
     let supabaseResponse = NextResponse.next({
@@ -98,6 +99,13 @@ export async function updateSession(request: NextRequest) {
       } catch {
         // profiles 쿼리 실패 시 /sign-up/profile 접근 허용
       }
+    }
+
+    // 3. 비로그인 사용자가 보호된 경로에 접근할 때 → sign-in으로 리다이렉트
+    if (!user && !isPublicPath) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/sign-in';
+      return NextResponse.redirect(url);
     }
 
     // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
