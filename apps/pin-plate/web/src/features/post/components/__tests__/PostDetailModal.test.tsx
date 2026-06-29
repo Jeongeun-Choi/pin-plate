@@ -4,26 +4,20 @@ import { Provider as JotaiProvider } from 'jotai';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PostDetailModal } from '../PostDetailModal';
-import {
-  loadGuestPosts,
-  saveGuestPosts,
-} from '@/features/guest/storage/guestPostStorage';
-import type { GuestPost } from '@/features/guest/types/guestPost';
+import type { LocalPostWithUrls } from '@/features/local-db/types';
 import { createTestQueryClient } from '@/test-utils';
 
-const createGuestPost = (id: string): GuestPost => ({
-  id,
-  created_at: '2026-05-13T00:00:00.000Z',
-  place_name: `테스트 맛집 ${id}`,
-  address: '서울시 강남구',
-  lat: 37.5,
-  lng: 127,
-  kakao_place_id: `kakao-${id}`,
-  content: '맛있어요',
-  rating: 4,
-  image_urls: [],
-  tags: [],
-});
+const mockDeletePost = vi.fn();
+const mockUpdatePost = vi.fn();
+const mockBack = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: mockBack,
+  }),
+}));
 
 vi.mock('@/features/map/components/MapPreview', () => ({
   MapPreview: () => <div data-testid="map-preview" />,
@@ -35,6 +29,37 @@ vi.mock('@/hooks/useCurrentLocation', () => ({
     fetchLocation: vi.fn().mockResolvedValue({ lat: 37.5, lng: 127 }),
   }),
 }));
+
+vi.mock('@/features/local-db/hooks/useLocalPost', () => ({
+  useLocalPost: vi.fn(),
+}));
+
+vi.mock('@/features/local-db/hooks/useLocalDeletePost', () => ({
+  useLocalDeletePost: () => ({ mutateAsync: mockDeletePost }),
+}));
+
+vi.mock('@/features/local-db/hooks/useLocalUpdatePost', () => ({
+  useLocalUpdatePost: () => ({ mutateAsync: mockUpdatePost }),
+}));
+
+const { useLocalPost } = await import('@/features/local-db/hooks/useLocalPost');
+const mockedUseLocalPost = vi.mocked(useLocalPost);
+
+const createLocalPostWithUrls = (id: string): LocalPostWithUrls => ({
+  id,
+  place_id: `place-${id}`,
+  created_at: '2026-05-13T00:00:00.000Z',
+  place_name: `테스트 맛집 ${id}`,
+  address: '서울시 강남구',
+  lat: 37.5,
+  lng: 127,
+  kakao_place_id: `kakao-${id}`,
+  content: '맛있어요',
+  rating: 4,
+  image_ids: [],
+  image_urls: [],
+  tags: [],
+});
 
 const createPostDetailModalWrapper = () => {
   const queryClient = createTestQueryClient();
@@ -50,19 +75,23 @@ const createPostDetailModalWrapper = () => {
 
 describe('PostDetailModal', () => {
   beforeEach(() => {
-    localStorage.clear();
-    vi.stubGlobal(
-      'confirm',
-      vi.fn(() => true),
-    );
+    mockDeletePost.mockReset();
+    mockUpdatePost.mockReset();
+    mockBack.mockReset();
+    mockDeletePost.mockResolvedValue(undefined);
+    mockUpdatePost.mockResolvedValue(undefined);
+    vi.stubGlobal('confirm', vi.fn(() => true));
     vi.stubGlobal('alert', vi.fn());
   });
 
-  it('guest post route id이면 localStorage의 게스트 글 상세를 보여준다', () => {
-    const guestPost = createGuestPost('first');
-    saveGuestPosts([guestPost]);
+  it('guest post route id이면 IndexedDB의 게스트 글 상세를 보여준다', () => {
+    const localPost = createLocalPostWithUrls('first');
+    mockedUseLocalPost.mockReturnValue({
+      data: localPost,
+      isLoading: false,
+    } as ReturnType<typeof useLocalPost>);
 
-    render(<PostDetailModal id={guestPost.id} />, {
+    render(<PostDetailModal id={localPost.id} />, {
       wrapper: createPostDetailModalWrapper(),
     });
 
@@ -72,10 +101,13 @@ describe('PostDetailModal', () => {
   });
 
   it('guest post 상세에서도 수정하기와 삭제하기 메뉴를 보여준다', () => {
-    const guestPost = createGuestPost('first');
-    saveGuestPosts([guestPost]);
+    const localPost = createLocalPostWithUrls('first');
+    mockedUseLocalPost.mockReturnValue({
+      data: localPost,
+      isLoading: false,
+    } as ReturnType<typeof useLocalPost>);
 
-    render(<PostDetailModal id={guestPost.id} />, {
+    render(<PostDetailModal id={localPost.id} />, {
       wrapper: createPostDetailModalWrapper(),
     });
 
@@ -85,25 +117,31 @@ describe('PostDetailModal', () => {
     expect(screen.getByText('삭제하기')).toBeInTheDocument();
   });
 
-  it('guest post 삭제하기를 누르면 localStorage에서 글을 삭제한다', () => {
-    const guestPost = createGuestPost('first');
-    saveGuestPosts([guestPost]);
+  it('guest post 삭제하기를 누르면 deletePost가 호출된다', async () => {
+    const localPost = createLocalPostWithUrls('first');
+    mockedUseLocalPost.mockReturnValue({
+      data: localPost,
+      isLoading: false,
+    } as ReturnType<typeof useLocalPost>);
 
-    render(<PostDetailModal id={guestPost.id} />, {
+    render(<PostDetailModal id={localPost.id} />, {
       wrapper: createPostDetailModalWrapper(),
     });
 
     fireEvent.click(screen.getByText('⋮'));
     fireEvent.click(screen.getByText('삭제하기'));
 
-    expect(loadGuestPosts()).toEqual([]);
+    expect(mockDeletePost).toHaveBeenCalledWith('first');
   });
 
   it('guest post 수정 화면은 로그인 수정 화면과 같은 편집 UI를 보여준다', () => {
-    const guestPost = createGuestPost('first');
-    saveGuestPosts([guestPost]);
+    const localPost = createLocalPostWithUrls('first');
+    mockedUseLocalPost.mockReturnValue({
+      data: localPost,
+      isLoading: false,
+    } as ReturnType<typeof useLocalPost>);
 
-    render(<PostDetailModal id={guestPost.id} />, {
+    render(<PostDetailModal id={localPost.id} />, {
       wrapper: createPostDetailModalWrapper(),
     });
 
@@ -115,11 +153,14 @@ describe('PostDetailModal', () => {
     expect(screen.getByText('사진')).toBeInTheDocument();
   });
 
-  it('guest post 수정 완료 시 같은 편집 UI로 localStorage의 글을 갱신한다', () => {
-    const guestPost = createGuestPost('first');
-    saveGuestPosts([guestPost]);
+  it('guest post 수정 완료 시 updatePost가 수정된 내용으로 호출된다', async () => {
+    const localPost = createLocalPostWithUrls('first');
+    mockedUseLocalPost.mockReturnValue({
+      data: localPost,
+      isLoading: false,
+    } as ReturnType<typeof useLocalPost>);
 
-    render(<PostDetailModal id={guestPost.id} />, {
+    render(<PostDetailModal id={localPost.id} />, {
       wrapper: createPostDetailModalWrapper(),
     });
 
@@ -130,9 +171,11 @@ describe('PostDetailModal', () => {
     });
     fireEvent.click(screen.getByText('완료'));
 
-    expect(loadGuestPosts()[0]).toMatchObject({
-      id: guestPost.id,
-      content: '수정한 내용',
-    });
+    expect(mockUpdatePost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'first',
+        updates: expect.objectContaining({ content: '수정한 내용' }),
+      }),
+    );
   });
 });

@@ -72,6 +72,7 @@ describe('usePostForm', () => {
     vi.stubGlobal('alert', mockAlert);
     mockCreatePost.mockReset();
     mockGetUser.mockReset();
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } });
     mockGetPlaceByKakaoId.mockReset();
     mockCreatePlace.mockReset();
     mockFetch.mockReset();

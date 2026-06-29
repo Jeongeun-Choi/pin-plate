@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GuestPost } from '@/features/guest/types/guestPost';
+import type { LocalPlaceWithStats } from '@/features/local-db/types';
 import type { Post } from '@/features/post/types/post';
 import MyPage from '../page';
 
@@ -17,8 +17,13 @@ vi.mock('@/features/my-page/hooks/useMyProfile', () => ({
   useMyProfile: vi.fn(),
 }));
 
-vi.mock('@/features/guest/hooks/useGuestPosts', () => ({
-  useGuestPosts: vi.fn(),
+vi.mock('@/features/local-db/hooks/useLocalPlacesWithStats', () => ({
+  useLocalPlacesWithStats: vi.fn(),
+}));
+
+vi.mock('@/features/local-db/hooks/useLocalPosts', () => ({
+  useLocalPosts: vi.fn(),
+  useRawLocalPosts: vi.fn().mockReturnValue({ data: [], isLoading: false }),
 }));
 
 vi.mock('@/features/post/hooks/usePosts', () => ({
@@ -26,11 +31,15 @@ vi.mock('@/features/post/hooks/usePosts', () => ({
 }));
 
 const { useMyProfile } = await import('@/features/my-page/hooks/useMyProfile');
-const { useGuestPosts } = await import('@/features/guest/hooks/useGuestPosts');
+const { useLocalPlacesWithStats } = await import(
+  '@/features/local-db/hooks/useLocalPlacesWithStats'
+);
+const { useLocalPosts } = await import('@/features/local-db/hooks/useLocalPosts');
 const { usePosts } = await import('@/features/post/hooks/usePosts');
 
 const mockedUseMyProfile = vi.mocked(useMyProfile);
-const mockedUseGuestPosts = vi.mocked(useGuestPosts);
+const mockedUseLocalPlacesWithStats = vi.mocked(useLocalPlacesWithStats);
+const mockedUseLocalPosts = vi.mocked(useLocalPosts);
 const mockedUsePosts = vi.mocked(usePosts);
 
 const renderMyPage = () => {
@@ -48,18 +57,22 @@ const renderMyPage = () => {
   );
 };
 
-const createLocalPost = (): GuestPost => ({
-  id: 'local-post-id',
-  created_at: '2026-05-13T00:00:00.000Z',
+const createLocalPlace = (id: string): LocalPlaceWithStats => ({
+  id,
+  kakao_place_id: `kakao-${id}`,
   place_name: '긴 이름의 맛집',
   address: '서울시 성동구',
   lat: 37.5446,
   lng: 127.0557,
-  kakao_place_id: 'kakao-local-post-id',
-  content: '좋았어요',
-  rating: 4.5,
-  image_urls: [],
+  status: 'visited',
   tags: [],
+  created_at: '2026-05-13T00:00:00.000Z',
+  updated_at: '2026-05-13T00:00:00.000Z',
+  posts: [{ id, rating: 4.5, image_urls: [], created_at: '2026-05-13T00:00:00.000Z' }],
+  visit_count: 1,
+  avg_rating: 4.5,
+  last_visited_at: '2026-05-13T00:00:00.000Z',
+  first_image: null,
 });
 
 const createServerPost = (overrides: Partial<Post>): Post => ({
@@ -87,14 +100,13 @@ describe('MyPage signed-out preview', () => {
       data: null,
       isLoading: false,
     } as ReturnType<typeof useMyProfile>);
-    mockedUseGuestPosts.mockReturnValue({
-      guestPosts: [],
-      guestPostCount: 0,
-      addGuestPost: vi.fn(),
-      updateGuestPost: vi.fn(),
-      removeGuestPost: vi.fn(),
-      clearGuestPosts: vi.fn(),
-    } as ReturnType<typeof useGuestPosts>);
+    mockedUseLocalPlacesWithStats.mockReturnValue({
+      data: [],
+    } as unknown as ReturnType<typeof useLocalPlacesWithStats>);
+    mockedUseLocalPosts.mockReturnValue({
+      data: [],
+      isLoading: false,
+    } as unknown as ReturnType<typeof useLocalPosts>);
     mockedUsePosts.mockReturnValue({
       data: [],
       isLoading: false,
@@ -105,28 +117,21 @@ describe('MyPage signed-out preview', () => {
     vi.useRealTimers();
   });
 
-  it('shows the locked report preview copy to signed-out users', () => {
+  it('shows the report preview copy to signed-out users', () => {
     renderMyPage();
 
     expect(
       screen.getByRole('heading', { name: '나의 맛집 기록' }),
     ).toBeInTheDocument();
     expect(screen.getByText('취향 리포트')).toBeInTheDocument();
-    expect(
-      screen.getByText('로그인하면 내 취향 차트가 열려요'),
-    ).toBeInTheDocument();
     expect(screen.getByText('이번 주 자주 간 음식점')).toBeInTheDocument();
-    expect(screen.getByText('월간 장소 분포')).toBeInTheDocument();
-    expect(screen.getByText('자주 남긴 태그')).toBeInTheDocument();
     expect(screen.queryByText('로그인이 필요합니다')).not.toBeInTheDocument();
   });
 
   it('routes primary and secondary actions to auth pages', () => {
     renderMyPage();
 
-    fireEvent.click(
-      screen.getAllByRole('button', { name: '로그인하고 리포트 보기' })[0],
-    );
+    fireEvent.click(screen.getByRole('button', { name: '로그인하고 백업하기' }));
     expect(pushMock).toHaveBeenCalledWith('/sign-in');
 
     fireEvent.click(screen.getByRole('button', { name: '회원가입' }));
@@ -148,14 +153,9 @@ describe('MyPage signed-out preview', () => {
   });
 
   it('shows local records and routes to existing post detail URLs', () => {
-    mockedUseGuestPosts.mockReturnValue({
-      guestPosts: [createLocalPost()],
-      guestPostCount: 1,
-      addGuestPost: vi.fn(),
-      updateGuestPost: vi.fn(),
-      removeGuestPost: vi.fn(),
-      clearGuestPosts: vi.fn(),
-    } as ReturnType<typeof useGuestPosts>);
+    mockedUseLocalPlacesWithStats.mockReturnValue({
+      data: [createLocalPlace('local-post-id')],
+    } as unknown as ReturnType<typeof useLocalPlacesWithStats>);
 
     renderMyPage();
 

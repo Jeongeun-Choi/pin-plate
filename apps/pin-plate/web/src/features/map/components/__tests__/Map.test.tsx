@@ -1,9 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Provider as JotaiProvider } from 'jotai';
+import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Map } from '../Map';
-import { saveGuestPosts } from '@/features/guest/storage/guestPostStorage';
-import type { GuestPost } from '@/features/guest/types/guestPost';
+import type { LocalPlaceWithStats } from '@/features/local-db/types';
 
 const mockPush = vi.fn();
 
@@ -53,32 +54,55 @@ vi.mock('@/features/place/hooks/usePlaces', () => ({
   usePlaces: () => ({ data: [] }),
 }));
 
+const { mockUseLocalPlacesWithStats } = vi.hoisted(() => ({
+  mockUseLocalPlacesWithStats: vi.fn(),
+}));
+
+vi.mock('@/features/local-db/hooks/useLocalPlacesWithStats', () => ({
+  useLocalPlacesWithStats: mockUseLocalPlacesWithStats,
+}));
+
 vi.mock('../CustomMarker', () => ({
   default: () => <div data-testid="custom-marker" />,
 }));
 
-const renderMap = () => render(<Map />, { wrapper: JotaiProvider });
-
-const createGuestPost = (id: string): GuestPost => ({
+const createLocalPlace = (id: string): LocalPlaceWithStats => ({
   id,
-  created_at: '2026-05-13T00:00:00.000Z',
+  kakao_place_id: `kakao-${id}`,
   place_name: `테스트 맛집 ${id}`,
   address: '서울시 강남구',
   lat: 37.5,
   lng: 127,
-  kakao_place_id: `kakao-${id}`,
-  content: '맛있어요',
-  rating: 4,
-  image_urls: [],
+  status: 'visited',
   tags: [],
+  created_at: '2026-05-13T00:00:00.000Z',
+  updated_at: '2026-05-13T00:00:00.000Z',
+  posts: [{ id, rating: 4, image_urls: [], created_at: '2026-05-13T00:00:00.000Z' }],
+  visit_count: 1,
+  avg_rating: 4,
+  last_visited_at: '2026-05-13T00:00:00.000Z',
+  first_image: null,
 });
+
+const renderMap = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      <JotaiProvider>{children}</JotaiProvider>
+    </QueryClientProvider>
+  );
+
+  return render(<Map />, { wrapper: Wrapper });
+};
 
 describe('Map', () => {
   let getCurrentPosition: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    localStorage.clear();
-    window.nativeLocation = undefined;
+    mockUseLocalPlacesWithStats.mockReturnValue({ data: [] });
     mockPush.mockReset();
     getCurrentPosition = vi.fn();
 
@@ -116,8 +140,8 @@ describe('Map', () => {
     });
   });
 
-  it('renders a marker for a guest post stored in localStorage', async () => {
-    saveGuestPosts([createGuestPost('first')]);
+  it('renders a marker for a local place stored in IndexedDB', async () => {
+    mockUseLocalPlacesWithStats.mockReturnValue({ data: [createLocalPlace('first')] });
     getCurrentPosition.mockImplementationOnce((onSuccess) => {
       onSuccess({
         coords: {
@@ -134,8 +158,8 @@ describe('Map', () => {
     });
   });
 
-  it('navigates to the guest post detail route when clicking a guest post marker', async () => {
-    saveGuestPosts([createGuestPost('first')]);
+  it('navigates to the local post detail route when clicking a local place marker', async () => {
+    mockUseLocalPlacesWithStats.mockReturnValue({ data: [createLocalPlace('first')] });
     getCurrentPosition.mockImplementationOnce((onSuccess) => {
       onSuccess({
         coords: {

@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
 import { getPlaceByKakaoId } from '@/features/place/api/getPlaceByKakaoId';
 import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
@@ -10,10 +9,6 @@ import { SaveSharedPlaceButton } from '../components/SaveSharedPlaceButton';
 
 vi.mock('@/utils/supabase/getCurrentUser', () => ({
   getCurrentUser: vi.fn(),
-}));
-
-vi.mock('@/features/guest/hooks/useGuestPosts', () => ({
-  useGuestPosts: vi.fn(),
 }));
 
 vi.mock('@/features/place/api/getPlaceByKakaoId', () => ({
@@ -57,7 +52,6 @@ const renderButton = () => {
   );
 };
 
-const addGuestPost = vi.fn();
 const createPlace = vi.fn();
 
 describe('SaveSharedPlaceButton', () => {
@@ -69,75 +63,24 @@ describe('SaveSharedPlaceButton', () => {
       mutateAsync: createPlace,
       isPending: false,
     } as unknown as ReturnType<typeof useCreatePlace>);
-    vi.mocked(useGuestPosts).mockReturnValue({
-      guestPosts: [],
-      guestPostCount: 0,
-      addGuestPost,
-      removeGuestPost: vi.fn(),
-      updateGuestPost: vi.fn(),
-      clearGuestPosts: vi.fn(),
-    });
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue('guest-post-1');
   });
 
-  it('saves through the guest post hook when the viewer is logged out', async () => {
+  it('shows a disabled login-required button when the viewer is logged out', async () => {
     renderButton();
 
     const saveButton = await screen.findByRole('button', {
-      name: '성수 카페 내 지도에 저장',
+      name: '성수 카페 로그인 후 저장 가능해요',
     });
-    await waitFor(() => expect(saveButton).toBeEnabled());
-
-    fireEvent.click(saveButton);
-
-    await waitFor(() =>
-      expect(
-        screen.getByRole('button', { name: '성수 카페 저장됐어요' }),
-      ).toBeDisabled(),
-    );
-    expect(addGuestPost).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'guest-post-1',
-        kakao_place_id: 'kakao-1',
-        rating: 0,
-        status: 'wish',
-        has_visit_record: false,
-      }),
-    );
+    expect(saveButton).toBeDisabled();
   });
 
-  it('shows an already saved state on load for a logged-out duplicate shared place', async () => {
-    vi.mocked(useGuestPosts).mockReturnValue({
-      guestPosts: [
-        {
-          id: 'guest-post-1',
-          created_at: '2026-05-13T00:00:00.000Z',
-          place_name: '성수 카페',
-          address: '서울 성동구',
-          lat: 37.5,
-          lng: 127.1,
-          kakao_place_id: 'kakao-1',
-          content: '기존 글',
-          rating: 4,
-          image_urls: [],
-          tags: [],
-        },
-      ],
-      guestPostCount: 1,
-      addGuestPost,
-      removeGuestPost: vi.fn(),
-      updateGuestPost: vi.fn(),
-      clearGuestPosts: vi.fn(),
-    });
-
+  it('shows the same login-required state regardless of prior guest data when logged out', async () => {
     renderButton();
 
-    expect(
-      await screen.findByRole('button', {
-        name: '성수 카페 이미 저장됐어요',
-      }),
-    ).toBeDisabled();
-    expect(addGuestPost).not.toHaveBeenCalled();
+    const saveButton = await screen.findByRole('button', {
+      name: '성수 카페 로그인 후 저장 가능해요',
+    });
+    expect(saveButton).toBeDisabled();
   });
 
   it('shows an already saved state on load for a logged-in duplicate shared place', async () => {
