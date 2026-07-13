@@ -14,7 +14,7 @@ export const trigger = style({
   justifyContent: 'space-between',
   gap: vars.spacing[3],
   padding: `${vars.spacing[3]} ${vars.spacing[4]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   backgroundColor: vars.colors.common.white,
   color: vars.colors.text.primary,
@@ -29,7 +29,7 @@ export const trigger = style({
     boxShadow: `0 0 0 3px ${vars.colors.primary.light}`,
   },
   ':disabled': {
-    backgroundColor: vars.colors.secondary.bg,
+    backgroundColor: vars.colors.background.bg,
     color: vars.colors.text.sub,
     cursor: 'not-allowed',
   },
@@ -67,7 +67,7 @@ export const menu = style({
   maxHeight: 240,
   overflowY: 'auto',
   padding: vars.spacing[2],
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   backgroundColor: vars.colors.common.white,
   boxShadow: vars.boxShadow.float,
@@ -91,7 +91,7 @@ export const option = style({
   lineHeight: vars.lineHeight.body,
   textAlign: 'left',
   ':hover': {
-    backgroundColor: vars.colors.secondary.bg,
+    backgroundColor: vars.colors.background.bg,
     color: vars.colors.text.primary,
   },
   ':focus-visible': {
@@ -101,7 +101,7 @@ export const option = style({
 });
 
 export const activeOption = style({
-  backgroundColor: vars.colors.secondary.bg,
+  backgroundColor: vars.colors.background.bg,
   color: vars.colors.text.primary,
 });
 

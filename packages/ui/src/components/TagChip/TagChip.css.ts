@@ -12,7 +12,7 @@ const base = style({
   cursor: 'pointer',
   userSelect: 'none',
   transition: 'all 0.15s ease',
-  border: `1.5px solid ${vars.colors.secondary.border}`,
+  border: `1.5px solid ${vars.colors.background.border}`,
   backgroundColor: vars.colors.common.white,
   color: vars.colors.text.sub,
   selectors: {

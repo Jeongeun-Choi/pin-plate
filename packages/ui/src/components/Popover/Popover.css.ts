@@ -36,7 +36,7 @@ export const trigger = style({
   fontSize: '20px',
   lineHeight: 1,
   ':hover': {
-    backgroundColor: vars.colors.secondary.bg,
+    backgroundColor: vars.colors.background.bg,
     color: vars.colors.text.primary,
   },
 });
@@ -73,8 +73,8 @@ export const menu = style({
       marginTop: '4px',
       paddingTop: 0,
       paddingBottom: 0,
-      border: `1px solid ${vars.colors.secondary.border}`,
-      backgroundColor: vars.colors.secondary.surface,
+      border: `1px solid ${vars.colors.background.border}`,
+      backgroundColor: vars.colors.background.surface,
       padding: vars.spacing[2],
       borderRadius: vars.borderRadius.xl,
       boxShadow: vars.boxShadow.lg, // Assuming we want a larger shadow for popover
@@ -95,7 +95,7 @@ export const item = style({
   textAlign: 'left',
   width: '100%',
   ':hover': {
-    backgroundColor: vars.colors.secondary.bg,
+    backgroundColor: vars.colors.background.bg,
   },
   '@media': {
     'screen and (min-width: 768px)': {

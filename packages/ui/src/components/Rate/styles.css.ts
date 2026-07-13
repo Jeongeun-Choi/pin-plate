@@ -28,7 +28,7 @@ export const starWrapper = recipe({
 });
 
 export const starBase = style({
-  color: vars.colors.secondary.border,
+  color: vars.colors.background.border,
 });
 
 export const starOverlay = style({
