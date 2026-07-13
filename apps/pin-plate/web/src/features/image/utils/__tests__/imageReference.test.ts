@@ -3,7 +3,6 @@ import {
   buildPublicImageUrl,
   getTrustedImageKeyFromUrl,
   getTrustedImageUrl,
-  isTrustedGuestImageKey,
   isTrustedImageKey,
   isTrustedUserImageKey,
 } from '../imageReference';
@@ -46,15 +45,6 @@ describe('imageReference', () => {
     ).toBe(true);
     expect(
       isTrustedUserImageKey('uploads/users/user-2/photo.webp', 'user-1'),
-    ).toBe(false);
-  });
-
-  it('accepts only keys for the current guest prefix', () => {
-    expect(
-      isTrustedGuestImageKey('uploads/guests/guest-1/photo.webp', 'guest-1'),
-    ).toBe(true);
-    expect(
-      isTrustedGuestImageKey('uploads/guests/guest-2/photo.webp', 'guest-1'),
     ).toBe(false);
   });
 

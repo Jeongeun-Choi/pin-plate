@@ -49,44 +49,20 @@ afterEach(() => {
 });
 
 describe('POST /api/image', () => {
-  it('creates a guest upload session and presigned posts when the user is logged out', async () => {
+  it('returns 401 when the user is not authenticated', async () => {
     stubImageEnv();
     mockAuthenticatedUser(null);
-    mockCreatePresignedPost.mockResolvedValue({
-      url: 'https://s3.example.com',
-      fields: { key: 'value' },
-    } as never);
 
     const res = await POST(
       makeRequest({
         files: [{ filename: 'dish.webp', type: 'image/webp' }],
       }) as never,
     );
-
     const data = await res.json();
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('set-cookie')).toContain(
-      'pin_plate_guest_upload_session=',
-    );
-    expect(data.urls[0]).toMatchObject({
-      originalName: 'dish.webp',
-      imageKey: expect.stringMatching(/^uploads\/guests\/.+\/.+\.webp$/),
-      url: 'https://s3.example.com',
-      fields: { key: 'value' },
-      objectUrl: expect.stringMatching(
-        /^https:\/\/test-bucket\.s3\.dualstack\.ap-northeast-2\.amazonaws\.com\/uploads\/guests\/.+\/.+\.webp$/,
-      ),
-      publicUrl: expect.stringMatching(
-        /^https:\/\/test-bucket\.s3\.dualstack\.ap-northeast-2\.amazonaws\.com\/uploads\/guests\/.+\/.+\.webp$/,
-      ),
-    });
-    expect(mockCreatePresignedPost).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        Key: expect.stringMatching(/^uploads\/guests\/.+\/.+\.webp$/),
-      }),
-    );
+    expect(res.status).toBe(401);
+    expect(data.error).toBe('Unauthorized');
+    expect(mockCreatePresignedPost).not.toHaveBeenCalled();
   });
 
   it('creates S3 presigned posts for authenticated image uploads', async () => {
@@ -149,7 +125,7 @@ describe('POST /api/image', () => {
 
   it('rejects svg uploads even though they are image MIME types', async () => {
     stubImageEnv();
-    mockAuthenticatedUser(null);
+    mockAuthenticatedUser({ id: 'user-1' });
 
     const res = await POST(
       makeRequest({
@@ -163,78 +139,33 @@ describe('POST /api/image', () => {
     expect(mockCreatePresignedPost).not.toHaveBeenCalled();
   });
 
-  it('rate limits repeated guest upload requests by the guest session', async () => {
+  it('rate limits repeated upload requests by the authenticated user', async () => {
     stubImageEnv();
-    mockAuthenticatedUser(null);
+    mockAuthenticatedUser({ id: 'rate-limit-user' });
     mockCreatePresignedPost.mockResolvedValue({
       url: 'https://s3.example.com',
       fields: { key: 'value' },
     } as never);
 
-    const firstRes = await POST(
-      makeRequest({
-        files: [{ filename: 'dish.webp', type: 'image/webp' }],
-      }) as never,
-    );
-    const guestCookie = firstRes.headers.get('set-cookie')?.split(';')[0];
-    expect(guestCookie).toContain('pin_plate_guest_upload_session=');
-
-    for (let requestCount = 1; requestCount < 20; requestCount += 1) {
+    for (let requestCount = 0; requestCount < 20; requestCount += 1) {
       const res = await POST(
-        makeRequest(
-          {
-            files: [
-              { filename: `dish-${requestCount}.webp`, type: 'image/webp' },
-            ],
-          },
-          { Cookie: guestCookie ?? '' },
-        ) as never,
+        makeRequest({
+          files: [
+            { filename: `dish-${requestCount}.webp`, type: 'image/webp' },
+          ],
+        }) as never,
       );
       expect(res.status).toBe(200);
     }
 
     const limitedRes = await POST(
-      makeRequest(
-        { files: [{ filename: 'limited.webp', type: 'image/webp' }] },
-        { Cookie: guestCookie ?? '' },
-      ) as never,
+      makeRequest({
+        files: [{ filename: 'limited.webp', type: 'image/webp' }],
+      }) as never,
     );
     const data = await limitedRes.json();
 
     expect(limitedRes.status).toBe(429);
     expect(data.error).toBe('Too many requests');
-  });
-
-  it('accepts a server-issued guest session token from the mobile upload header', async () => {
-    stubImageEnv();
-    mockAuthenticatedUser(null);
-    mockCreatePresignedPost.mockResolvedValue({
-      url: 'https://s3.example.com',
-      fields: { key: 'value' },
-    } as never);
-
-    const firstRes = await POST(
-      makeRequest({
-        files: [{ filename: 'web.webp', type: 'image/webp' }],
-      }) as never,
-    );
-    const guestToken = firstRes.headers
-      .get('set-cookie')
-      ?.match(/pin_plate_guest_upload_session=([^;]+)/)?.[1];
-
-    const mobileRes = await POST(
-      makeRequest(
-        { files: [{ filename: 'mobile.png', type: 'image/png' }] },
-        { 'X-Pin-Plate-Guest-Session': guestToken ?? '' },
-      ) as never,
-    );
-
-    expect(mobileRes.status).toBe(200);
-    expect(mockCreatePresignedPost).toHaveBeenLastCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        Key: expect.stringMatching(/^uploads\/guests\/.+\/.+\.png$/),
-      }),
-    );
   });
 });

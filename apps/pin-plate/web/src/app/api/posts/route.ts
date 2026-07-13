@@ -5,7 +5,6 @@ import {
   parsePostPayload,
   parseUpdatePostPayload,
 } from './postRequest';
-import { getVerifiedGuestIdFromRequest } from '@/features/image/utils/guestUploadSession';
 
 const getAuthenticatedUserId = async () => {
   const supabase = await createClient();
@@ -34,12 +33,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const guestId = getVerifiedGuestIdFromRequest(request);
   const postPayload = await buildSanitizedPostPayload(
     supabase,
     payload,
     userId,
-    guestId,
   );
   if (!postPayload) {
     return NextResponse.json({ error: 'Invalid image key' }, { status: 400 });
@@ -75,12 +72,10 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const guestId = getVerifiedGuestIdFromRequest(request);
   const postPayload = await buildSanitizedPostPayload(
     supabase,
     updatePostRequestBody.payload,
     userId,
-    guestId,
   );
   if (!postPayload) {
     return NextResponse.json({ error: 'Invalid image key' }, { status: 400 });

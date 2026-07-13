@@ -20,7 +20,6 @@ import { isPostModalOpenAtom } from '@/features/post/atoms';
 import { AccountPopover } from './AccountPopover';
 import { myPageKeys, getMyProfile } from '@/features/my-page';
 import { useSearchPlaces } from '@/features/map/hooks/useSearchPlaces';
-import { GuestSyncBanner } from '@/features/guest/components/GuestSyncBanner';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import { ShareMapDialog } from '@/features/shared-map/components/ShareMapDialog';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
@@ -206,7 +205,6 @@ export const Header = () => {
           onClose={handleShareMapClose}
         />
       )}
-      <GuestSyncBanner />
     </>
   );
 };

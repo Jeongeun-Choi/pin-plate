@@ -18,7 +18,6 @@ import { searchQueryAtom } from '@/app/atoms';
 import { currentLocationAtom, statusFilterAtom } from '@/features/map/atoms';
 import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
 import { calcDistanceMeters } from '@/utils/distance';
-import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
 import type { User } from '@supabase/supabase-js';
 
 type SortType = 'latest' | 'rating' | 'distance';
@@ -50,53 +49,6 @@ const getOptimizedCardImageProps = (
     srcSet: props.srcSet,
     sizes: props.sizes,
   };
-};
-
-const GuestPostList = () => {
-  const { guestPosts } = useGuestPosts();
-
-  if (guestPosts.length === 0) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.contentWrapper}>
-          <p className={styles.emptyMessage}>
-            로그인하고 나만의 맛집을 기록해보세요!
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={styles.container}>
-      <div className={styles.contentWrapper}>
-        <div className={styles.grid}>
-          {guestPosts.map((post) => {
-            const imageProps = getOptimizedCardImageProps(
-              post.image_urls[0],
-              post.place_name,
-            );
-
-            return (
-              <Card
-                key={post.id}
-                title={post.place_name}
-                rating={post.rating.toFixed(1)}
-                location={post.address}
-                description=""
-                date={new Date(post.created_at).toLocaleDateString('ko-KR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-                {...imageProps}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
 };
 
 interface AuthenticatedPostListProps {
@@ -285,9 +237,7 @@ export const PostList = () => {
     queryFn: getCurrentUser,
   });
 
-  if (isLoading) return null;
-
-  if (!user) return <GuestPostList />;
+  if (isLoading || !user) return null;
 
   return <AuthenticatedPostList user={user} />;
 };

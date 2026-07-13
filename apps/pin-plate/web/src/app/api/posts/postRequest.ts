@@ -3,7 +3,6 @@ import type { createClient } from '@/utils/supabase/server';
 import {
   buildPublicImageUrl,
   getTrustedImageKeyFromUrl,
-  isTrustedGuestImageKey,
   isTrustedUserImageKey,
 } from '@/features/image/utils/imageReference';
 import { resolvePostPlaceId } from './postPlace';
@@ -88,24 +87,15 @@ export const parseUpdatePostPayload = async (
 
 const uniqueImageKeys = (imageKeys: string[]) => Array.from(new Set(imageKeys));
 
-const isActorImageKey = (
-  imageKey: string,
-  userId: string,
-  guestId: string | null,
-) =>
-  isTrustedUserImageKey(imageKey, userId) ||
-  (guestId ? isTrustedGuestImageKey(imageKey, guestId) : false);
-
 const sanitizeImageKeys = (
   payload: IncomingPostPayload,
   userId: string,
-  guestId: string | null,
 ): string[] | null => {
   const submittedImageKeys = payload.image_keys ?? [];
 
   if (
     submittedImageKeys.some(
-      (imageKey) => !isActorImageKey(imageKey, userId, guestId),
+      (imageKey) => !isTrustedUserImageKey(imageKey, userId),
     )
   ) {
     return null;
@@ -114,7 +104,7 @@ const sanitizeImageKeys = (
   const imageKeysFromUrls = (payload.image_urls ?? [])
     .map(getTrustedImageKeyFromUrl)
     .filter((imageKey): imageKey is string => Boolean(imageKey))
-    .filter((imageKey) => isActorImageKey(imageKey, userId, guestId));
+    .filter((imageKey) => isTrustedUserImageKey(imageKey, userId));
 
   return uniqueImageKeys([...submittedImageKeys, ...imageKeysFromUrls]);
 };
@@ -123,9 +113,8 @@ export const buildSanitizedPostPayload = async (
   supabase: SupabaseServerClient,
   payload: IncomingPostPayload,
   userId: string,
-  guestId: string | null,
 ) => {
-  const imageKeys = sanitizeImageKeys(payload, userId, guestId);
+  const imageKeys = sanitizeImageKeys(payload, userId);
 
   if (!imageKeys) return null;
 

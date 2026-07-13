@@ -9,8 +9,6 @@ import { compressImages } from '../utils/compressImages';
 import { viewModeAtom } from '@/app/atoms';
 import { useMap } from '@vis.gl/react-google-maps';
 import { sanitizeTags } from '../constants/tags';
-import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
-import type { GuestPost } from '@/features/guest/types/guestPost';
 import { isTrustedImageKey } from '@/features/image/utils/imageReference';
 
 interface UploadedPhoto {
@@ -71,8 +69,6 @@ export const usePostForm = (
   const { data: posts } = usePosts();
 
   const viewMode = useAtomValue(viewModeAtom);
-
-  const { addGuestPost } = useGuestPosts();
 
   const map = useMap();
 
@@ -191,32 +187,15 @@ export const usePostForm = (
     try {
       const currentUser = await getCurrentUser();
 
+      if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
       const lat = parseFloat(selectedPlace.y);
       const lng = parseFloat(selectedPlace.x);
       const address =
         selectedPlace.road_address_name || selectedPlace.address_name;
-
-      if (!currentUser) {
-        const guestPost: GuestPost = {
-          id: crypto.randomUUID(),
-          created_at: new Date().toISOString(),
-          place_name: selectedPlace.place_name,
-          address,
-          lat,
-          lng,
-          kakao_place_id: selectedPlace.id,
-          content,
-          rating,
-          image_urls: photoUrls,
-          image_keys: photoKeys,
-          tags: sanitizeTags(tags),
-        };
-        addGuestPost(guestPost);
-        alert('작성한 게시글이 저장됐습니다. 아직 계정에는 저장되지 않았어요.');
-        resetForm();
-        onSuccess?.();
-        return;
-      }
 
       await createPost({
         content,
@@ -255,7 +234,6 @@ export const usePostForm = (
     onSuccess,
     resetForm,
     map,
-    addGuestPost,
   ]);
 
   const handleRemovePhoto = useCallback((index: number) => {

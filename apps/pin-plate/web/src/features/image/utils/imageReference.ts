@@ -55,13 +55,6 @@ export const isTrustedUserImageKey = (
   isTrustedImageKey(imageKey) &&
   imageKey.startsWith(`uploads/users/${userId}/`);
 
-export const isTrustedGuestImageKey = (
-  imageKey: string,
-  guestId: string,
-): boolean =>
-  isTrustedImageKey(imageKey) &&
-  imageKey.startsWith(`uploads/guests/${guestId}/`);
-
 export const buildPublicImageUrl = (imageKey: string): string =>
   new URL(imageKey, `${getImagePublicBaseUrl()}/`).toString();
 

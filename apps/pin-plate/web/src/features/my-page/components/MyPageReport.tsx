@@ -1,17 +1,15 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { vars } from '@pin-plate/ui';
-import { GuestLocalPostsSection } from '@/features/guest/components/GuestLocalPostsSection';
 import { usePosts } from '@/features/post/hooks/usePosts';
 import {
   buildMyPageReportStats,
   type MyPageReportStats,
   type ReportMetric,
 } from '../utils/reportStats';
-import * as s from './GuestMyPagePreview.css';
+import * as s from './MyPageReport.css';
 
 const reportColors = [
   vars.colors.primary.default,
@@ -446,58 +444,4 @@ export const MyPageReportSection = () => {
   const reportStats = useMemo(() => buildMyPageReportStats(posts), [posts]);
 
   return <MyPageReportPreview stats={reportStats} isLoading={isPostsLoading} />;
-};
-
-export const GuestMyPagePreview = () => {
-  const titleId = useId();
-  const router = useRouter();
-
-  const handleLoginClick = () => {
-    router.push('/sign-in');
-  };
-
-  const handleSignUpClick = () => {
-    router.push('/sign-up');
-  };
-
-  return (
-    <div className={s.container}>
-      <section className={s.hero} aria-labelledby={titleId}>
-        <div className={s.heroTextGroup}>
-          <h1 id={titleId} className={s.title}>
-            나의 맛집 기록
-          </h1>
-          <p className={s.description}>
-            지금은 이 기기에 임시로 저장돼요. 로그인하면 기록을 안전하게
-            보관하고 취향 리포트를 볼 수 있어요.
-          </p>
-        </div>
-
-        <div className={s.heroActions}>
-          <button
-            type="button"
-            className={s.primaryButton}
-            onClick={handleLoginClick}
-          >
-            로그인하고 리포트 보기
-          </button>
-          <button
-            type="button"
-            className={s.secondaryButton}
-            onClick={handleSignUpClick}
-          >
-            회원가입
-          </button>
-        </div>
-      </section>
-
-      <MyPageReportPreview
-        isLocked
-        stats={sampleReportStats}
-        onLoginClick={handleLoginClick}
-      />
-
-      <GuestLocalPostsSection />
-    </div>
-  );
 };

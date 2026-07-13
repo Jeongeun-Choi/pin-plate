@@ -1,4 +1,3 @@
-import { createHmac } from 'crypto';
 import { createClient } from '@/utils/supabase/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PATCH, POST } from './route';
@@ -31,21 +30,13 @@ const {
   mockUpdateSingle: vi.fn(),
 }));
 
-const GUEST_COOKIE_NAME = 'pin_plate_guest_upload_session';
 const TEST_IMAGE_ORIGIN = 'https://image.test';
 
-const signGuestId = (guestId: string) =>
-  createHmac('sha256', 'test-guest-secret').update(guestId).digest('base64url');
-
-const createGuestToken = (guestId: string) =>
-  `${guestId}.${signGuestId(guestId)}`;
-
-const makeRequest = (body: unknown, headers?: Record<string, string>) =>
+const makeRequest = (body: unknown) =>
   new Request('http://localhost/api/posts', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...headers,
     },
     body: JSON.stringify(body),
   });
@@ -75,7 +66,6 @@ const mockAuthenticatedUser = (user: { id: string } | null) => {
 
 beforeEach(() => {
   vi.stubEnv('IMAGE_PUBLIC_BASE_URL', TEST_IMAGE_ORIGIN);
-  vi.stubEnv('GUEST_UPLOAD_SECRET', 'test-guest-secret');
   mockInsertSelect.mockResolvedValue({ data: [{ id: 1 }], error: null });
   mockInsert.mockReturnValue({ select: mockInsertSelect });
   mockUpdateSingle.mockResolvedValue({
@@ -115,27 +105,6 @@ describe('POST /api/posts', () => {
     expect(mockInsert).toHaveBeenCalledWith(
       expect.not.objectContaining({
         image_keys: expect.anything(),
-      }),
-    );
-  });
-
-  it('accepts trusted guest image keys when the guest upload cookie matches', async () => {
-    mockAuthenticatedUser({ id: 'user-1' });
-    const guestToken = createGuestToken('guest-1');
-
-    const response = await POST(
-      makeRequest(
-        createPostPayload({
-          image_keys: ['uploads/guests/guest-1/photo.webp'],
-        }),
-        { Cookie: `${GUEST_COOKIE_NAME}=${encodeURIComponent(guestToken)}` },
-      ) as never,
-    );
-
-    expect(response.status).toBe(200);
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        image_urls: [`${TEST_IMAGE_ORIGIN}/uploads/guests/guest-1/photo.webp`],
       }),
     );
   });

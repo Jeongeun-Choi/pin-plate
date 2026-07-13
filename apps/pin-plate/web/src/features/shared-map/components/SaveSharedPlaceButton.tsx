@@ -2,23 +2,17 @@
 
 import { useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
 import { getPlaceByKakaoId } from '@/features/place/api/getPlaceByKakaoId';
 import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import type { SharedMapPlace } from '../types/sharedMap';
-import {
-  buildGuestPostFromSharedPlace,
-  getSharedPlaceGuestSaveStatus,
-  type SaveSharedPlaceResult,
-} from '../utils/saveSharedPlace';
 import * as s from './SharedMapView.css';
 
 interface Props {
   sharedPlace: SharedMapPlace;
 }
 
-type SaveButtonState = 'idle' | SaveSharedPlaceResult | 'failed';
+type SaveButtonState = 'idle' | 'saved' | 'already_saved' | 'failed';
 
 const buttonTextByState: Record<SaveButtonState, string> = {
   idle: '내 지도에 저장',
@@ -39,8 +33,6 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
 
   const { mutateAsync: createPlace, isPending: isCreatingPlace } =
     useCreatePlace();
-
-  const { guestPosts, addGuestPost } = useGuestPosts();
 
   const { data: existingSavedPlace, isLoading: isExistingSavedPlaceLoading } =
     useQuery({
@@ -66,18 +58,7 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
 
     try {
       if (!currentUser) {
-        const guestSaveStatus = getSharedPlaceGuestSaveStatus(
-          sharedPlace,
-          guestPosts,
-        );
-
-        if (guestSaveStatus === 'already_saved') {
-          setSaveButtonState('already_saved');
-          return;
-        }
-
-        addGuestPost(buildGuestPostFromSharedPlace(sharedPlace));
-        setSaveButtonState('saved');
+        alert('로그인이 필요합니다.');
         return;
       }
 
@@ -125,22 +106,16 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
       setIsSavingSharedPlace(false);
     }
   }, [
-    addGuestPost,
     createPlace,
     currentUser,
     existingSavedPlace,
-    guestPosts,
     isSavingSharedPlace,
     sharedPlace,
   ]);
 
-  const hasGuestSavedSharedPlace =
-    currentUser === null &&
-    getSharedPlaceGuestSaveStatus(sharedPlace, guestPosts) === 'already_saved';
-  const displaySaveButtonState: SaveButtonState =
-    hasGuestSavedSharedPlace || existingSavedPlace
-      ? 'already_saved'
-      : saveButtonState;
+  const displaySaveButtonState: SaveButtonState = existingSavedPlace
+    ? 'already_saved'
+    : saveButtonState;
   const isSaveComplete =
     displaySaveButtonState === 'saved' ||
     displaySaveButtonState === 'already_saved';
