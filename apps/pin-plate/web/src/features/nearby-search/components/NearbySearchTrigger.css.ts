@@ -13,8 +13,8 @@ export const trigger = style({
   whiteSpace: 'nowrap',
   cursor: 'pointer',
   flexShrink: 0,
-  border: `2px solid ${vars.colors.secondary.border}`,
-  backgroundColor: vars.colors.secondary.surface,
+  border: `2px solid ${vars.colors.background.border}`,
+  backgroundColor: vars.colors.background.surface,
   color: vars.colors.text.primary,
   transition: 'all 0.2s ease',
   selectors: {

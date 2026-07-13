@@ -6,14 +6,14 @@ export const wrapper = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: vars.colors.secondary.bg,
+  backgroundColor: vars.colors.background.bg,
   padding: vars.spacing[6],
 });
 
 export const card = style({
   width: '100%',
   maxWidth: 360,
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   borderRadius: 24,
   boxShadow: '0px 20px 25px rgba(0,0,0,0.1), 0px 8px 10px rgba(0,0,0,0.1)',
   padding: `${vars.spacing[5]} ${vars.spacing[6]}`,
@@ -38,7 +38,7 @@ export const topIconWrap = style({
   alignItems: 'center',
   justifyContent: 'center',
   boxShadow: '0px 10px 15px rgba(0,0,0,0.1), 0px 4px 6px rgba(0,0,0,0.1)',
-  backgroundImage: `linear-gradient(135deg, ${vars.colors.primary.default} 0%, ${vars.colors.status.error} 100%)`,
+  backgroundImage: `linear-gradient(135deg, ${vars.colors.primary.default} 0%, ${vars.colors.brand.secondary} 100%)`,
 });
 
 export const title = style({
@@ -92,7 +92,7 @@ export const input = style({
 export const cta = style({
   height: 56,
   borderRadius: 14,
-  backgroundImage: `linear-gradient(90deg, ${vars.colors.primary.default} 0%, ${vars.colors.status.error} 100%)`,
+  backgroundImage: `linear-gradient(90deg, ${vars.colors.primary.default} 0%, ${vars.colors.brand.secondary} 100%)`,
   color: '#fff',
   display: 'flex',
   alignItems: 'center',
@@ -131,7 +131,7 @@ export const dividerLine = style({
 });
 
 export const dividerText = style({
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   padding: '0 8px',
   fontSize: vars.fontSize.sm,
   color: vars.colors.text.sub,
@@ -140,7 +140,7 @@ export const dividerText = style({
 export const googleBtn = style({
   height: 58,
   borderRadius: 14,
-  border: `1.4px solid ${vars.colors.secondary.border}`,
+  border: `1.4px solid ${vars.colors.background.border}`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -148,7 +148,7 @@ export const googleBtn = style({
   fontFamily: vars.fontFamily.body,
   fontSize: vars.fontSize.base,
   color: '#364153',
-  background: vars.colors.secondary.surface,
+  background: vars.colors.background.surface,
   cursor: 'pointer',
 });
 
@@ -159,7 +159,7 @@ export const footerText = style({
 });
 
 export const errorMessage = style({
-  color: vars.colors.status.error,
+  color: vars.colors.brand.secondary,
   fontSize: vars.fontSize.sm,
   textAlign: 'center',
 });

@@ -6,15 +6,15 @@ export const filterRow = style({
   alignItems: 'center',
   height: 48,
   padding: `0 ${vars.spacing[4]}`,
-  backgroundColor: vars.colors.secondary.surface,
-  borderBottom: `1px solid ${vars.colors.secondary.border}`,
+  backgroundColor: vars.colors.background.surface,
+  borderBottom: `1px solid ${vars.colors.background.border}`,
   flexShrink: 0,
 });
 
 export const divider = style({
   width: 1,
   height: 20,
-  backgroundColor: vars.colors.secondary.border,
+  backgroundColor: vars.colors.background.border,
   flexShrink: 0,
   margin: `0 ${vars.spacing[2]}`,
 });

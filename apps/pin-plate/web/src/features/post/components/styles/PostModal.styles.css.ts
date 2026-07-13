@@ -16,7 +16,7 @@ export const submitButton = style({
 export const existingReviewBanner = style({
   padding: '10px 20px',
   backgroundColor: vars.colors.primary.light,
-  borderBottom: `1px solid ${vars.colors.secondary.border}`,
+  borderBottom: `1px solid ${vars.colors.background.border}`,
   color: vars.colors.text.body,
   fontSize: '13px',
   fontWeight: '600',

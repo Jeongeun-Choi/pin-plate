@@ -60,7 +60,7 @@ export const handle = style({
   width: 36,
   height: 4,
   borderRadius: vars.borderRadius.full,
-  backgroundColor: vars.colors.secondary.border,
+  backgroundColor: vars.colors.background.border,
   margin: `${vars.spacing[3]} auto ${vars.spacing[1]}`,
 
   '@media': {

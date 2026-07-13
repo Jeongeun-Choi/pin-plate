@@ -6,16 +6,16 @@ export const wrapper = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: vars.colors.secondary.bg,
+  backgroundColor: vars.colors.background.bg,
   padding: vars.spacing[6],
 });
 
 export const card = style({
   width: '100%',
   maxWidth: 360,
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   borderRadius: 24,
-  border: `2px solid ${vars.colors.secondary.border}`,
+  border: `2px solid ${vars.colors.background.border}`,
   boxShadow: vars.boxShadow.card,
   padding: `${vars.spacing[5]} ${vars.spacing[6]}`,
   display: 'flex',
@@ -39,7 +39,7 @@ export const topIconWrap = style({
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: vars.colors.common.white,
-  border: `2px solid ${vars.colors.secondary.border}`,
+  border: `2px solid ${vars.colors.background.border}`,
   boxShadow: '0px 10px 15px rgba(0,0,0,0.1), 0px 4px 6px rgba(0,0,0,0.1)',
 });
 
@@ -194,7 +194,7 @@ export const loginButton = style({
 });
 
 export const errorText = style({
-  color: vars.colors.status.error,
+  color: vars.colors.brand.secondary,
   fontSize: '14px',
   textAlign: 'center',
 });

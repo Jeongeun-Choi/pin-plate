@@ -6,7 +6,7 @@ export const container = style({
   justifyContent: 'center',
   alignItems: 'center',
   height: '100vh',
-  backgroundColor: vars.colors.secondary.bg, // Corrected
+  backgroundColor: vars.colors.background.bg, // Corrected
   padding: '0 20px',
 });
 
@@ -48,7 +48,7 @@ export const input = style({
   width: '100%',
   padding: '12px 16px',
   borderRadius: vars.borderRadius.xl, // Corrected
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   fontSize: vars.fontSize.base, // Corrected
   color: vars.colors.text.primary,
   outline: 'none',
@@ -63,13 +63,13 @@ export const input = style({
   },
 
   ':disabled': {
-    backgroundColor: vars.colors.secondary.surface,
+    backgroundColor: vars.colors.background.surface,
     color: vars.colors.text.sub,
     cursor: 'not-allowed',
   },
 });
 
 export const errorMessage = style({
-  color: vars.colors.status.error, // Corrected
+  color: vars.colors.brand.secondary, // Corrected
   fontSize: vars.fontSize.xs, // Corrected
 });

@@ -7,7 +7,7 @@ export const header = style({
   display: 'flex',
   justifyContent: 'center',
   backgroundColor: '#ffffff',
-  borderBottom: `4px solid ${vars.colors.secondary.border}`,
+  borderBottom: `4px solid ${vars.colors.background.border}`,
   marginBottom: 20,
 });
 

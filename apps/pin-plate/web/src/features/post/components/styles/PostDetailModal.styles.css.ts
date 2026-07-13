@@ -213,7 +213,7 @@ export const descriptionBox = style({
 
 export const actionFooter = style({
   padding: '20px',
-  borderTop: `1px solid ${vars.colors.secondary.border}`,
+  borderTop: `1px solid ${vars.colors.background.border}`,
   display: 'flex',
   gap: '12px',
   backgroundColor: '#fff',
@@ -263,7 +263,7 @@ export const deleteButton = style([
 export const visitBanner = style({
   padding: '10px 20px',
   backgroundColor: vars.colors.primary.light,
-  borderBottom: `1px solid ${vars.colors.secondary.border}`,
+  borderBottom: `1px solid ${vars.colors.background.border}`,
   color: vars.colors.text.body,
   fontSize: '13px',
   fontWeight: '700',
@@ -283,7 +283,7 @@ export const reviewPanel = style({
   minHeight: '100%',
   scrollSnapAlign: 'start',
   scrollSnapStop: 'always',
-  borderBottom: `1px solid ${vars.colors.secondary.border}`,
+  borderBottom: `1px solid ${vars.colors.background.border}`,
   flexShrink: 0,
 
   '@media': {

@@ -27,5 +27,5 @@ export const footer = style({
   gap: vars.spacing[2],
   padding: vars.spacing[5],
   paddingBottom: `calc(${vars.spacing[5]} + env(safe-area-inset-bottom))`,
-  borderTop: `1px solid ${vars.colors.secondary.border}`,
+  borderTop: `1px solid ${vars.colors.background.border}`,
 });

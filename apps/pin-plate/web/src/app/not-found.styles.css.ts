@@ -10,7 +10,7 @@ export const container = style({
   width: '100%',
   padding: `0 ${vars.spacing[6]}`,
   textAlign: 'center',
-  backgroundColor: vars.colors.secondary.bg,
+  backgroundColor: vars.colors.background.bg,
 });
 
 export const card = style({
@@ -18,9 +18,9 @@ export const card = style({
   width: '100%',
   padding: `${vars.spacing[12]} ${vars.spacing[8]}`,
   borderRadius: vars.borderRadius['3xl'],
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   boxShadow: vars.boxShadow.float,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
