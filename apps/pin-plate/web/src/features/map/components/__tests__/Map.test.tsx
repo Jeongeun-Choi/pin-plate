@@ -1,9 +1,7 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { Provider as JotaiProvider } from 'jotai';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Map } from '../Map';
-import { saveGuestPosts } from '@/features/guest/storage/guestPostStorage';
-import type { GuestPost } from '@/features/guest/types/guestPost';
 
 const mockPush = vi.fn();
 
@@ -59,20 +57,6 @@ vi.mock('../CustomMarker', () => ({
 
 const renderMap = () => render(<Map />, { wrapper: JotaiProvider });
 
-const createGuestPost = (id: string): GuestPost => ({
-  id,
-  created_at: '2026-05-13T00:00:00.000Z',
-  place_name: `테스트 맛집 ${id}`,
-  address: '서울시 강남구',
-  lat: 37.5,
-  lng: 127,
-  kakao_place_id: `kakao-${id}`,
-  content: '맛있어요',
-  rating: 4,
-  image_urls: [],
-  tags: [],
-});
-
 describe('Map', () => {
   let getCurrentPosition: ReturnType<typeof vi.fn>;
 
@@ -114,47 +98,5 @@ describe('Map', () => {
         JSON.stringify({ lat: 35.1796, lng: 129.0756 }),
       );
     });
-  });
-
-  it('renders a marker for a guest post stored in localStorage', async () => {
-    saveGuestPosts([createGuestPost('first')]);
-    getCurrentPosition.mockImplementationOnce((onSuccess) => {
-      onSuccess({
-        coords: {
-          latitude: 35.1796,
-          longitude: 129.0756,
-        },
-      });
-    });
-
-    renderMap();
-
-    await waitFor(() => {
-      expect(screen.getByTestId('custom-marker')).toBeInTheDocument();
-    });
-  });
-
-  it('navigates to the guest post detail route when clicking a guest post marker', async () => {
-    saveGuestPosts([createGuestPost('first')]);
-    getCurrentPosition.mockImplementationOnce((onSuccess) => {
-      onSuccess({
-        coords: {
-          latitude: 35.1796,
-          longitude: 129.0756,
-        },
-      });
-    });
-
-    renderMap();
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId('advanced-marker').length).toBeGreaterThan(
-        0,
-      );
-    });
-
-    fireEvent.click(screen.getAllByTestId('advanced-marker')[0]);
-
-    expect(mockPush).toHaveBeenCalledWith('/post/first');
   });
 });

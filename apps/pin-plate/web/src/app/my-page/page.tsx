@@ -3,19 +3,17 @@
 export const dynamic = 'force-dynamic';
 
 import {
-  GuestMyPagePreview,
   MyPageReportSection,
   MyPageHeader,
   MyPageMenu,
   useMyProfile,
 } from '@/features/my-page';
-import { GuestSavedPostsSection } from '@/features/guest/components/GuestSavedPostsSection';
 import * as styles from './page.css';
 
 export default function MyPage() {
   const { data: profile, isLoading } = useMyProfile();
 
-  if (isLoading) {
+  if (isLoading || !profile) {
     return (
       <div className={styles.loadingState} role="status" aria-live="polite">
         마이페이지를 불러오는 중이에요.
@@ -23,15 +21,11 @@ export default function MyPage() {
     );
   }
 
-  if (!profile) return <GuestMyPagePreview />;
-
   return (
     <div className={styles.mainContent}>
       <MyPageHeader />
 
       <MyPageReportSection />
-
-      <GuestSavedPostsSection userId={profile.id} />
 
       <MyPageMenu />
 

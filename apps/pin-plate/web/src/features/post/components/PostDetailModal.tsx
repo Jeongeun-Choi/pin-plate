@@ -1,14 +1,11 @@
 'use client';
 
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, Spinner } from '@pin-plate/ui';
 import { usePostDetailModal } from '../hooks/usePostDetailModal';
 import type { Post } from '../types/post';
 import type { CreatePostPayload } from '../types/post';
-import { useGuestPosts } from '@/features/guest/hooks/useGuestPosts';
-import { loadGuestPosts } from '@/features/guest/storage/guestPostStorage';
-import type { GuestPost } from '@/features/guest/types/guestPost';
 import EditPostContent from './EditPostContent';
 import { ReviewCard } from './ReviewCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
@@ -18,23 +15,6 @@ interface PostDetailModalProps {
   id: string;
   isIntercepted?: boolean;
 }
-
-const toGuestDetailPost = (guestPost: GuestPost): Post => ({
-  id: 0,
-  place_id: undefined,
-  content: guestPost.content,
-  rating: guestPost.rating,
-  image_urls: guestPost.image_urls,
-  image_keys: guestPost.image_keys,
-  place_name: guestPost.place_name,
-  address: guestPost.address,
-  lat: guestPost.lat,
-  lng: guestPost.lng,
-  kakao_place_id: guestPost.kakao_place_id,
-  user_id: 'guest',
-  tags: guestPost.tags,
-  created_at: guestPost.created_at,
-});
 
 const SavedPostDetailInner = ({ id }: { id: string }) => {
   const {
@@ -107,120 +87,6 @@ const SavedPostDetailInner = ({ id }: { id: string }) => {
   );
 };
 
-const GuestPostDetailInner = ({ guestPost }: { guestPost: GuestPost }) => {
-  const [editingGuestPost, setEditingGuestPost] = useState<GuestPost | null>(
-    null,
-  );
-
-  const router = useRouter();
-  const { removeGuestPost, updateGuestPost } = useGuestPosts();
-
-  const post = toGuestDetailPost(guestPost);
-
-  const handleDeleteGuestPost = useCallback(() => {
-    if (!confirm('정말로 삭제하시겠습니까?')) return;
-
-    removeGuestPost(guestPost.id);
-    router.back();
-  }, [guestPost.id, removeGuestPost, router]);
-
-  const handleEditGuestPost = useCallback(() => {
-    setEditingGuestPost(guestPost);
-  }, [guestPost]);
-
-  const handleCancelGuestPostEdit = useCallback(() => {
-    setEditingGuestPost(null);
-  }, []);
-
-  const handleSaveGuestPost = useCallback(
-    (currentGuestPost: GuestPost, payload: CreatePostPayload) => {
-      updateGuestPost({
-        ...currentGuestPost,
-        content: payload.content,
-        rating: payload.rating,
-        image_urls: payload.image_urls,
-        image_keys: payload.image_keys,
-        place_name: payload.place_name,
-        address: payload.address,
-        lat: payload.lat,
-        lng: payload.lng,
-        kakao_place_id: payload.kakao_place_id,
-        tags: payload.tags,
-      });
-      setEditingGuestPost(null);
-    },
-    [updateGuestPost],
-  );
-
-  if (editingGuestPost) {
-    return (
-      <GuestPostDetailEditView
-        guestPost={editingGuestPost}
-        onCancel={handleCancelGuestPostEdit}
-        onSuccess={handleCancelGuestPostEdit}
-        onSubmitOverride={(payload) =>
-          handleSaveGuestPost(editingGuestPost, payload)
-        }
-      />
-    );
-  }
-
-  return (
-    <>
-      <Modal.Header>
-        <Modal.Title>{post.place_name}</Modal.Title>
-        <Modal.Close />
-      </Modal.Header>
-
-      <Modal.Body>
-        <div className={styles.scrollContainer}>
-          <ReviewCard
-            post={post}
-            onEdit={handleEditGuestPost}
-            onDelete={handleDeleteGuestPost}
-            sectionRef={() => {}}
-          />
-        </div>
-      </Modal.Body>
-    </>
-  );
-};
-
-const GuestPostDetailEditView = ({
-  guestPost,
-  onCancel,
-  onSuccess,
-  onSubmitOverride,
-}: {
-  guestPost: GuestPost;
-  onCancel: () => void;
-  onSuccess: () => void;
-  onSubmitOverride: (payload: CreatePostPayload) => Promise<void> | void;
-}) => (
-  <PostDetailEditView
-    post={toGuestDetailPost(guestPost)}
-    onCancel={onCancel}
-    onSuccess={onSuccess}
-    onSubmitOverride={onSubmitOverride}
-  />
-);
-
-const PostDetailInner = ({ id }: { id: string }) => {
-  const { guestPosts } = useGuestPosts();
-  const guestPost = useMemo(
-    () =>
-      guestPosts.find((post) => post.id === id) ??
-      loadGuestPosts().find((post) => post.id === id),
-    [guestPosts, id],
-  );
-
-  if (guestPost) {
-    return <GuestPostDetailInner guestPost={guestPost} />;
-  }
-
-  return <SavedPostDetailInner id={id} />;
-};
-
 const PostDetailEditView = ({
   post,
   onCancel,
@@ -290,7 +156,7 @@ export const PostDetailModal = ({
       <Modal.FullScreenContainer>
         <ErrorBoundary fallback={<PostDetailError />}>
           <Suspense fallback={<PostDetailSkeleton />}>
-            <PostDetailInner id={id} />
+            <SavedPostDetailInner id={id} />
           </Suspense>
         </ErrorBoundary>
       </Modal.FullScreenContainer>
