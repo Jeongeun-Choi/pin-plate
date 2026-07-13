@@ -309,7 +309,7 @@ export const Map = () => {
                 <CustomMarker
                   width={pinWidth}
                   height={pinHeight}
-                  color={vars.colors.pin[0]}
+                  color={vars.colors.brand.secondary}
                 />
               </AdvancedMarker>
             );
