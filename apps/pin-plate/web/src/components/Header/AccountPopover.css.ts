@@ -74,7 +74,7 @@ export const menuItem = style({
   width: '100%',
   textAlign: 'left',
   ':hover': {
-    backgroundColor: vars.colors.secondary.bg,
+    backgroundColor: vars.colors.background.bg,
   },
 });
 

@@ -42,7 +42,7 @@ export const checkboxIndicator = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  border: `2px solid ${vars.colors.secondary.border}`,
+  border: `2px solid ${vars.colors.background.border}`,
   borderRadius: vars.spacing[1],
   backgroundColor: vars.colors.common.white,
   color: 'transparent',

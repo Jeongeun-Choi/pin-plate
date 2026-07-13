@@ -101,8 +101,8 @@ export const chip = style({
   fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.medium,
   cursor: 'pointer',
-  border: `1.5px solid ${vars.colors.secondary.border}`,
-  backgroundColor: vars.colors.secondary.surface,
+  border: `1.5px solid ${vars.colors.background.border}`,
+  backgroundColor: vars.colors.background.surface,
   color: vars.colors.text.body,
   transition: 'all 0.15s ease',
   selectors: {
@@ -135,7 +135,7 @@ export const emptyMessage = style({
 
 export const errorMessage = style({
   fontSize: vars.fontSize.sm,
-  color: vars.colors.status.error,
+  color: vars.colors.brand.secondary,
   textAlign: 'center',
   padding: `${vars.spacing[2]} 0`,
 });

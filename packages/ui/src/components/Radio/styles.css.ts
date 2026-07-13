@@ -27,7 +27,7 @@ export const radioInput = style({
   border: `2px solid ${vars.colors.common.white}`,
   borderRadius: vars.borderRadius.full,
   backgroundColor: vars.colors.common.white,
-  boxShadow: `0 0 0 1px ${vars.colors.secondary.border}`,
+  boxShadow: `0 0 0 1px ${vars.colors.background.border}`,
   cursor: 'pointer',
   transition:
     'background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',

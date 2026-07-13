@@ -14,7 +14,7 @@ colors:
   text-body: "#4a4a4a"
   text-muted: "#6b6b6b"
   success: "#4CAF50"
-  error: "#ff6b6b"
+  error: "#ff6b6b" # also used as brand-secondary accent (search-result pin)
   warning: "#ffd93d"
   rating-unvisited: "#e9c46a"
   rating-1: "#f4a261"

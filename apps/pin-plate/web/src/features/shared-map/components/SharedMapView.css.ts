@@ -79,9 +79,9 @@ export const mapPanel = style({
   minHeight: 0,
   height: 'auto',
   overflow: 'hidden',
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   boxShadow: vars.boxShadow.card,
   '@media': {
     '(min-width: 900px)': {
@@ -124,9 +124,9 @@ export const placeCard = style({
   flexDirection: 'column',
   gap: vars.spacing[3],
   padding: vars.spacing[4],
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   boxShadow: vars.boxShadow.card,
 });
 
@@ -177,7 +177,7 @@ export const tagList = style({
 
 export const tag = style({
   padding: `${vars.spacing[1]} ${vars.spacing[2]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.full,
   color: vars.colors.text.body,
   fontSize: vars.fontSize.xs,
@@ -189,9 +189,9 @@ export const saveButton = style({
   minHeight: 36,
   flexShrink: 0,
   padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.full,
-  backgroundColor: vars.colors.secondary.bg,
+  backgroundColor: vars.colors.background.bg,
   color: vars.colors.text.sub,
   fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.bold,
@@ -210,8 +210,8 @@ export const empty = style({
   alignItems: 'center',
   justifyContent: 'center',
   margin: 0,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   color: vars.colors.text.sub,
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
 });

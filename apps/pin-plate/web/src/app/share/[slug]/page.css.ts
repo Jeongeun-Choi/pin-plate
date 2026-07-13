@@ -3,7 +3,7 @@ import { vars } from '@pin-plate/ui';
 
 export const page = style({
   minHeight: '100dvh',
-  backgroundColor: vars.colors.secondary.bg,
+  backgroundColor: vars.colors.background.bg,
 });
 
 export const missingState = style({
@@ -23,9 +23,9 @@ export const missingContent = style({
   alignItems: 'center',
   gap: vars.spacing[4],
   padding: `${vars.spacing[10]} ${vars.spacing[6]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   boxShadow: vars.boxShadow.card,
   textAlign: 'center',
 });

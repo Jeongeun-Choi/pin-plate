@@ -31,7 +31,7 @@ export const lockedPreview = style({
   overflow: 'hidden',
   borderRadius: vars.borderRadius['2xl'],
   backgroundColor: vars.colors.common.white,
-  border: `4px solid ${vars.colors.secondary.border}`,
+  border: `4px solid ${vars.colors.background.border}`,
   boxShadow: vars.boxShadow.lg,
 });
 
@@ -72,7 +72,7 @@ export const tabList = style({
   gap: vars.spacing[2],
   padding: vars.spacing[1],
   borderRadius: vars.borderRadius.xl,
-  backgroundColor: vars.colors.secondary.bg,
+  backgroundColor: vars.colors.background.bg,
 });
 
 export const tab = style({
@@ -102,7 +102,7 @@ export const periodTabList = style({
   padding: vars.spacing[1],
   borderRadius: vars.borderRadius.full,
   backgroundColor: vars.colors.common.white,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
 });
 
 export const periodTab = style({
@@ -132,7 +132,7 @@ export const chartCard = style({
   gap: vars.spacing[3],
   padding: vars.spacing[4],
   borderRadius: vars.borderRadius.xl,
-  backgroundColor: vars.colors.secondary.bg,
+  backgroundColor: vars.colors.background.bg,
 });
 
 export const previewChartCard = style([

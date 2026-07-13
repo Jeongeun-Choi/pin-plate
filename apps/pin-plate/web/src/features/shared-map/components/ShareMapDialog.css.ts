@@ -25,7 +25,7 @@ export const dialog = style({
   flexDirection: 'column',
   overflow: 'hidden',
   borderRadius: vars.borderRadius.xl,
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   boxShadow: vars.boxShadow.xl,
   '@media': {
     '(max-width: 640px)': {
@@ -43,7 +43,7 @@ export const header = style({
   justifyContent: 'space-between',
   gap: vars.spacing[4],
   padding: vars.spacing[5],
-  borderBottom: `1px solid ${vars.colors.secondary.border}`,
+  borderBottom: `1px solid ${vars.colors.background.border}`,
   '@media': {
     '(max-width: 640px)': {
       padding: vars.spacing[4],
@@ -101,7 +101,7 @@ export const stepList = style({
 export const stepItem = style({
   minWidth: 0,
   padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   color: vars.colors.text.sub,
   fontSize: vars.fontSize.xs,
@@ -133,7 +133,7 @@ export const label = style({
 export const input = style({
   width: '100%',
   padding: `${vars.spacing[3]} ${vars.spacing[4]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   backgroundColor: vars.colors.common.white,
   color: vars.colors.text.primary,
@@ -187,7 +187,7 @@ export const radioLabel = style({
   gap: vars.spacing[2],
   minHeight: 42,
   padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   color: vars.colors.text.body,
   fontSize: vars.fontSize.sm,
@@ -212,7 +212,7 @@ export const radioInput = style({
   borderRadius: vars.borderRadius.full,
   backgroundColor: vars.colors.common.white,
   accentColor: vars.colors.primary.default,
-  boxShadow: `0 0 0 1px ${vars.colors.secondary.border}`,
+  boxShadow: `0 0 0 1px ${vars.colors.background.border}`,
   selectors: {
     '&:checked': {
       borderColor: vars.colors.common.white,
@@ -278,7 +278,7 @@ export const tagPickerSearch = style({
   flexDirection: 'column',
   gap: vars.spacing[2],
   paddingBottom: vars.spacing[3],
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
 });
 
 export const tagGroup = style({
@@ -309,7 +309,7 @@ export const tagOptionRow = style({
   alignItems: 'center',
   gap: vars.spacing[2],
   padding: `${vars.spacing[3]} ${vars.spacing[4]}`,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   backgroundColor: vars.colors.common.white,
   color: vars.colors.text.body,
@@ -359,7 +359,7 @@ export const selectionSummary = style({
   justifyContent: 'space-between',
   gap: vars.spacing[3],
   padding: vars.spacing[4],
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   backgroundColor: vars.colors.common.white,
   '@media': {
@@ -440,14 +440,14 @@ export const countText = style({
 });
 
 export const emptyText = style({
-  color: vars.colors.status.error,
+  color: vars.colors.brand.secondary,
   fontSize: vars.fontSize.sm,
   fontWeight: vars.fontWeight.bold,
 });
 
 export const errorText = style({
   margin: 0,
-  color: vars.colors.status.error,
+  color: vars.colors.brand.secondary,
   fontSize: vars.fontSize.sm,
   lineHeight: vars.lineHeight.body,
 });
@@ -474,7 +474,7 @@ export const previewCard = style({
   flexDirection: 'column',
   gap: vars.spacing[2],
   padding: vars.spacing[4],
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   backgroundColor: vars.colors.common.white,
 });
@@ -530,8 +530,8 @@ export const footer = style({
   justifyContent: 'flex-end',
   gap: vars.spacing[3],
   padding: vars.spacing[5],
-  borderTop: `1px solid ${vars.colors.secondary.border}`,
-  backgroundColor: vars.colors.secondary.surface,
+  borderTop: `1px solid ${vars.colors.background.border}`,
+  backgroundColor: vars.colors.background.surface,
   '@media': {
     '(max-width: 640px)': {
       position: 'sticky',

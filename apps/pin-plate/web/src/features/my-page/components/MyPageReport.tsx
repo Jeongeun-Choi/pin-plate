@@ -14,7 +14,7 @@ import * as s from './MyPageReport.css';
 const reportColors = [
   vars.colors.primary.default,
   vars.colors.primary.light,
-  vars.colors.secondary.border,
+  vars.colors.background.border,
   vars.colors.status.success,
 ];
 

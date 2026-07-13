@@ -39,7 +39,7 @@ export const overlay = style({
 export const container = style({
   width: '100vw',
   maxWidth: '430px',
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   borderRadius: `${vars.borderRadius['3xl']} ${vars.borderRadius['3xl']} 0 0`,
   display: 'flex',
   flexDirection: 'column',
@@ -57,7 +57,7 @@ export const container = style({
       maxHeight: '90vh',
       height: '600px',
       borderRadius: '32px',
-      border: `5px solid ${vars.colors.secondary.border}`,
+      border: `5px solid ${vars.colors.background.border}`,
       boxShadow: '0px 25px 50px -12px rgba(0,0,0,0.25)', // Custom shadow
       animation: `${fadeIn} 0.3s ease-out forwards`,
     },
@@ -68,7 +68,7 @@ export const fullScreenContainer = style({
   width: '100vw',
   height: '100dvh', // Use dynamic viewport height
   maxWidth: 'none',
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   borderRadius: 0,
   display: 'flex',
   flexDirection: 'column',
@@ -85,7 +85,7 @@ export const fullScreenContainer = style({
       maxHeight: '90vh',
       height: '600px',
       borderRadius: '32px',
-      border: `5px solid ${vars.colors.secondary.border}`,
+      border: `5px solid ${vars.colors.background.border}`,
       boxShadow: '0px 25px 50px -12px rgba(0,0,0,0.25)',
       animation: `${fadeIn} 0.3s ease-out forwards`,
     },
@@ -97,7 +97,7 @@ export const header = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: vars.spacing[5], // 20px
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   flexShrink: 0,
 });
 
@@ -140,10 +140,10 @@ export const content = style({
 
 export const footer = style({
   padding: vars.spacing[5],
-  borderTop: `1px solid ${vars.colors.secondary.border}`,
+  borderTop: `1px solid ${vars.colors.background.border}`,
   display: 'flex',
   gap: vars.spacing[3], // 12px
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   flexShrink: 0,
   paddingBottom: `calc(${vars.spacing[5]} + env(safe-area-inset-bottom))`,
 });

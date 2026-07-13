@@ -41,7 +41,10 @@ export const vars = createGlobalTheme(':root', {
       text: '#8b4513', // text-primary (Chocolate Brown) - Contrast for primary button
       textSoft: '#a65a1e', // Softer warm brown for small map pin rating text
     },
-    secondary: {
+    brand: {
+      secondary: '#ff6b6b', // brand-secondary (Tomato Red) — search-result pin, error-adjacent accent
+    },
+    background: {
       bg: '#fff8ed', // app-bg (Cream/Vanilla Background)
       surface: '#ffffff', // app-bg-white (White Background)
       border: '#ffe4d6', // border-light (Peach Cream Border)
@@ -54,7 +57,6 @@ export const vars = createGlobalTheme(':root', {
     },
     status: {
       success: '#4CAF50', // Existing green (Keep standard for now)
-      error: '#ff6b6b', // brand-secondary (Tomato Red)
       warning: '#ffd93d', // rating-3/border-yellow (Butter Yellow)
     },
     rating: {

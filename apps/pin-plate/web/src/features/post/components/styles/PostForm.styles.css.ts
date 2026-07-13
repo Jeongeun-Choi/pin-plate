@@ -125,6 +125,6 @@ export const tagEditBtn = style({
   fontWeight: vars.fontWeight.medium,
   color: vars.colors.text.sub,
   backgroundColor: 'transparent',
-  border: `1.5px solid ${vars.colors.secondary.border}`,
+  border: `1.5px solid ${vars.colors.background.border}`,
   cursor: 'pointer',
 });

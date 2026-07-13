@@ -23,9 +23,9 @@ export const loadingState = style({
 export const footerMessage = style({
   marginTop: vars.spacing[6],
   padding: vars.spacing[6],
-  backgroundColor: vars.colors.secondary.bg,
+  backgroundColor: vars.colors.background.bg,
   borderRadius: vars.borderRadius['2xl'],
-  border: `4px solid ${vars.colors.secondary.border}`,
+  border: `4px solid ${vars.colors.background.border}`,
   width: '100%',
 });
 

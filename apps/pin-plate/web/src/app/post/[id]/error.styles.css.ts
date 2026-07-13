@@ -10,7 +10,7 @@ export const container = style({
   width: '100%',
   padding: vars.spacing[10],
   textAlign: 'center',
-  backgroundColor: vars.colors.secondary.surface,
+  backgroundColor: vars.colors.background.surface,
   borderRadius: vars.borderRadius['2xl'],
 });
 

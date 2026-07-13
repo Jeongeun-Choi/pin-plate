@@ -8,7 +8,7 @@ export const textareaStyle = style({
   color: vars.colors.text.primary,
   padding: `${vars.spacing[3]} ${vars.spacing[4]}`, // Input보다 위아래 패딩을 조금 넉넉하게
   borderRadius: vars.borderRadius.xl,
-  border: `1px solid ${vars.colors.secondary.border}`,
+  border: `1px solid ${vars.colors.background.border}`,
   fontSize: vars.fontSize.base, // 가독성을 위해 본문 사이즈 사용 (원하시면 tiny로 변경 가능)
   fontWeight: vars.fontWeight.regular,
   fontFamily: vars.fontFamily.body,
@@ -20,7 +20,7 @@ export const textareaStyle = style({
   },
 
   ':disabled': {
-    backgroundColor: vars.colors.secondary.bg,
+    backgroundColor: vars.colors.background.bg,
     cursor: 'not-allowed',
     opacity: 0.5,
   },
