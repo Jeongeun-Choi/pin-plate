@@ -1,11 +1,12 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+const PUBLIC_PATH_PREFIXES = ['/sign-in', '/sign-up', '/auth', '/share'];
+
 export async function updateSession(request: NextRequest) {
-  const isPublicPath =
-    request.nextUrl.pathname.startsWith('/sign-in') ||
-    request.nextUrl.pathname.startsWith('/sign-up') ||
-    request.nextUrl.pathname.startsWith('/auth');
+  const isPublicPath = PUBLIC_PATH_PREFIXES.some((prefix) =>
+    request.nextUrl.pathname.startsWith(prefix),
+  );
 
   try {
     let supabaseResponse = NextResponse.next({
@@ -42,6 +43,16 @@ export async function updateSession(request: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
+    if (!user && !isPublicPath) {
+      if (request.nextUrl.pathname.startsWith('/api')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      const url = request.nextUrl.clone();
+      url.pathname = '/sign-in';
+      return NextResponse.redirect(url);
+    }
 
     if (user && !isPublicPath) {
       const { data: profile } = await supabase

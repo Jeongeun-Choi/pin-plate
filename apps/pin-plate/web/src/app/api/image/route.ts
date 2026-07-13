@@ -4,13 +4,6 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { createClient } from '@/utils/supabase/server';
 import { buildPublicImageUrl } from '@/features/image/utils/imageReference';
-import {
-  GUEST_UPLOAD_COOKIE_MAX_AGE,
-  GUEST_UPLOAD_COOKIE_NAME,
-  createGuestSessionToken,
-  getVerifiedGuestId,
-  getVerifiedGuestIdFromRequest,
-} from '@/features/image/utils/guestUploadSession';
 
 const client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
@@ -44,10 +37,7 @@ interface UploadFile {
 }
 
 interface UploadActor {
-  type: 'user' | 'guest';
   id: string;
-  guestSessionToken?: string;
-  shouldSetGuestCookie: boolean;
 }
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -64,41 +54,13 @@ const checkRateLimit = (ip: string): boolean => {
   return true;
 };
 
-const resolveUploadActor = async (
-  request: NextRequest,
-): Promise<UploadActor> => {
+const resolveUploadActor = async (): Promise<UploadActor | null> => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
-    return {
-      type: 'user',
-      id: user.id,
-      shouldSetGuestCookie: false,
-    };
-  }
-
-  const verifiedGuestId = getVerifiedGuestIdFromRequest(request);
-
-  if (verifiedGuestId) {
-    return {
-      type: 'guest',
-      id: verifiedGuestId,
-      shouldSetGuestCookie: false,
-    };
-  }
-
-  const guestSessionToken = createGuestSessionToken();
-  const guestId = getVerifiedGuestId(guestSessionToken)!;
-
-  return {
-    type: 'guest',
-    id: guestId,
-    guestSessionToken,
-    shouldSetGuestCookie: true,
-  };
+  return user ? { id: user.id } : null;
 };
 
 const isUploadFile = (file: unknown): file is UploadFile => {
@@ -114,10 +76,9 @@ const isUploadFile = (file: unknown): file is UploadFile => {
 };
 
 const getUploadKey = (actor: UploadActor, file: UploadFile) => {
-  const ownerPath = actor.type === 'user' ? 'users' : 'guests';
   const extension = ALLOWED_IMAGE_TYPES[file.type];
 
-  return `uploads/${ownerPath}/${actor.id}/${randomUUID()}.${extension}`;
+  return `uploads/users/${actor.id}/${randomUUID()}.${extension}`;
 };
 
 const getPresignedPostFields = (fields: Record<string, string>) =>
@@ -140,9 +101,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const actor = await resolveUploadActor(request);
+  const actor = await resolveUploadActor();
 
-  if (!checkRateLimit(`${actor.type}:${actor.id}`)) {
+  if (!actor) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (!checkRateLimit(`user:${actor.id}`)) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
@@ -197,19 +162,7 @@ export async function POST(request: NextRequest) {
       }),
     );
 
-    const response = NextResponse.json({ urls: presignedItems });
-
-    if (actor.shouldSetGuestCookie && actor.guestSessionToken) {
-      response.cookies.set(GUEST_UPLOAD_COOKIE_NAME, actor.guestSessionToken, {
-        httpOnly: true,
-        maxAge: GUEST_UPLOAD_COOKIE_MAX_AGE,
-        path: '/',
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-      });
-    }
-
-    return response;
+    return NextResponse.json({ urls: presignedItems });
   } catch (error: unknown) {
     console.error('S3 Presigned Post Error:', error);
     return NextResponse.json(

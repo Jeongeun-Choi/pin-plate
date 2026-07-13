@@ -60,7 +60,6 @@ const createPostPayload = () => ({
 describe('POST /api/posts place persistence', () => {
   beforeEach(() => {
     vi.stubEnv('IMAGE_PUBLIC_BASE_URL', TEST_IMAGE_ORIGIN);
-    vi.stubEnv('GUEST_UPLOAD_SECRET', 'test-guest-secret');
 
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-1' } },
