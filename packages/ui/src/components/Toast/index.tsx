@@ -5,6 +5,11 @@ import { IcCheck, IcDismiss, IcFilledBookmark, IcPlus } from '../../icons';
 import * as s from './Toast.css';
 
 export type ToastVariant = 'default' | 'success' | 'error' | 'info';
+export type ToastPosition =
+  | 'responsive'
+  | 'top-right'
+  | 'top-center'
+  | 'bottom-center';
 
 interface ToastProps {
   title: string;
@@ -13,11 +18,13 @@ interface ToastProps {
   actionLabel?: string;
   onAction?: () => void;
   onDismiss?: () => void;
+  isDismissible?: boolean;
   role?: 'status' | 'alert';
 }
 
 interface ToastViewportProps {
   children: ReactNode;
+  position?: ToastPosition;
 }
 
 const variantIconMap = {
@@ -27,9 +34,15 @@ const variantIconMap = {
   info: IcPlus,
 } satisfies Record<ToastVariant, ComponentType<SVGProps<SVGSVGElement>>>;
 
-export const ToastViewport = ({ children }: ToastViewportProps) => {
+export const ToastViewport = ({
+  children,
+  position = 'responsive',
+}: ToastViewportProps) => {
   return (
-    <div aria-live="polite" className={s.viewport}>
+    <div
+      aria-live="polite"
+      className={`${s.viewport} ${s.viewportPositions[position]}`}
+    >
       {children}
     </div>
   );
@@ -42,6 +55,7 @@ export const Toast = ({
   actionLabel,
   onAction,
   onDismiss,
+  isDismissible = false,
   role = variant === 'error' ? 'alert' : 'status',
 }: ToastProps) => {
   const Icon = variantIconMap[variant];
@@ -50,7 +64,6 @@ export const Toast = ({
 
   return (
     <div className={toastClassName} role={role}>
-      <span className={`${s.rail} ${s.railVariants[variant]}`} />
       <span
         aria-hidden="true"
         className={`${s.iconBubble} ${s.iconVariants[variant]}`}
@@ -68,7 +81,7 @@ export const Toast = ({
           {actionLabel}
         </button>
       ) : null}
-      {onDismiss ? (
+      {isDismissible && onDismiss ? (
         <button
           aria-label="알림 닫기"
           className={s.dismissButton}

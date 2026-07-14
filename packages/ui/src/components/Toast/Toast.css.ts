@@ -4,24 +4,53 @@ import { vars } from '../../styles/vars.css';
 const toastEnter = keyframes({
   from: {
     opacity: 0,
-    transform: 'translate3d(-50%, 8px, 0)',
+    transform: 'translate3d(0, 8px, 0)',
   },
   to: {
     opacity: 1,
-    transform: 'translate3d(-50%, 0, 0)',
+    transform: 'translate3d(0, 0, 0)',
   },
 });
 
 export const viewport = style({
   position: 'fixed',
-  left: '50%',
-  bottom: `calc(env(safe-area-inset-bottom) + ${vars.spacing[20]})`,
   zIndex: vars.zIndex.toast,
   display: 'flex',
   width: `min(calc(100vw - ${vars.spacing[8]}), 420px)`,
   flexDirection: 'column',
   gap: vars.spacing[3],
   pointerEvents: 'none',
+});
+
+export const viewportPositions = styleVariants({
+  responsive: {
+    left: '50%',
+    bottom: `calc(env(safe-area-inset-bottom) + ${vars.spacing[20]})`,
+    transform: 'translateX(-50%)',
+    '@media': {
+      'screen and (min-width: 768px)': {
+        top: vars.spacing[6],
+        bottom: 'auto',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '420px',
+      },
+    },
+  },
+  'top-right': {
+    top: vars.spacing[6],
+    right: vars.spacing[6],
+  },
+  'top-center': {
+    top: vars.spacing[6],
+    left: '50%',
+    transform: 'translateX(-50%)',
+  },
+  'bottom-center': {
+    left: '50%',
+    bottom: `calc(env(safe-area-inset-bottom) + ${vars.spacing[20]})`,
+    transform: 'translateX(-50%)',
+  },
 });
 
 export const toast = style({
@@ -41,32 +70,9 @@ export const toast = style({
   pointerEvents: 'auto',
   animation: `${toastEnter} 180ms ease-out`,
   '@media': {
-    '(prefers-reduced-motion: reduce)': {
+    'screen and (prefers-reduced-motion: reduce)': {
       animation: 'none',
     },
-  },
-});
-
-export const rail = style({
-  position: 'absolute',
-  top: 0,
-  bottom: 0,
-  left: 0,
-  width: vars.spacing[1],
-});
-
-export const railVariants = styleVariants({
-  default: {
-    backgroundColor: vars.colors.background.border,
-  },
-  success: {
-    backgroundColor: vars.colors.primary.default,
-  },
-  error: {
-    backgroundColor: vars.colors.brand.secondary,
-  },
-  info: {
-    backgroundColor: vars.colors.primary.default,
   },
 });
 
