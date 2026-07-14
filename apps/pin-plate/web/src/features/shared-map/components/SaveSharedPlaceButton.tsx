@@ -7,6 +7,7 @@ import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import type { SharedMapPlace } from '../types/sharedMap';
 import * as s from './SharedMapView.css';
+import { useToast } from '@/providers/ToastProvider';
 
 interface Props {
   sharedPlace: SharedMapPlace;
@@ -33,6 +34,7 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
 
   const { mutateAsync: createPlace, isPending: isCreatingPlace } =
     useCreatePlace();
+  const { showErrorToast } = useToast();
 
   const { data: existingSavedPlace, isLoading: isExistingSavedPlaceLoading } =
     useQuery({
@@ -58,7 +60,10 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
 
     try {
       if (!currentUser) {
-        alert('로그인이 필요합니다.');
+        showErrorToast({
+          title: '로그인이 필요해요',
+          description: '로그인한 사용자만 장소를 저장할 수 있어요.',
+        });
         return;
       }
 
@@ -110,6 +115,7 @@ export const SaveSharedPlaceButton = ({ sharedPlace }: Props) => {
     currentUser,
     existingSavedPlace,
     isSavingSharedPlace,
+    showErrorToast,
     sharedPlace,
   ]);
 

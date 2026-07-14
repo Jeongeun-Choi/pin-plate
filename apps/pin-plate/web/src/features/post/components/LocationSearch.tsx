@@ -2,6 +2,7 @@ import { useRef, useState, KeyboardEvent } from 'react';
 import { Place, PlaceSearchResponse } from '../types/search';
 import * as styles from './styles/LocationSearch.css';
 import { IcSearch, IcMarker, Input, Spinner } from '@pin-plate/ui';
+import { useToast } from '@/providers/ToastProvider';
 
 interface LocationSearchProps {
   currentLocation?: { lat: number; lng: number } | null;
@@ -12,10 +13,11 @@ const LocationSearch = ({
   currentLocation,
   onSelectPlace,
 }: LocationSearchProps) => {
-  const locationRef = useRef<HTMLInputElement>(null);
   const [searchResults, setSearchResults] = useState<Place[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const locationRef = useRef<HTMLInputElement>(null);
+  const { showErrorToast } = useToast();
 
   const handleSearch = async () => {
     const location = locationRef.current?.value;
@@ -34,7 +36,10 @@ const LocationSearch = ({
       setSearchResults(data.documents || []);
     } catch (error) {
       console.error('Search failed:', error);
-      alert('검색 중 오류가 발생했습니다.');
+      showErrorToast({
+        title: '검색 중 오류가 발생했어요',
+        description: '잠시 후 다시 검색해 주세요.',
+      });
     } finally {
       setIsLoading(false);
     }

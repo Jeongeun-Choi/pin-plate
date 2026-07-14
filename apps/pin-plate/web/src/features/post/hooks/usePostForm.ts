@@ -10,6 +10,7 @@ import { viewModeAtom } from '@/app/atoms';
 import { useMap } from '@vis.gl/react-google-maps';
 import { sanitizeTags } from '../constants/tags';
 import { isTrustedImageKey } from '@/features/image/utils/imageReference';
+import { useToast } from '@/providers/ToastProvider';
 
 interface UploadedPhoto {
   key: string | null;
@@ -73,6 +74,7 @@ export const usePostForm = (
   const map = useMap();
 
   const { mutateAsync: createPost } = useCreatePost();
+  const { showErrorToast, showSuccessToast } = useToast();
 
   const existingReviewsForPlace = useMemo(() => {
     if (!selectedPlace || !posts) return [];
@@ -106,7 +108,10 @@ export const usePostForm = (
     async (fileList: File[]) => {
       const remainingSlots = 5 - photoReferences.length;
       if (fileList.length > remainingSlots) {
-        alert(`최대 ${remainingSlots}장까지만 더 추가할 수 있습니다.`);
+        showErrorToast({
+          title: `사진은 최대 ${remainingSlots}장 더 추가할 수 있어요`,
+          description: '선택한 사진 수를 줄인 뒤 다시 시도해 주세요.',
+        });
         return;
       }
 
@@ -126,16 +131,20 @@ export const usePostForm = (
         });
       } catch (err) {
         console.error('Presigned URL Network Error:', err);
-        alert(`서버 연결 실패: /api/image 에 접근할 수 없습니다.\n${err}`);
+        showErrorToast({
+          title: '이미지 업로드를 시작하지 못했어요',
+          description: '네트워크 연결을 확인하고 다시 시도해 주세요.',
+        });
         return;
       }
 
       if (!presignedRes.ok) {
         const errorText = await presignedRes.text();
         console.error('Presigned URL Server Error:', errorText);
-        alert(
-          `서버 에러 (${presignedRes.status}): 이미지 URL을 받아오지 못했습니다.`,
-        );
+        showErrorToast({
+          title: '이미지 업로드를 시작하지 못했어요',
+          description: `서버 응답을 확인해 주세요. (${presignedRes.status})`,
+        });
         return;
       }
 
@@ -171,16 +180,22 @@ export const usePostForm = (
         console.error(err);
       }
     },
-    [photoReferences.length],
+    [photoReferences.length, showErrorToast],
   );
 
   const handleSubmit = useCallback(async () => {
     if (!selectedPlace) {
-      alert('방문한 장소를 선택해주세요.');
+      showErrorToast({
+        title: '방문한 장소를 선택해 주세요',
+        description: '장소를 선택한 뒤 게시글을 등록할 수 있어요.',
+      });
       return;
     }
     if (rating === 0) {
-      alert('별점을 입력해주세요.');
+      showErrorToast({
+        title: '별점을 입력해 주세요',
+        description: '방문 경험을 별점으로 남겨 주세요.',
+      });
       return;
     }
 
@@ -188,7 +203,10 @@ export const usePostForm = (
       const currentUser = await getCurrentUser();
 
       if (!currentUser) {
-        alert('로그인이 필요합니다.');
+        showErrorToast({
+          title: '로그인이 필요해요',
+          description: '로그인한 사용자만 게시글을 등록할 수 있어요.',
+        });
         return;
       }
 
@@ -215,12 +233,18 @@ export const usePostForm = (
         map?.setCenter({ lat, lng });
       }
 
-      alert('게시글이 등록되었습니다!');
+      showSuccessToast({
+        title: '게시글이 등록됐어요',
+        description: '내 지도에서 바로 확인할 수 있어요.',
+      });
       resetForm();
       onSuccess?.();
     } catch (error) {
       console.error(error);
-      alert('게시글 등록에 실패했습니다.');
+      showErrorToast({
+        title: '게시글 등록에 실패했어요',
+        description: '잠시 후 다시 시도해 주세요.',
+      });
     }
   }, [
     content,
@@ -234,6 +258,8 @@ export const usePostForm = (
     onSuccess,
     resetForm,
     map,
+    showErrorToast,
+    showSuccessToast,
   ]);
 
   const handleRemovePhoto = useCallback((index: number) => {

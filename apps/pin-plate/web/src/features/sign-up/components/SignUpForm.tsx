@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Input, Button } from '@pin-plate/ui';
 import { signup, type SignupState } from '../actions';
 import * as styles from './SignUpForm.styles.css';
+import { useToast } from '@/providers/ToastProvider';
 
 const initialState: SignupState = {
   error: '',
@@ -13,13 +14,17 @@ const initialState: SignupState = {
 export function SignUpForm() {
   const [state, formAction, isPending] = useActionState(signup, initialState);
   const router = useRouter();
+  const { showSuccessToast } = useToast();
 
   useEffect(() => {
     if (state?.success) {
-      alert('회원가입이 완료됐습니다.');
+      showSuccessToast({
+        title: '회원가입이 완료됐어요',
+        description: '로그인 화면에서 바로 시작할 수 있어요.',
+      });
       router.push('/sign-in');
     }
-  }, [state?.success, router]);
+  }, [state?.success, router, showSuccessToast]);
 
   return (
     <form className={styles.form} action={formAction}>

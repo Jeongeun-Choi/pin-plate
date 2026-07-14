@@ -14,6 +14,7 @@ import type { Place } from '@/features/post/types/search';
 import { getDesktopSheetPosition } from '../utils/placeDetailSheetPosition';
 import { NearbyPlaceList } from './NearbyPlaceList';
 import * as s from './PlaceDetailSheet.css';
+import { useToast } from '@/providers/ToastProvider';
 
 export const PlaceDetailSheet = () => {
   const openedAtRef = useRef(0);
@@ -30,6 +31,7 @@ export const PlaceDetailSheet = () => {
     useDeletePlace();
 
   const { data: places } = usePlaces();
+  const { showErrorToast, showToast } = useToast();
 
   const isDirectPlace = !!selectedSearchPlace;
 
@@ -75,7 +77,10 @@ export const PlaceDetailSheet = () => {
     try {
       await removePlace(placeId);
     } catch {
-      alert('삭제에 실패했습니다.');
+      showErrorToast({
+        title: '장소 삭제에 실패했어요',
+        description: '잠시 후 다시 시도해 주세요.',
+      });
     }
   };
 
@@ -83,7 +88,10 @@ export const PlaceDetailSheet = () => {
     try {
       const currentUser = await getCurrentUser();
       if (!currentUser) {
-        alert('로그인이 필요합니다.');
+        showErrorToast({
+          title: '로그인이 필요해요',
+          description: '로그인한 사용자만 장소를 저장할 수 있어요.',
+        });
         return;
       }
       await createPlace({
@@ -101,9 +109,16 @@ export const PlaceDetailSheet = () => {
     } catch (err: unknown) {
       const pgError = err as { code?: string };
       if (pgError?.code === '23505') {
-        alert('이미 저장된 장소예요.');
+        showToast({
+          title: '이미 저장된 장소예요',
+          description: '내 지도에서 확인할 수 있어요.',
+          variant: 'info',
+        });
       } else {
-        alert('저장에 실패했습니다.');
+        showErrorToast({
+          title: '장소 저장에 실패했어요',
+          description: '잠시 후 다시 시도해 주세요.',
+        });
       }
     }
   };
