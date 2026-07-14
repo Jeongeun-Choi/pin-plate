@@ -22,6 +22,8 @@ describe('LoginForm', () => {
 
   beforeEach(() => {
     queryClient = createTestQueryClient();
+    mockLoginWithEmail.mockReset();
+    mockLoginWithGoogle.mockReset();
 
     vi.mocked(useLoginHook.useLogin).mockReturnValue({
       mutate: mockLoginWithEmail,
@@ -33,7 +35,6 @@ describe('LoginForm', () => {
       mutate: mockLoginWithGoogle,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
-    vi.clearAllMocks();
   });
 
   const renderComponent = () =>
@@ -69,5 +70,66 @@ describe('LoginForm', () => {
     fireEvent.click(googleButton);
 
     expect(mockLoginWithGoogle).toHaveBeenCalled();
+  });
+
+  it('필수 입력 에러를 각 input 아래에 표시한다', () => {
+    renderComponent();
+    const form = screen.getByRole('button', { name: '로그인' }).closest('form');
+
+    expect(form).not.toBeNull();
+
+    fireEvent.submit(form as HTMLFormElement);
+
+    expect(screen.getByText('이메일을 입력해주세요.')).toBeInTheDocument();
+    expect(screen.getByText('비밀번호를 입력해주세요.')).toBeInTheDocument();
+    expect(mockLoginWithEmail).not.toHaveBeenCalled();
+  });
+
+  it('이메일 형식 에러를 이메일 input 아래에 표시한다', () => {
+    renderComponent();
+
+    fireEvent.change(screen.getByLabelText('이메일'), {
+      target: { value: 'wrong-email' },
+    });
+    fireEvent.change(screen.getByLabelText('비밀번호'), {
+      target: { value: 'password1' },
+    });
+
+    const form = screen.getByRole('button', { name: '로그인' }).closest('form');
+
+    expect(form).not.toBeNull();
+
+    fireEvent.submit(form as HTMLFormElement);
+
+    expect(
+      screen.getByText('유효한 이메일 형식을 입력해주세요.'),
+    ).toBeInTheDocument();
+    expect(mockLoginWithEmail).not.toHaveBeenCalled();
+  });
+
+  it('로그인 실패 메시지를 비밀번호 input 아래에 표시한다', () => {
+    mockLoginWithEmail.mockImplementation(
+      (_params: unknown, options?: { onError?: (error: Error) => void }) => {
+        options?.onError?.(new Error('Invalid login credentials'));
+      },
+    );
+    renderComponent();
+
+    fireEvent.change(screen.getByLabelText('이메일'), {
+      target: { value: 'user@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText('비밀번호'), {
+      target: { value: 'wrongpassword' },
+    });
+
+    const form = screen.getByRole('button', { name: '로그인' }).closest('form');
+
+    expect(form).not.toBeNull();
+
+    fireEvent.submit(form as HTMLFormElement);
+
+    expect(
+      screen.getByText('이메일 또는 비밀번호가 일치하지 않습니다.'),
+    ).toBeInTheDocument();
   });
 });

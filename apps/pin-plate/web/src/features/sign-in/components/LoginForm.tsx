@@ -3,11 +3,62 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Input } from '@pin-plate/ui';
+import { z } from 'zod';
 import * as styles from './LoginForm.styles.css';
 import { useGoogleLogin, useLogin } from '../hooks/useLogin';
+import { getAuthErrorMessage } from '../utils/validation';
+
+interface LoginFieldErrors {
+  email?: string;
+  password?: string;
+}
+
+const loginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, '이메일을 입력해주세요.')
+    .email('유효한 이메일 형식을 입력해주세요.'),
+  password: z.string().min(1, '비밀번호를 입력해주세요.'),
+});
+
+const getLoginValidationResult = (formData: FormData) => {
+  const parsedFields = loginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+
+  if (!parsedFields.success) {
+    const fieldErrors = parsedFields.error.issues.reduce<LoginFieldErrors>(
+      (errors, issue) => {
+        const fieldName = issue.path[0];
+
+        if (
+          (fieldName === 'email' || fieldName === 'password') &&
+          !errors[fieldName]
+        ) {
+          errors[fieldName] = issue.message;
+        }
+
+        return errors;
+      },
+      {},
+    );
+
+    return {
+      fields: null,
+      fieldErrors,
+    };
+  }
+
+  return {
+    fields: parsedFields.data,
+    fieldErrors: null,
+  };
+};
 
 export function LoginForm() {
-  const [loginError, setLoginError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
 
   const { mutate: loginWithEmail, isPending: isEmailLoginPending } = useLogin();
   const { mutate: loginWithGoogle } = useGoogleLogin();
@@ -15,22 +66,34 @@ export function LoginForm() {
   const handleEmailLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const { fields, fieldErrors: validationFieldErrors } =
+      getLoginValidationResult(formData);
 
-    if (!email || !password) {
-      setLoginError('이메일과 비밀번호를 입력해주세요.');
+    if (!fields) {
+      setFieldErrors(validationFieldErrors);
       return;
     }
 
-    setLoginError('');
+    setFieldErrors({});
     loginWithEmail(
-      { email, password },
+      { email: fields.email, password: fields.password },
       {
-        onError: () =>
-          setLoginError(
-            '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.',
-          ),
+        onError: (error) => {
+          const errorMessage = getAuthErrorMessage(
+            error instanceof Error ? error : null,
+          );
+
+          if (errorMessage?.includes('이메일 인증')) {
+            setFieldErrors({ email: errorMessage });
+            return;
+          }
+
+          setFieldErrors({
+            password:
+              errorMessage ??
+              '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.',
+          });
+        },
       },
     );
   };
@@ -54,8 +117,20 @@ export function LoginForm() {
               className={styles.emailInput}
               placeholder="example@email.com"
               disabled={isEmailLoginPending}
+              autoComplete="email"
+              aria-invalid={Boolean(fieldErrors.email)}
+              aria-describedby={fieldErrors.email ? 'email-error' : undefined}
               required
             />
+            {fieldErrors.email && (
+              <p
+                id="email-error"
+                className={styles.fieldErrorText}
+                role="alert"
+              >
+                {fieldErrors.email}
+              </p>
+            )}
           </div>
 
           <div className={styles.field}>
@@ -69,12 +144,24 @@ export function LoginForm() {
               className={styles.emailInput}
               placeholder="••••••••"
               disabled={isEmailLoginPending}
+              autoComplete="current-password"
+              aria-invalid={Boolean(fieldErrors.password)}
+              aria-describedby={
+                fieldErrors.password ? 'password-error' : undefined
+              }
               required
             />
+            {fieldErrors.password && (
+              <p
+                id="password-error"
+                className={styles.fieldErrorText}
+                role="alert"
+              >
+                {fieldErrors.password}
+              </p>
+            )}
           </div>
         </div>
-
-        {loginError && <div className={styles.errorText}>{loginError}</div>}
 
         <button
           type="submit"
