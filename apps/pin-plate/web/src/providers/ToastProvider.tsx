@@ -10,7 +10,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Toast, ToastVariant, ToastViewport } from '@pin-plate/ui';
+import {
+  Toast,
+  ToastPosition,
+  ToastVariant,
+  ToastViewport,
+} from '@pin-plate/ui';
 
 const DEFAULT_TOAST_DURATION = 3200;
 const ERROR_TOAST_DURATION = 4800;
@@ -22,11 +27,19 @@ interface ToastOptions {
   actionLabel?: string;
   onAction?: () => void;
   duration?: number;
+  isDismissible?: boolean;
 }
 
-interface ToastItem extends ToastOptions {
+interface ToastItem {
   id: string;
+  title: string;
+  description?: string;
   variant: ToastVariant;
+  actionLabel?: string;
+  onAction?: () => void;
+  duration: number;
+  isDismissible: boolean;
+  deduplicationKey: string;
 }
 
 interface ToastContextValue {
@@ -38,30 +51,72 @@ interface ToastContextValue {
 
 interface Props {
   children: ReactNode;
+  position?: ToastPosition;
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
-export const ToastProvider = ({ children }: Props) => {
+const getToastDeduplicationKey = ({
+  title,
+  description,
+  variant = 'default',
+  actionLabel,
+}: ToastOptions) =>
+  [variant, title, description ?? '', actionLabel ?? ''].join('|');
+
+export const ToastProvider = ({ children, position = 'responsive' }: Props) => {
   const [toastItems, setToastItems] = useState<ToastItem[]>([]);
 
+  const toastItemsRef = useRef<ToastItem[]>([]);
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map(),
   );
   const toastSequenceRef = useRef(0);
 
-  const dismissToast = useCallback((toastId: string) => {
-    const timer = timersRef.current.get(toastId);
+  const updateToastItems = useCallback(
+    (updater: (currentToastItems: ToastItem[]) => ToastItem[]) => {
+      setToastItems((currentToastItems) => {
+        const nextToastItems = updater(currentToastItems);
+        toastItemsRef.current = nextToastItems;
 
-    if (timer) {
-      clearTimeout(timer);
-      timersRef.current.delete(toastId);
-    }
+        return nextToastItems;
+      });
+    },
+    [],
+  );
 
-    setToastItems((currentToastItems) =>
-      currentToastItems.filter((toastItem) => toastItem.id !== toastId),
-    );
-  }, []);
+  const dismissToast = useCallback(
+    (toastId: string) => {
+      const timer = timersRef.current.get(toastId);
+
+      if (timer) {
+        clearTimeout(timer);
+        timersRef.current.delete(toastId);
+      }
+
+      updateToastItems((currentToastItems) =>
+        currentToastItems.filter((toastItem) => toastItem.id !== toastId),
+      );
+    },
+    [updateToastItems],
+  );
+
+  const scheduleToastDismiss = useCallback(
+    (toastId: string, toastDuration: number) => {
+      const existingTimer = timersRef.current.get(toastId);
+
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+        timersRef.current.delete(toastId);
+      }
+
+      if (toastDuration > 0) {
+        const timer = setTimeout(() => dismissToast(toastId), toastDuration);
+        timersRef.current.set(toastId, timer);
+      }
+    },
+    [dismissToast],
+  );
 
   const createToastId = useCallback(() => {
     toastSequenceRef.current += 1;
@@ -81,13 +136,29 @@ export const ToastProvider = ({ children }: Props) => {
       actionLabel,
       onAction,
       duration,
+      isDismissible = false,
     }: ToastOptions) => {
       const toastId = createToastId();
+      const deduplicationKey = getToastDeduplicationKey({
+        title,
+        description,
+        variant,
+        actionLabel,
+      });
+      const existingToast = toastItemsRef.current.find(
+        (toastItem) => toastItem.deduplicationKey === deduplicationKey,
+      );
       const toastDuration =
         duration ??
         (variant === 'error' ? ERROR_TOAST_DURATION : DEFAULT_TOAST_DURATION);
 
-      setToastItems((currentToastItems) => [
+      if (existingToast) {
+        scheduleToastDismiss(existingToast.id, toastDuration);
+
+        return existingToast.id;
+      }
+
+      updateToastItems((currentToastItems) => [
         ...currentToastItems,
         {
           id: toastId,
@@ -97,17 +168,16 @@ export const ToastProvider = ({ children }: Props) => {
           actionLabel,
           onAction,
           duration: toastDuration,
+          isDismissible,
+          deduplicationKey,
         },
       ]);
 
-      if (toastDuration > 0) {
-        const timer = setTimeout(() => dismissToast(toastId), toastDuration);
-        timersRef.current.set(toastId, timer);
-      }
+      scheduleToastDismiss(toastId, toastDuration);
 
       return toastId;
     },
-    [createToastId, dismissToast],
+    [createToastId, scheduleToastDismiss, updateToastItems],
   );
 
   const showSuccessToast = useCallback(
@@ -144,7 +214,7 @@ export const ToastProvider = ({ children }: Props) => {
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      <ToastViewport>
+      <ToastViewport position={position}>
         {toastItems.map((toastItem) => {
           const handleAction = () => {
             toastItem.onAction?.();
@@ -158,6 +228,7 @@ export const ToastProvider = ({ children }: Props) => {
               description={toastItem.description}
               onAction={toastItem.onAction ? handleAction : undefined}
               onDismiss={() => dismissToast(toastItem.id)}
+              isDismissible={toastItem.isDismissible}
               title={toastItem.title}
               variant={toastItem.variant}
             />
