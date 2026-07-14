@@ -1,15 +1,8 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
-import {
-  Button,
-  Spinner,
-  IcMarker,
-  IcDismiss,
-  IcBookmark,
-  IcFilledBookmark,
-} from '@pin-plate/ui';
+import { Spinner, IcDismiss } from '@pin-plate/ui';
 import { clickedMapInfoAtom, selectedSearchPlaceAtom } from '../atoms';
 import { useNearbyRestaurants } from '../hooks/useNearbyRestaurants';
 import { isPostModalOpenAtom, prefillPlaceAtom } from '@/features/post/atoms';
@@ -17,16 +10,19 @@ import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
 import { useDeletePlace } from '@/features/place/hooks/useDeletePlace';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
+import type { Place } from '@/features/post/types/search';
+import { getDesktopSheetPosition } from '../utils/placeDetailSheetPosition';
+import { NearbyPlaceList } from './NearbyPlaceList';
 import * as s from './PlaceDetailSheet.css';
 
 export const PlaceDetailSheet = () => {
+  const openedAtRef = useRef(0);
   const [clickedInfo, setClickedInfo] = useAtom(clickedMapInfoAtom);
   const [selectedSearchPlace, setSelectedSearchPlace] = useAtom(
     selectedSearchPlaceAtom,
   );
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
   const setPrefillPlace = useSetAtom(prefillPlaceAtom);
-  const openedAtRef = useRef(0);
 
   const { mutateAsync: createPlace, isPending: isAddingWish } =
     useCreatePlace();
@@ -45,13 +41,23 @@ export const PlaceDetailSheet = () => {
   const { data: nearbyRestaurants, isLoading: isNearbyRestaurantsLoading } =
     useNearbyRestaurants(coords);
 
-  const closestPlace = selectedSearchPlace ?? nearbyRestaurants?.[0] ?? null;
+  const displayPlaces = selectedSearchPlace
+    ? [selectedSearchPlace]
+    : (nearbyRestaurants ?? []);
+  const savedWishPlaceIdByKakaoId = useMemo(() => {
+    const wishPlaceEntries =
+      places?.flatMap((place) => {
+        if (!place.kakao_place_id || place.status !== 'wish') return [];
+        return [[place.kakao_place_id, place.id] as const];
+      }) ?? [];
 
-  const savedPlace =
-    places?.find(
-      (p) => p.kakao_place_id === closestPlace?.id && p.status === 'wish',
-    ) ?? null;
-  const isAlreadySaved = !!savedPlace;
+    return new Map(wishPlaceEntries);
+  }, [places]);
+  const desktopSheetPosition = useMemo(() => {
+    if (!clickedInfo) return null;
+    return getDesktopSheetPosition(clickedInfo.clientX, clickedInfo.clientY);
+  }, [clickedInfo]);
+  const isWishMutating = isAddingWish || isRemovingWish;
 
   const handleClose = () => {
     if (Date.now() - openedAtRef.current < 300) return;
@@ -59,24 +65,21 @@ export const PlaceDetailSheet = () => {
     setSelectedSearchPlace(null);
   };
 
-  const handleWritePost = () => {
-    if (!closestPlace) return;
-    setPrefillPlace(closestPlace);
+  const handleWritePost = (place: Place) => {
+    setPrefillPlace(place);
     setIsPostModalOpen(true);
     setClickedInfo(null);
   };
 
-  const handleRemoveWish = async () => {
-    if (!savedPlace) return;
+  const handleRemoveWish = async (placeId: string) => {
     try {
-      await removePlace(savedPlace.id);
+      await removePlace(placeId);
     } catch {
       alert('삭제에 실패했습니다.');
     }
   };
 
-  const handleAddWish = async () => {
-    if (!closestPlace) return;
+  const handleAddWish = async (place: Place) => {
     try {
       const currentUser = await getCurrentUser();
       if (!currentUser) {
@@ -86,11 +89,11 @@ export const PlaceDetailSheet = () => {
       await createPlace({
         userId: currentUser.id,
         payload: {
-          kakao_place_id: closestPlace.id,
-          place_name: closestPlace.place_name,
-          address: closestPlace.road_address_name || closestPlace.address_name,
-          lat: parseFloat(closestPlace.y),
-          lng: parseFloat(closestPlace.x),
+          kakao_place_id: place.id,
+          place_name: place.place_name,
+          address: place.road_address_name || place.address_name,
+          lat: parseFloat(place.y),
+          lng: parseFloat(place.x),
           status: 'wish',
           tags: [],
         },
@@ -113,25 +116,20 @@ export const PlaceDetailSheet = () => {
 
   if (!clickedInfo) return null;
 
-  const formatCategory = (categoryName: string) => {
-    const parts = categoryName.split(' > ');
-    return parts.slice(1).join(' > ') || categoryName;
-  };
-
-  const formatDistance = (distance: string) => {
-    const meters = Number(distance);
-    return meters >= 1000 ? `${(meters / 1000).toFixed(1)}km` : `${distance}m`;
-  };
-
   const desktopStyle = {
     '--click-x': `${clickedInfo.clientX}px`,
     '--click-y': `${clickedInfo.clientY}px`,
-  } as React.CSSProperties;
+    ...desktopSheetPosition?.style,
+  } as CSSProperties;
 
   return (
     <>
       <div className={s.backdrop} onClick={handleClose} />
-      <div className={s.sheet} style={desktopStyle}>
+      <div
+        className={s.sheet}
+        style={desktopStyle}
+        data-placement={desktopSheetPosition?.placement ?? 'above'}
+      >
         <div className={s.handle} />
         <button
           type="button"
@@ -147,57 +145,16 @@ export const PlaceDetailSheet = () => {
               <Spinner />
               <span className={s.loadingText}>주변 음식점을 찾는 중...</span>
             </div>
-          ) : closestPlace ? (
-            <>
-              <div className={s.detailSection}>
-                <div className={s.headerRow}>
-                  <div className={s.placeTextGroup}>
-                    <div className={s.placeName}>{closestPlace.place_name}</div>
-                    {closestPlace.category_name && (
-                      <div className={s.category}>
-                        {formatCategory(closestPlace.category_name)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className={s.infoRow}>
-                  <IcMarker width={14} height={14} />
-                  <span>
-                    {closestPlace.road_address_name ||
-                      closestPlace.address_name}
-                  </span>
-                </div>
-                {closestPlace.phone && (
-                  <div className={s.infoRow}>
-                    <span className={s.phoneLabel}>전화</span>
-                    <span>{closestPlace.phone}</span>
-                  </div>
-                )}
-                {closestPlace.distance && (
-                  <div className={s.distanceText}>
-                    {formatDistance(closestPlace.distance)}
-                  </div>
-                )}
-              </div>
-              <div className={s.buttonGroup}>
-                <Button
-                  variant="outline"
-                  size="full"
-                  className={s.wishButton}
-                  onClick={isAlreadySaved ? handleRemoveWish : handleAddWish}
-                  disabled={isAddingWish || isRemovingWish}
-                >
-                  {isAlreadySaved ? (
-                    <IcFilledBookmark width={16} height={16} />
-                  ) : (
-                    <IcBookmark width={16} height={16} />
-                  )}
-                </Button>
-                <Button variant="solid" size="full" onClick={handleWritePost}>
-                  글 작성하기
-                </Button>
-              </div>
-            </>
+          ) : displayPlaces.length > 0 ? (
+            <NearbyPlaceList
+              places={displayPlaces}
+              savedWishPlaceIdByKakaoId={savedWishPlaceIdByKakaoId}
+              shouldShowResultSummary={!isDirectPlace}
+              isWishMutating={isWishMutating}
+              onAddWish={handleAddWish}
+              onRemoveWish={handleRemoveWish}
+              onWritePost={handleWritePost}
+            />
           ) : (
             <div className={s.emptyContainer}>
               <span className={s.emptyText}>주변에 음식점이 없습니다.</span>
