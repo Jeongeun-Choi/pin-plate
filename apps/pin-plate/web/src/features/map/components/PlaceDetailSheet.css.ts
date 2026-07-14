@@ -42,15 +42,26 @@ export const sheet = style({
   '@media': {
     '(min-width: 768px)': {
       top: 'auto',
-      bottom: `calc(100dvh - var(--click-y) + 16px)`,
-      left: 'var(--click-x)',
+      bottom: 'auto',
+      left: 'var(--sheet-left)',
       right: 'auto',
       transform: 'translateX(-50%)',
       width: 320,
+      maxHeight: 'var(--sheet-max-height)',
+      overflow: 'hidden',
       borderRadius: vars.borderRadius['2xl'],
       boxShadow: vars.boxShadow.float,
       animation: `${popIn} 0.2s ease-out`,
       paddingBottom: 0,
+
+      selectors: {
+        '&[data-placement="above"]': {
+          bottom: 'var(--sheet-bottom)',
+        },
+        '&[data-placement="below"]': {
+          top: 'var(--sheet-top)',
+        },
+      },
     },
   },
 });
@@ -104,6 +115,8 @@ export const content = style({
   '@media': {
     '(min-width: 768px)': {
       padding: vars.spacing[5],
+      maxHeight: 'var(--sheet-max-height)',
+      overflowY: 'auto',
     },
   },
 });
@@ -131,78 +144,4 @@ export const emptyContainer = style({
 export const emptyText = style({
   fontSize: vars.fontSize.sm,
   color: vars.colors.text.sub,
-});
-
-export const detailSection = style({
-  marginBottom: vars.spacing[5],
-});
-
-export const headerRow = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: vars.spacing[3],
-  marginBottom: vars.spacing[3],
-
-  '@media': {
-    '(min-width: 768px)': {
-      paddingRight: vars.spacing[8],
-    },
-  },
-});
-
-export const placeTextGroup = style({
-  flex: 1,
-  minWidth: 0,
-});
-
-export const placeName = style({
-  fontSize: vars.fontSize.xl,
-  fontWeight: vars.fontWeight.bold,
-  color: vars.colors.text.primary,
-  lineHeight: vars.lineHeight.heading,
-  marginBottom: vars.spacing[1],
-
-  '@media': {
-    '(min-width: 768px)': {
-      fontSize: vars.fontSize.base,
-    },
-  },
-});
-
-export const category = style({
-  fontSize: vars.fontSize.xs,
-  color: vars.colors.text.caption,
-  marginBottom: vars.spacing[3],
-});
-
-export const infoRow = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: vars.spacing[2],
-  fontSize: vars.fontSize.sm,
-  color: vars.colors.text.body,
-  lineHeight: vars.lineHeight.body,
-  marginBottom: vars.spacing[1],
-});
-
-export const phoneLabel = style({
-  color: vars.colors.text.sub,
-  flexShrink: 0,
-});
-
-export const distanceText = style({
-  fontSize: vars.fontSize.xs,
-  color: vars.colors.text.caption,
-  fontWeight: vars.fontWeight.medium,
-  marginTop: vars.spacing[2],
-});
-
-export const wishButton = style({
-  width: 54,
-});
-
-export const buttonGroup = style({
-  display: 'grid',
-  gridTemplateColumns: 'auto 1fr',
-  gap: vars.spacing[2],
 });

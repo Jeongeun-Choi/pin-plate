@@ -12,7 +12,7 @@ export const NearbySearchRoot = () => {
 
   return (
     <>
-      <div className={s.filterRow}>
+      <div className={s.filterRow} data-place-detail-sheet-boundary>
         <NearbySearchTrigger />
         <span className={s.divider} aria-hidden="true" />
         <div className={s.chipsWrapper}>
