@@ -12,3 +12,4 @@ export * from './components/Popover';
 export * from './components/Card';
 export * from './components/Spinner';
 export * from './components/TagChip';
+export * from './components/Toast';
