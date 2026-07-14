@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Place, PlaceSearchResponse } from '../types/search';
+import { useToast } from '@/providers/ToastProvider';
 
 interface UseLocationSearchProps {
   currentLocation?: { lat: number; lng: number } | null;
@@ -11,6 +12,7 @@ export const useLocationSearch = ({
   const [searchResults, setSearchResults] = useState<Place[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const { showErrorToast } = useToast();
 
   const search = async (keyword: string) => {
     if (!keyword.trim()) return;
@@ -28,7 +30,10 @@ export const useLocationSearch = ({
       setSearchResults(data.documents || []);
     } catch (error) {
       console.error('Search failed:', error);
-      alert('검색 중 오류가 발생했습니다.');
+      showErrorToast({
+        title: '검색 중 오류가 발생했어요',
+        description: '잠시 후 다시 검색해 주세요.',
+      });
       setSearchResults([]);
     } finally {
       setIsLoading(false);

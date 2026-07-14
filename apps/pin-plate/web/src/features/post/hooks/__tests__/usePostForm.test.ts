@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { usePostForm } from '../usePostForm';
 import { createWrapper } from '@/test-utils';
@@ -47,7 +47,6 @@ vi.mock('../../utils/compressImages', () => ({
 }));
 
 const mockFetch = vi.fn();
-const mockAlert = vi.fn();
 const TEST_IMAGE_ORIGIN = 'https://image.test';
 
 const createMockPlace = (overrides?: Partial<Place>): Place => ({
@@ -69,13 +68,11 @@ const createMockPlace = (overrides?: Partial<Place>): Place => ({
 describe('usePostForm', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', mockFetch);
-    vi.stubGlobal('alert', mockAlert);
     mockCreatePost.mockReset();
     mockGetUser.mockReset();
     mockGetPlaceByKakaoId.mockReset();
     mockCreatePlace.mockReset();
     mockFetch.mockReset();
-    mockAlert.mockReset();
   });
 
   it('초기 상태가 올바르다', () => {
@@ -212,7 +209,7 @@ describe('usePostForm', () => {
     expect(result.current.formState.photos[0]).toContain('b.jpg');
   });
 
-  it('사진이 5장일 때 추가 업로드를 시도하면 alert를 표시한다', async () => {
+  it('사진이 5장일 때 추가 업로드를 시도하면 토스트를 표시한다', async () => {
     const { result } = renderHook(() => usePostForm(), {
       wrapper: createWrapper(),
     });
@@ -252,12 +249,12 @@ describe('usePostForm', () => {
       ]);
     });
 
-    expect(mockAlert).toHaveBeenCalledWith(
-      '최대 0장까지만 더 추가할 수 있습니다.',
-    );
+    expect(
+      screen.getByText('사진은 최대 0장 더 추가할 수 있어요'),
+    ).toBeInTheDocument();
   });
 
-  it('장소를 선택하지 않고 submit하면 alert를 표시한다', async () => {
+  it('장소를 선택하지 않고 submit하면 토스트를 표시한다', async () => {
     const { result } = renderHook(() => usePostForm(), {
       wrapper: createWrapper(),
     });
@@ -266,11 +263,11 @@ describe('usePostForm', () => {
       await result.current.submit();
     });
 
-    expect(mockAlert).toHaveBeenCalledWith('방문한 장소를 선택해주세요.');
+    expect(screen.getByText('방문한 장소를 선택해 주세요')).toBeInTheDocument();
     expect(mockCreatePost).not.toHaveBeenCalled();
   });
 
-  it('별점 없이 submit하면 alert를 표시한다', async () => {
+  it('별점 없이 submit하면 토스트를 표시한다', async () => {
     const { result } = renderHook(() => usePostForm(), {
       wrapper: createWrapper(),
     });
@@ -283,7 +280,7 @@ describe('usePostForm', () => {
       await result.current.submit();
     });
 
-    expect(mockAlert).toHaveBeenCalledWith('별점을 입력해주세요.');
+    expect(screen.getByText('별점을 입력해 주세요')).toBeInTheDocument();
     expect(mockCreatePost).not.toHaveBeenCalled();
   });
 
@@ -354,7 +351,7 @@ describe('usePostForm', () => {
         place_id: expect.anything(),
       }),
     );
-    expect(mockAlert).toHaveBeenCalledWith('게시글이 등록되었습니다!');
+    expect(screen.getByText('게시글이 등록됐어요')).toBeInTheDocument();
     expect(mockOnSuccess).toHaveBeenCalled();
     expect(result.current.formState.content).toBe('');
     expect(result.current.formState.rating).toBe(0);

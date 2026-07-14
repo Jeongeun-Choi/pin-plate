@@ -1,21 +1,20 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useLocationSearch } from '../useLocationSearch';
+import { createWrapper } from '@/test-utils';
 
 describe('useLocationSearch', () => {
   const mockFetch = vi.fn();
-  const mockAlert = vi.fn();
 
   beforeEach(() => {
     vi.stubGlobal('fetch', mockFetch);
-    vi.stubGlobal('alert', mockAlert);
     mockFetch.mockReset();
-    mockAlert.mockReset();
   });
 
   it('초기 상태는 빈 결과, 로딩 false, 검색 미수행이다', () => {
-    const { result } = renderHook(() =>
-      useLocationSearch({ currentLocation: null }),
+    const { result } = renderHook(
+      () => useLocationSearch({ currentLocation: null }),
+      { wrapper: createWrapper() },
     );
 
     expect(result.current.searchResults).toEqual([]);
@@ -31,8 +30,9 @@ describe('useLocationSearch', () => {
       json: () => Promise.resolve({ documents: mockDocuments }),
     });
 
-    const { result } = renderHook(() =>
-      useLocationSearch({ currentLocation: null }),
+    const { result } = renderHook(
+      () => useLocationSearch({ currentLocation: null }),
+      { wrapper: createWrapper() },
     );
 
     await act(async () => {
@@ -50,8 +50,9 @@ describe('useLocationSearch', () => {
       json: () => Promise.resolve({ documents: [] }),
     });
 
-    const { result } = renderHook(() =>
-      useLocationSearch({ currentLocation: { lat: 37.5, lng: 127.0 } }),
+    const { result } = renderHook(
+      () => useLocationSearch({ currentLocation: { lat: 37.5, lng: 127.0 } }),
+      { wrapper: createWrapper() },
     );
 
     await act(async () => {
@@ -64,8 +65,9 @@ describe('useLocationSearch', () => {
   });
 
   it('빈 키워드는 fetch를 호출하지 않는다', async () => {
-    const { result } = renderHook(() =>
-      useLocationSearch({ currentLocation: null }),
+    const { result } = renderHook(
+      () => useLocationSearch({ currentLocation: null }),
+      { wrapper: createWrapper() },
     );
 
     await act(async () => {
@@ -77,8 +79,9 @@ describe('useLocationSearch', () => {
   });
 
   it('공백만 있는 키워드도 fetch를 호출하지 않는다', async () => {
-    const { result } = renderHook(() =>
-      useLocationSearch({ currentLocation: null }),
+    const { result } = renderHook(
+      () => useLocationSearch({ currentLocation: null }),
+      { wrapper: createWrapper() },
     );
 
     await act(async () => {
@@ -88,11 +91,12 @@ describe('useLocationSearch', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('fetch 실패 시 결과를 비우고 alert를 호출한다', async () => {
+  it('fetch 실패 시 결과를 비우고 토스트를 표시한다', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-    const { result } = renderHook(() =>
-      useLocationSearch({ currentLocation: null }),
+    const { result } = renderHook(
+      () => useLocationSearch({ currentLocation: null }),
+      { wrapper: createWrapper() },
     );
 
     await act(async () => {
@@ -101,7 +105,7 @@ describe('useLocationSearch', () => {
 
     expect(result.current.searchResults).toEqual([]);
     expect(result.current.isLoading).toBe(false);
-    expect(mockAlert).toHaveBeenCalledWith('검색 중 오류가 발생했습니다.');
+    expect(screen.getByText('검색 중 오류가 발생했어요')).toBeInTheDocument();
   });
 
   it('resetSearch는 상태를 초기화한다', async () => {
@@ -110,8 +114,9 @@ describe('useLocationSearch', () => {
         Promise.resolve({ documents: [{ id: '1', place_name: '맛집' }] }),
     });
 
-    const { result } = renderHook(() =>
-      useLocationSearch({ currentLocation: null }),
+    const { result } = renderHook(
+      () => useLocationSearch({ currentLocation: null }),
+      { wrapper: createWrapper() },
     );
 
     await act(async () => {

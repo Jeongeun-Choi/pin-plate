@@ -15,6 +15,7 @@ import SelectedPlace from './SelectedPlace';
 import TagPickerSheet from './TagPickerSheet';
 import { getTagLabel } from '../constants/tags';
 import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
+import { useToast } from '@/providers/ToastProvider';
 
 interface Props {
   post: Post;
@@ -36,6 +37,7 @@ export default function EditPostContent({
   const { formState, handlers, submit } = useEditPostForm(post, onSuccess, {
     onSubmitOverride,
   });
+  const { showErrorToast } = useToast();
   const { content, rating, photos, tags, selectedPlace, currentLocation } =
     formState;
   const {
@@ -55,7 +57,10 @@ export default function EditPostContent({
 
   const handlePhotoAddClick = () => {
     if (photos.length >= 5) {
-      alert('사진은 최대 5개까지 등록 가능합니다.');
+      showErrorToast({
+        title: '사진은 최대 5개까지 등록할 수 있어요',
+        description: '사진을 삭제한 뒤 다시 추가해 주세요.',
+      });
       return;
     }
     fileInputRef.current?.click();

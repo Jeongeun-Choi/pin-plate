@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { clickedMapInfoAtom, selectedSearchPlaceAtom } from '../../atoms';
 import { PlaceDetailSheet } from '../PlaceDetailSheet';
 import type { Place } from '@/features/post/types/search';
+import { ToastProvider } from '@/providers/ToastProvider';
 
 const mockUseNearbyRestaurants = vi.fn();
 const mockUsePlaces = vi.fn();
@@ -73,7 +74,9 @@ const renderSheet = ({
 
   return render(
     <JotaiProvider store={store}>
-      <PlaceDetailSheet />
+      <ToastProvider>
+        <PlaceDetailSheet />
+      </ToastProvider>
     </JotaiProvider>,
   );
 };

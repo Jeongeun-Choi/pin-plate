@@ -6,6 +6,7 @@ import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { compressImages } from '../utils/compressImages';
 import { sanitizeTags } from '../constants/tags';
 import { isTrustedImageKey } from '@/features/image/utils/imageReference';
+import { useToast } from '@/providers/ToastProvider';
 
 interface UploadedPhoto {
   key: string | null;
@@ -87,6 +88,7 @@ export const useEditPostForm = (
     useCurrentLocation();
 
   const { mutateAsync: updatePost } = useUpdatePost();
+  const { showErrorToast, showSuccessToast } = useToast();
 
   const photoUrls = useMemo(
     () => photoReferences.map((photoReference) => photoReference.url),
@@ -107,7 +109,10 @@ export const useEditPostForm = (
   const handleUploadAndSetImages = async (fileList: File[]) => {
     const remainingSlots = 5 - photoReferences.length;
     if (fileList.length > remainingSlots) {
-      alert(`최대 ${remainingSlots}장까지만 더 추가할 수 있습니다.`);
+      showErrorToast({
+        title: `사진은 최대 ${remainingSlots}장 더 추가할 수 있어요`,
+        description: '선택한 사진 수를 줄인 뒤 다시 시도해 주세요.',
+      });
       return;
     }
 
@@ -128,16 +133,20 @@ export const useEditPostForm = (
       });
     } catch (err) {
       console.error('Presigned URL Network Error:', err);
-      alert(`서버 연결 실패: /api/image 에 접근할 수 없습니다.\n${err}`);
+      showErrorToast({
+        title: '이미지 업로드를 시작하지 못했어요',
+        description: '네트워크 연결을 확인하고 다시 시도해 주세요.',
+      });
       return;
     }
 
     if (!presignedRes.ok) {
       const errorText = await presignedRes.text();
       console.error('Presigned URL Server Error:', errorText);
-      alert(
-        `서버 에러 (${presignedRes.status}): 이미지 URL을 받아오지 못했습니다.`,
-      );
+      showErrorToast({
+        title: '이미지 업로드를 시작하지 못했어요',
+        description: `서버 응답을 확인해 주세요. (${presignedRes.status})`,
+      });
       return;
     }
 
@@ -181,11 +190,17 @@ export const useEditPostForm = (
 
   const handleSubmit = async () => {
     if (!selectedPlace) {
-      alert('방문한 장소를 선택해주세요.');
+      showErrorToast({
+        title: '방문한 장소를 선택해 주세요',
+        description: '장소를 선택한 뒤 게시글을 수정할 수 있어요.',
+      });
       return;
     }
     if (rating === 0) {
-      alert('별점을 입력해주세요.');
+      showErrorToast({
+        title: '별점을 입력해 주세요',
+        description: '방문 경험을 별점으로 남겨 주세요.',
+      });
       return;
     }
 
@@ -213,7 +228,10 @@ export const useEditPostForm = (
         });
       }
 
-      alert('게시글이 수정되었습니다!');
+      showSuccessToast({
+        title: '게시글이 수정됐어요',
+        description: '변경한 내용이 저장됐어요.',
+      });
       onSuccess?.();
     } catch (error: unknown) {
       console.error('Update Post Error:', error);
@@ -221,13 +239,15 @@ export const useEditPostForm = (
       // Supabase error handling
       const err = error as { code?: string; message?: string };
       if (err?.code) {
-        alert(
-          `게시글 수정 실패 (${err.code}): ${err.message || ''}\n(내 글이 아니거나 권한이 없을 수 있습니다)`,
-        );
+        showErrorToast({
+          title: `게시글 수정에 실패했어요 (${err.code})`,
+          description: err.message || '내 글이 아니거나 권한이 없을 수 있어요.',
+        });
       } else {
-        alert(
-          `게시글 수정에 실패했습니다.\n${err?.message || '알 수 없는 오류'}`,
-        );
+        showErrorToast({
+          title: '게시글 수정에 실패했어요',
+          description: err?.message || '알 수 없는 오류가 발생했어요.',
+        });
       }
     }
   };

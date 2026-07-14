@@ -9,6 +9,7 @@ import type { ProfileWithEmail } from '@/features/my-page/api/getMyProfile';
 import { createClient } from '@/utils/supabase/client';
 import * as styles from './page.css';
 import { Button, Input } from '@pin-plate/ui';
+import { useToast } from '@/providers/ToastProvider';
 
 export default function ProfileEditPage() {
   const { data: profile, isLoading } = useMyProfile();
@@ -24,9 +25,10 @@ interface Props {
 }
 
 function ProfileEditForm({ profile }: Props) {
-  const router = useRouter();
   const [nickname, setNickname] = useState(profile.nickname || '');
   const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
+  const { showErrorToast, showSuccessToast } = useToast();
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -43,12 +45,18 @@ function ProfileEditForm({ profile }: Props) {
 
       if (updateError) throw updateError;
 
-      alert('프로필이 수정되었습니다.');
+      showSuccessToast({
+        title: '프로필이 수정됐어요',
+        description: '변경한 닉네임이 저장됐어요.',
+      });
       router.refresh();
       router.back();
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('프로필 수정 중 오류가 발생했습니다.');
+      showErrorToast({
+        title: '프로필 수정에 실패했어요',
+        description: '잠시 후 다시 시도해 주세요.',
+      });
     } finally {
       setIsSaving(false);
     }

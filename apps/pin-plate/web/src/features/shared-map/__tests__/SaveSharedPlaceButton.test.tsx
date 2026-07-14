@@ -6,6 +6,7 @@ import { useCreatePlace } from '@/features/place/hooks/useCreatePlace';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import type { SharedMapPlace } from '../types/sharedMap';
 import { SaveSharedPlaceButton } from '../components/SaveSharedPlaceButton';
+import { ToastProvider } from '@/providers/ToastProvider';
 
 vi.mock('@/utils/supabase/getCurrentUser', () => ({
   getCurrentUser: vi.fn(),
@@ -47,7 +48,9 @@ const renderButton = () => {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <SaveSharedPlaceButton sharedPlace={sharedPlace} />
+      <ToastProvider>
+        <SaveSharedPlaceButton sharedPlace={sharedPlace} />
+      </ToastProvider>
     </QueryClientProvider>,
   );
 };
@@ -63,7 +66,6 @@ describe('SaveSharedPlaceButton', () => {
       mutateAsync: createPlace,
       isPending: false,
     } as unknown as ReturnType<typeof useCreatePlace>);
-    vi.spyOn(window, 'alert').mockImplementation(() => {});
   });
 
   it('prompts to log in and does not save when the viewer is logged out', async () => {
@@ -76,9 +78,7 @@ describe('SaveSharedPlaceButton', () => {
 
     fireEvent.click(saveButton);
 
-    await waitFor(() =>
-      expect(window.alert).toHaveBeenCalledWith('로그인이 필요합니다.'),
-    );
+    expect(await screen.findByText('로그인이 필요해요')).toBeInTheDocument();
     expect(createPlace).not.toHaveBeenCalled();
     expect(
       screen.getByRole('button', { name: '성수 카페 내 지도에 저장' }),

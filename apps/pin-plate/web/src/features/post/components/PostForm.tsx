@@ -11,6 +11,7 @@ import SelectedPlace from './SelectedPlace';
 import TagPickerSheet from './TagPickerSheet';
 import { getTagLabel } from '../constants/tags';
 import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
+import { useToast } from '@/providers/ToastProvider';
 
 interface Props {
   formState: {
@@ -50,20 +51,21 @@ const PostForm = ({ formState, handlers }: Props) => {
   const [isTagPickerOpen, setIsTagPickerOpen] = useState(false);
   const [tagPickerOpenKey, setTagPickerOpenKey] = useState(0);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { showErrorToast } = useToast();
+
   const handleOpenTagPicker = () => {
     setTagPickerOpenKey((k) => k + 1);
     setIsTagPickerOpen(true);
   };
 
-  useEffect(() => {
-    fetchCurrentLocation();
-  }, [fetchCurrentLocation]);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const handlePhotoAddClick = () => {
     if (photos.length >= 5) {
-      alert('사진은 최대 5개까지 등록 가능합니다.');
+      showErrorToast({
+        title: '사진은 최대 5개까지 등록할 수 있어요',
+        description: '사진을 삭제한 뒤 다시 추가해 주세요.',
+      });
       return;
     }
     fileInputRef.current?.click();
@@ -79,6 +81,10 @@ const PostForm = ({ formState, handlers }: Props) => {
       fileInputRef.current.value = '';
     }
   };
+
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, [fetchCurrentLocation]);
 
   return (
     <>
