@@ -163,3 +163,39 @@ export const errorMessage = style({
   fontSize: vars.fontSize.sm,
   textAlign: 'center',
 });
+
+export const fieldErrorMessage = style({
+  margin: 0,
+  color: vars.colors.brand.secondary,
+  fontSize: vars.fontSize.sm,
+  textAlign: 'left',
+});
+
+export const helperList = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: vars.spacing[2],
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+});
+
+export const helperItem = style({
+  fontFamily: vars.fontFamily.body,
+  fontSize: vars.fontSize.xs,
+  color: vars.colors.text.sub,
+});
+
+export const helperItemInvalid = style([
+  helperItem,
+  {
+    color: vars.colors.brand.secondary,
+  },
+]);
+
+export const matchMessage = style({
+  margin: 0,
+  color: vars.colors.primary.default,
+  fontSize: vars.fontSize.sm,
+  textAlign: 'center',
+});
