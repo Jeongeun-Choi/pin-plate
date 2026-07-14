@@ -199,6 +199,13 @@ export const errorText = style({
   textAlign: 'center',
 });
 
+export const fieldErrorText = style({
+  margin: 0,
+  color: vars.colors.brand.secondary,
+  fontSize: vars.fontSize.sm,
+  textAlign: 'left',
+});
+
 export const signupLink = style({
   width: '100%',
   textAlign: 'center',
