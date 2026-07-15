@@ -203,7 +203,7 @@ export function SignUpForm() {
           <p
             id="confirm-password-message"
             className={
-              isPasswordMatched ? styles.matchMessage : styles.errorMessage
+              isPasswordMatched ? styles.matchMessage : styles.fieldErrorMessage
             }
             aria-live="polite"
           >

@@ -55,7 +55,7 @@ const redirectAfterLogin = async (
       'is_in_registration_flow=true; path=/sign-up/profile; max-age=300; SameSite=Lax';
     router.push('/sign-up/profile');
   } else {
-    router.refresh();
     router.push('/');
+    router.refresh();
   }
 };

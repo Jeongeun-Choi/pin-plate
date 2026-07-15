@@ -197,5 +197,5 @@ export const matchMessage = style({
   margin: 0,
   color: vars.colors.primary.default,
   fontSize: vars.fontSize.sm,
-  textAlign: 'center',
+  textAlign: 'left',
 });

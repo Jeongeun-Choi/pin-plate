@@ -7,6 +7,8 @@ build/
 .env*
 coverage/
 .npmrc
+test-results/
+playwright-report/
 
 # Next.js
 .next/
