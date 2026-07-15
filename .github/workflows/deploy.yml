@@ -64,6 +64,18 @@ jobs:
       - name: Test
         run: pnpm --filter web test --run
 
+      - name: Install Playwright browsers
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: E2E Test
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://example.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_API_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_API_KEY || 'e2e-dummy-anon-key' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://example.supabase.co' }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY || secrets.NEXT_PUBLIC_SUPABASE_API_KEY || 'e2e-dummy-anon-key' }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || 'e2e-dummy-service-key' }}
+        run: pnpm --filter web e2e
+
       - name: Set SST secrets
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
