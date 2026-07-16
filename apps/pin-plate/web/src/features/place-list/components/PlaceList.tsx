@@ -1,30 +1,31 @@
 'use client';
 
-import * as styles from './PostList.css';
+import * as styles from './PlaceList.css';
 import { useMemo, useState } from 'react';
 import { getImageProps } from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { Card, IcClock, IcNavigation, IcOutlinestar } from '@pin-plate/ui';
+import { useAtom, useAtomValue } from 'jotai';
+import { Card } from '@pin-plate/ui';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { getPlaces } from '../../place/api/getPlaces';
 import { placeKeys } from '../../place/placeKeys';
-import { PlaceStatusBadge } from '../../place/components/PlaceStatusBadge';
-import { StatusFilterChips } from '../../place/components/StatusFilterChips';
 import type { PlaceWithStats } from '../../place/types/place';
-import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { searchQueryAtom } from '@/app/atoms';
-import { currentLocationAtom, statusFilterAtom } from '@/features/map/atoms';
+import { statusFilterAtom } from '@/features/map/atoms';
 import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
-import { calcDistanceMeters } from '@/utils/distance';
 import type { User } from '@supabase/supabase-js';
-
-type SortType = 'latest' | 'rating' | 'distance';
 
 const CARD_IMAGE_WIDTH = 360;
 const CARD_IMAGE_HEIGHT = 240;
 const CARD_IMAGE_SIZES = '(min-width: 1024px) 320px, 100vw';
+type SortType = 'latest' | 'rating';
+
+const PLACE_LIST_STATUS_FILTER_OPTIONS = [
+  { value: 'all' as const, label: '전체' },
+  { value: 'wish' as const, label: '가볼 곳' },
+  { value: 'visited' as const, label: '기록한 곳' },
+];
 
 const getOptimizedCardImageProps = (
   imageUrl: string | null | undefined,
@@ -51,19 +52,15 @@ const getOptimizedCardImageProps = (
   };
 };
 
-interface AuthenticatedPostListProps {
+interface AuthenticatedPlaceListProps {
   user: User;
 }
 
-const AuthenticatedPostList = ({ user }: AuthenticatedPostListProps) => {
+const AuthenticatedPlaceList = ({ user }: AuthenticatedPlaceListProps) => {
   const [sortBy, setSortBy] = useState<SortType>('latest');
-  const statusFilter = useAtomValue(statusFilterAtom);
+  const [statusFilter, setStatusFilter] = useAtom(statusFilterAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
-  const currentLocation = useAtomValue(currentLocationAtom);
-  const setCurrentLocation = useSetAtom(currentLocationAtom);
   const router = useRouter();
-
-  const { fetchLocation } = useCurrentLocation();
 
   const { data: places } = useSuspenseQuery<PlaceWithStats[]>({
     queryKey: placeKeys.lists(user.id),
@@ -87,71 +84,51 @@ const AuthenticatedPostList = ({ user }: AuthenticatedPostListProps) => {
     return [...statusFilteredPlaces].sort((a, b) => {
       if (sortBy === 'latest') {
         return (
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          new Date(b.last_visited_at ?? b.created_at).getTime() -
+          new Date(a.last_visited_at ?? a.created_at).getTime()
         );
       }
-      if (sortBy === 'rating') {
-        return (b.avg_rating ?? 0) - (a.avg_rating ?? 0);
-      }
-      if (sortBy === 'distance' && currentLocation) {
-        const distA = calcDistanceMeters(
-          currentLocation.lat,
-          currentLocation.lng,
-          a.lat,
-          a.lng,
-        );
-        const distB = calcDistanceMeters(
-          currentLocation.lat,
-          currentLocation.lng,
-          b.lat,
-          b.lng,
-        );
-        return distA - distB;
-      }
-      return 0;
+
+      return (b.avg_rating ?? 0) - (a.avg_rating ?? 0);
     });
-  }, [statusFilteredPlaces, sortBy, currentLocation]);
+  }, [statusFilteredPlaces, sortBy]);
 
   return (
     <div className={styles.container}>
       <div className={styles.filterBar}>
-        <div className={styles.filterButtonGroup}>
-          <StatusFilterChips />
+        <div className={styles.filterTopRow}>
+          <div className={styles.reviewCount}>
+            총 {visiblePlaces.length}개의 장소
+          </div>
         </div>
 
-        <div className={styles.filterButtonGroup}>
-          <button
-            className={`${styles.filterButton} ${sortBy === 'latest' ? styles.activeFilterButton : ''}`}
-            onClick={() => setSortBy('latest')}
-          >
-            <IcClock width={16} height={16} />
-            <span>최신순</span>
-          </button>
-          <button
-            className={`${styles.filterButton} ${sortBy === 'rating' ? styles.activeFilterButton : ''}`}
-            onClick={() => setSortBy('rating')}
-          >
-            <IcOutlinestar width={16} height={16} />
-            <span>별점순</span>
-          </button>
-          <button
-            className={`${styles.filterButton} ${sortBy === 'distance' ? styles.activeFilterButton : ''}`}
-            onClick={() => {
-              setSortBy('distance');
-              if (!currentLocation) {
-                fetchLocation()
-                  .then((loc) => setCurrentLocation(loc))
-                  .catch(console.error);
-              }
-            }}
-          >
-            <IcNavigation width={16} height={16} />
-            <span>거리순</span>
-          </button>
-        </div>
+        <div className={styles.filterControlRow}>
+          <div className={styles.filterButtonGroup}>
+            {PLACE_LIST_STATUS_FILTER_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                className={`${styles.filterButton} ${statusFilter === option.value ? styles.activeFilterButton : ''}`}
+                onClick={() => setStatusFilter(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
 
-        <div className={styles.reviewCount}>
-          총 {visiblePlaces.length}개의 장소
+          <div className={styles.sortButtonGroup}>
+            <button
+              className={`${styles.filterButton} ${sortBy === 'latest' ? styles.activeFilterButton : ''}`}
+              onClick={() => setSortBy('latest')}
+            >
+              최근 기록순
+            </button>
+            <button
+              className={`${styles.filterButton} ${sortBy === 'rating' ? styles.activeFilterButton : ''}`}
+              onClick={() => setSortBy('rating')}
+            >
+              별점순
+            </button>
+          </div>
         </div>
       </div>
 
@@ -172,10 +149,16 @@ const AuthenticatedPostList = ({ user }: AuthenticatedPostListProps) => {
               }
             };
 
+            const isWishPlace = place.status === 'wish';
             const ratingDisplay =
-              place.status === 'wish' || place.avg_rating == null
-                ? '—'
+              isWishPlace || place.avg_rating == null
+                ? ''
                 : place.avg_rating.toFixed(1);
+            const ratingAriaLabel = isWishPlace
+              ? '가보고 싶은 장소'
+              : ratingDisplay
+                ? `별점 ${ratingDisplay}`
+                : '별점 없음';
 
             const dateDisplay = place.last_visited_at
               ? new Date(place.last_visited_at).toLocaleDateString('ko-KR', {
@@ -192,7 +175,7 @@ const AuthenticatedPostList = ({ user }: AuthenticatedPostListProps) => {
             const description =
               place.status === 'wish'
                 ? '아직 방문하지 않은 장소'
-                : place.visit_count > 1
+                : place.visit_count > 0
                   ? `총 ${place.visit_count}번 방문`
                   : undefined;
             const imageProps = getOptimizedCardImageProps(
@@ -201,22 +184,14 @@ const AuthenticatedPostList = ({ user }: AuthenticatedPostListProps) => {
             );
 
             return (
-              <div key={place.id} style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 12,
-                    left: 12,
-                    zIndex: 1,
-                  }}
-                >
-                  <PlaceStatusBadge status={place.status} />
-                </div>
+              <div key={place.id}>
                 <Card
                   onClick={handleClick}
                   style={{ cursor: 'pointer' }}
                   title={place.place_name}
                   rating={ratingDisplay}
+                  ratingIcon={isWishPlace ? 'bookmark' : 'star'}
+                  ratingAriaLabel={ratingAriaLabel}
                   location={place.address}
                   description={description ?? ''}
                   date={dateDisplay}
@@ -231,7 +206,7 @@ const AuthenticatedPostList = ({ user }: AuthenticatedPostListProps) => {
   );
 };
 
-export const PostList = () => {
+export const PlaceList = () => {
   const { data: user, isLoading } = useQuery({
     queryKey: ['auth', 'user'],
     queryFn: getCurrentUser,
@@ -239,5 +214,5 @@ export const PostList = () => {
 
   if (isLoading || !user) return null;
 
-  return <AuthenticatedPostList user={user} />;
+  return <AuthenticatedPlaceList user={user} />;
 };

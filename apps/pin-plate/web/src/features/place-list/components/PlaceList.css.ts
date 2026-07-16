@@ -19,10 +19,30 @@ export const filterBar = style({
   padding: '16px',
   display: 'flex',
   flexDirection: 'column',
-  gap: '16px',
+  gap: '12px',
   '@media': {
     '(min-width: 768px)': {
-      padding: '16px 24px',
+      padding: '20px 24px',
+    },
+  },
+});
+
+export const filterTopRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '12px',
+});
+
+export const filterControlRow = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '12px',
+  '@media': {
+    '(min-width: 768px)': {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
     },
   },
 });
@@ -61,19 +81,36 @@ export const filterButtonGroup = style({
   },
 });
 
+export const sortButtonGroup = style({
+  display: 'flex',
+  gap: '8px',
+  overflowX: 'auto',
+  scrollbarWidth: 'none',
+  '::-webkit-scrollbar': {
+    display: 'none',
+  },
+  '@media': {
+    '(min-width: 768px)': {
+      justifyContent: 'flex-end',
+    },
+  },
+});
+
 export const filterButton = style({
   height: '32px',
-  padding: '0 24px',
+  padding: '0 20px',
   borderRadius: '9999px',
   fontSize: '14px',
-  fontWeight: 500,
+  fontWeight: vars.fontWeight.medium,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   gap: '6px',
   whiteSpace: 'nowrap',
+  flexShrink: 0,
   cursor: 'pointer',
-  transition: 'all 0.2s ease',
+  transition:
+    'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
   border: '2px solid #ffe4d6',
   backgroundColor: '#fff4e6',
   color: '#1a1a1a',
@@ -86,8 +123,8 @@ export const activeFilterButton = style({
 });
 
 export const reviewCount = style({
-  fontSize: '12px',
-  fontWeight: 700,
+  fontSize: '14px',
+  fontWeight: 800,
   color: '#4a4a4a',
 });
 

@@ -2,7 +2,7 @@ import type { PlaceStatus } from '../types/place';
 
 export const PLACE_STATUS_LABEL: Record<PlaceStatus, string> = {
   wish: '가보고싶음',
-  visited: '다녀옴',
+  visited: '기록한 곳',
   want_to_revisit: '다시가고싶음',
   recommend: '추천하고싶음',
 };
@@ -10,7 +10,7 @@ export const PLACE_STATUS_LABEL: Record<PlaceStatus, string> = {
 export const PLACE_STATUS_FILTER_LABEL: Record<PlaceStatus | 'all', string> = {
   all: '전체',
   wish: '가볼 곳',
-  visited: '다녀온',
+  visited: '기록한 곳',
   want_to_revisit: '또 갈 곳',
   recommend: '추천',
 };
