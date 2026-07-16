@@ -78,6 +78,12 @@ export const ratingBadge = style({
   boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.1)',
 });
 
+export const bookmarkRatingBadge = style({
+  width: '32px',
+  padding: 0,
+  justifyContent: 'center',
+});
+
 export const ratingText = style({
   fontSize: '14px',
   fontWeight: 900,

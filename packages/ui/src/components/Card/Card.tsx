@@ -1,10 +1,14 @@
 import * as React from 'react';
 import * as styles from './styles.css';
-import { IcFilledstar, IcFork, IcMarker } from '../../icons';
+import { IcFilledBookmark, IcFilledstar, IcFork, IcMarker } from '../../icons';
+
+type CardIndicatorIcon = 'star' | 'bookmark';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   rating: string | number;
+  ratingIcon?: CardIndicatorIcon;
+  ratingAriaLabel?: string;
   location: string;
   description: string;
   date: string;
@@ -18,6 +22,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     {
       title,
       rating,
+      ratingIcon = 'star',
+      ratingAriaLabel,
       location,
       description,
       date,
@@ -29,6 +35,10 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     },
     ref,
   ) => {
+    const IndicatorIcon =
+      ratingIcon === 'bookmark' ? IcFilledBookmark : IcFilledstar;
+    const shouldShowRatingText = String(rating).trim().length > 0;
+
     return (
       <div ref={ref} className={`${styles.card} ${className || ''}`} {...props}>
         <div className={styles.cardImageWrapper}>
@@ -51,9 +61,14 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         <div className={styles.cardInfo}>
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>{title}</h3>
-            <div className={styles.ratingBadge}>
-              <IcFilledstar width={16} height={16} color="#ffd93d" />
-              <span className={styles.ratingText}>{rating}</span>
+            <div
+              className={`${styles.ratingBadge} ${ratingIcon === 'bookmark' ? styles.bookmarkRatingBadge : ''}`}
+              aria-label={ratingAriaLabel}
+            >
+              <IndicatorIcon width={16} height={16} color="#ffd93d" />
+              {shouldShowRatingText && (
+                <span className={styles.ratingText}>{rating}</span>
+              )}
             </div>
           </div>
 
