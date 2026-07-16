@@ -7,12 +7,12 @@ const readSource = (path: string) =>
 
 describe('uploaded image rendering', () => {
   it('generates Next image optimizer srcSets for uploaded card images', () => {
-    const postListSource = readSource(
-      'src/features/post-list/components/PostList.tsx',
+    const placeListSource = readSource(
+      'src/features/place-list/components/PlaceList.tsx',
     );
 
-    expect(postListSource).toContain("from 'next/image'");
-    expect(postListSource).toContain('getImageProps');
+    expect(placeListSource).toContain("from 'next/image'");
+    expect(placeListSource).toContain('getImageProps');
   });
 
   it('keeps uploaded detail and form images optimized', () => {

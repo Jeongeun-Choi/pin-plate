@@ -9,7 +9,7 @@ import { viewModeAtom } from '@/app/atoms';
 import { Navigation } from '@/components/Navigation';
 import { GlobalPostModal } from '@/components/GlobalPostModal';
 import { Header } from '@/components/Header';
-import { PostList } from '@/features/post-list/components/PostList';
+import { PlaceList } from '@/features/place-list/components/PlaceList';
 import { PlaceDetailSheet } from '@/features/map/components/PlaceDetailSheet';
 // import { NearbySearchRoot } from '@/features/nearby-search/components/NearbySearchRoot';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
@@ -45,7 +45,7 @@ export default function Home() {
               </div>
             }
           >
-            <PostList />
+            <PlaceList />
           </Suspense>
         </ErrorBoundary>
       )}
