@@ -3,8 +3,8 @@
 import { memo } from 'react';
 import { Map as GoogleMap, AdvancedMarker } from '@vis.gl/react-google-maps';
 import * as styles from './MapPreview.styles.css';
-import { getPinIcon, toDataUrl } from '../utils/marker';
 import { vars } from '@pin-plate/ui';
+import CustomMarker from './CustomMarker';
 
 interface Props {
   lat: number;
@@ -19,7 +19,8 @@ export const MapPreview = memo(({ lat, lng }: Props) => {
   return (
     <div className={styles.container}>
       <GoogleMap
-        defaultCenter={position}
+        mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
+        center={position}
         defaultZoom={16}
         disableDefaultUI
         clickableIcons={false}
@@ -27,14 +28,10 @@ export const MapPreview = memo(({ lat, lng }: Props) => {
         className={styles.map}
       >
         <AdvancedMarker position={position}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={toDataUrl(
-              getPinIcon(vars.colors.pin[500], pinWidth, pinHeight),
-            )}
+          <CustomMarker
             width={pinWidth}
             height={pinHeight}
-            alt=""
+            color={vars.colors.pin[500]}
           />
         </AdvancedMarker>
       </GoogleMap>
