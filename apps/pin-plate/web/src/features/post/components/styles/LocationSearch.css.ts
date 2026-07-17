@@ -14,26 +14,25 @@ export const searchContainer = style({
   width: '100%',
 });
 
-export const searchInputWrapper = style({
+export const searchInput = style({
   flex: 1,
+  width: '100%',
   height: '50px',
   border: '2px solid #fde4d8',
   borderRadius: vars.borderRadius['2xl'],
   padding: '0 16px',
-  display: 'flex',
-  alignItems: 'center',
   backgroundColor: '#fff',
   boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.1)',
-});
-
-export const searchInput = style({
-  width: '100%',
-  border: 'none',
   outline: 'none',
   fontSize: vars.fontSize.base,
   color: '#6b5d52',
+  fontWeight: vars.fontWeight.medium,
   '::placeholder': {
     color: 'rgba(107, 93, 82, 0.5)',
+  },
+  ':focus-visible': {
+    borderColor: '#ffa07a',
+    boxShadow: '0 0 0 3px rgba(255, 160, 122, 0.18)',
   },
 });
 

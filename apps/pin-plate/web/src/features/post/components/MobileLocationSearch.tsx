@@ -49,15 +49,14 @@ const MobileLocationSearch = ({
       </div>
 
       <div className={styles.searchContainer}>
-        <div className={styles.searchInputWrapper}>
-          <Input
-            ref={inputRef}
-            className={styles.searchInput}
-            placeholder="장소명 또는 주소 입력"
-            autoFocus
-            onKeyDown={handleEnter}
-          />
-        </div>
+        <Input
+          ref={inputRef}
+          className={styles.searchInput}
+          placeholder="장소명 또는 주소 입력"
+          autoFocus
+          onKeyDown={handleEnter}
+          unstyled
+        />
         <button
           type="button"
           onClick={handleSearchClick}

@@ -54,14 +54,13 @@ const LocationSearch = ({
   return (
     <div className={styles.container}>
       <div className={styles.searchContainer}>
-        <div className={styles.searchInputWrapper}>
-          <Input
-            ref={locationRef}
-            className={styles.searchInput}
-            placeholder="장소를 입력하세요"
-            onKeyDown={handleEnter}
-          />
-        </div>
+        <Input
+          ref={locationRef}
+          className={styles.searchInput}
+          placeholder="장소를 입력하세요"
+          onKeyDown={handleEnter}
+          unstyled
+        />
         <button
           type="button"
           onClick={handleSearch}
