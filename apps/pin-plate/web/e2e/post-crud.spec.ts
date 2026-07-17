@@ -345,6 +345,9 @@ const setRating = async (page: Page, value: number) => {
     });
 };
 
+const getCreatedPostPanel = (page: Page) =>
+  page.locator(`[data-post-id="${CREATED_POST_ID}"]`);
+
 test.describe('post CRUD', () => {
   test('creates, reads, updates, and deletes a post from the app UI', async ({
     page,
@@ -391,12 +394,19 @@ test.describe('post CRUD', () => {
 
     await page.getByRole('button', { name: '리스트' }).click();
     await expect(page.getByText('총 1개의 장소')).toBeVisible();
-    await page.getByText(PLACE_NAME).click();
+    await Promise.all([
+      page.waitForURL(new RegExp(`/post/${CREATED_POST_ID}$`)),
+      page.getByRole('heading', { name: PLACE_NAME }).click(),
+    ]);
 
     await expect(page.getByRole('heading', { name: PLACE_NAME })).toBeVisible();
-    await expect(page.getByText('처음 남긴 CRUD 기록')).toBeVisible();
+    const createdPostPanel = getCreatedPostPanel(page);
+    await expect(createdPostPanel).toBeVisible();
+    await expect(
+      createdPostPanel.getByText('처음 남긴 CRUD 기록'),
+    ).toBeVisible();
 
-    await page.getByRole('button', { name: '⋮' }).click();
+    await createdPostPanel.getByRole('button', { name: '⋮' }).click();
     await page.getByRole('button', { name: '수정하기' }).click();
     await expect(
       page.getByRole('heading', { name: '리뷰 수정' }),
@@ -415,13 +425,13 @@ test.describe('post CRUD', () => {
         user_id: state.userId,
       },
     });
-    await expect(page.getByText('수정된 CRUD 기록')).toBeVisible();
+    await expect(createdPostPanel.getByText('수정된 CRUD 기록')).toBeVisible();
 
     page.once('dialog', async (dialog) => {
       expect(dialog.message()).toBe('정말로 삭제하시겠습니까?');
       await dialog.accept();
     });
-    await page.getByRole('button', { name: '⋮' }).click();
+    await createdPostPanel.getByRole('button', { name: '⋮' }).click();
     await page.getByRole('button', { name: '삭제하기' }).click();
 
     await expect
