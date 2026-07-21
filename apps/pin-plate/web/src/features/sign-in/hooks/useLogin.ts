@@ -1,12 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import {
-  login,
-  loginWithGoogle,
-  getUserNickname,
-  getSession,
-  LoginParams,
-} from '../api/auth';
+import { login, loginWithGoogle, getSession, LoginParams } from '../api/auth';
+import { redirectAfterLogin } from '../lib/redirectAfterLogin';
 
 export const useLogin = () => {
   const router = useRouter();
@@ -42,20 +37,4 @@ export const useGoogleLogin = () => {
       console.error('Google login failed:', error);
     },
   });
-};
-
-const redirectAfterLogin = async (
-  userId: string,
-  router: ReturnType<typeof useRouter>,
-) => {
-  const nickname = await getUserNickname(userId);
-
-  if (!nickname) {
-    document.cookie =
-      'is_in_registration_flow=true; path=/sign-up/profile; max-age=300; SameSite=Lax';
-    router.push('/sign-up/profile');
-  } else {
-    router.push('/');
-    router.refresh();
-  }
 };

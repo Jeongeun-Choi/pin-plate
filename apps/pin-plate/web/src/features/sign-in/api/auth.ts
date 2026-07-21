@@ -21,10 +21,14 @@ export const login = async (
 
 export const loginWithGoogle = async () => {
   const supabase = createClient();
+  const isMobileWebView = Boolean(window.ReactNativeWebView);
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/auth/callback?popup=true`,
+      redirectTo: isMobileWebView
+        ? `${window.location.origin}/auth/callback`
+        : `${window.location.origin}/auth/callback?popup=true`,
       skipBrowserRedirect: true,
       queryParams: {
         access_type: 'offline',
@@ -35,28 +39,35 @@ export const loginWithGoogle = async () => {
 
   if (error) throw new Error(error.message);
 
-  if (data.url) {
-    const width = 500;
-    const height = 600;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
+  if (!data.url) return;
 
-    window.open(
-      data.url,
-      'google-login',
-      `width=${width},height=${height},top=${top},left=${left}`,
-    );
-
-    return new Promise<void>((resolve) => {
-      const channel = new BroadcastChannel('google_login_channel');
-      channel.onmessage = (event: MessageEvent) => {
-        if (event.data.type === 'GOOGLE_LOGIN_SUCCESS') {
-          channel.close();
-          supabase.auth.getSession().then(() => resolve());
-        }
-      };
-    });
+  // 모바일 WebView는 팝업(window.open)과 BroadcastChannel을 지원하지 않으므로
+  // 같은 화면에서 그대로 이동시키고, 완료 처리는 콜백 페이지가 전담한다.
+  if (isMobileWebView) {
+    window.location.href = data.url;
+    return;
   }
+
+  const width = 500;
+  const height = 600;
+  const left = window.screen.width / 2 - width / 2;
+  const top = window.screen.height / 2 - height / 2;
+
+  window.open(
+    data.url,
+    'google-login',
+    `width=${width},height=${height},top=${top},left=${left}`,
+  );
+
+  return new Promise<void>((resolve) => {
+    const channel = new BroadcastChannel('google_login_channel');
+    channel.onmessage = (event: MessageEvent) => {
+      if (event.data.type === 'GOOGLE_LOGIN_SUCCESS') {
+        channel.close();
+        supabase.auth.getSession().then(() => resolve());
+      }
+    };
+  });
 };
 
 export const getUserNickname = async (
