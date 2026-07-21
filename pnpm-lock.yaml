@@ -117,7 +117,7 @@ importers:
         specifier: ^1.18.0
         version: 1.20.1
       '@vis.gl/react-google-maps':
-        specifier: ^1.8.3
+        specifier: 1.8.3
         version: 1.8.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       browser-image-compression:
         specifier: ^2.0.2
