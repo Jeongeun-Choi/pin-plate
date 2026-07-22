@@ -2,6 +2,12 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const PUBLIC_PATH_PREFIXES = ['/sign-in', '/sign-up', '/auth', '/share'];
+const PROXY_HIT_HEADER = 'x-pin-plate-proxy';
+
+const markProxyHit = <T extends NextResponse>(response: T): T => {
+  response.headers.set(PROXY_HIT_HEADER, 'hit');
+  return response;
+};
 
 export async function updateSession(request: NextRequest) {
   const isPublicPath = PUBLIC_PATH_PREFIXES.some((prefix) =>
@@ -12,6 +18,7 @@ export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
       request,
     });
+    markProxyHit(supabaseResponse);
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,6 +35,7 @@ export async function updateSession(request: NextRequest) {
             supabaseResponse = NextResponse.next({
               request,
             });
+            markProxyHit(supabaseResponse);
             cookiesToSet.forEach(({ name, value, options }) =>
               supabaseResponse.cookies.set(name, value, options),
             );
@@ -46,12 +54,14 @@ export async function updateSession(request: NextRequest) {
 
     if (!user && !isPublicPath) {
       if (request.nextUrl.pathname.startsWith('/api')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        return markProxyHit(
+          NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+        );
       }
 
       const url = request.nextUrl.clone();
       url.pathname = '/sign-in';
-      return NextResponse.redirect(url);
+      return markProxyHit(NextResponse.redirect(url));
     }
 
     if (user && !isPublicPath) {
@@ -65,7 +75,7 @@ export async function updateSession(request: NextRequest) {
         await supabase.auth.signOut();
         const url = request.nextUrl.clone();
         url.pathname = '/sign-in';
-        return NextResponse.redirect(url);
+        return markProxyHit(NextResponse.redirect(url));
       }
     }
 
@@ -79,7 +89,7 @@ export async function updateSession(request: NextRequest) {
     ) {
       const url = request.nextUrl.clone();
       url.pathname = '/';
-      return NextResponse.redirect(url);
+      return markProxyHit(NextResponse.redirect(url));
     }
 
     // 2. 프로필 설정 페이지(`/sign-up/profile`) 접근 제어
@@ -90,7 +100,7 @@ export async function updateSession(request: NextRequest) {
       if (!isInRegistrationFlow) {
         const url = request.nextUrl.clone();
         url.pathname = '/';
-        return NextResponse.redirect(url);
+        return markProxyHit(NextResponse.redirect(url));
       }
 
       try {
@@ -104,7 +114,7 @@ export async function updateSession(request: NextRequest) {
         if (profile?.nickname) {
           const url = request.nextUrl.clone();
           url.pathname = '/';
-          return NextResponse.redirect(url);
+          return markProxyHit(NextResponse.redirect(url));
         }
       } catch {
         // profiles 쿼리 실패 시 /sign-up/profile 접근 허용
@@ -125,6 +135,6 @@ export async function updateSession(request: NextRequest) {
 
     return supabaseResponse;
   } catch {
-    return NextResponse.next({ request });
+    return markProxyHit(NextResponse.next({ request }));
   }
 }
