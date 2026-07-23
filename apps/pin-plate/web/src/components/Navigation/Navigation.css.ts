@@ -3,7 +3,7 @@ import { vars } from '@pin-plate/ui';
 import {
   mobileNavigationHeight,
   mobileSafeAreaInsetBottom,
-} from '@/utils/mobileSafeArea';
+} from '../../utils/mobileSafeArea';
 
 // Mobile Container
 export const mobileContainer = style({

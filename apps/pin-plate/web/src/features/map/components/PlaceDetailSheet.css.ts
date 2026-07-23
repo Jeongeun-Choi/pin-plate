@@ -1,6 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@pin-plate/ui';
-import { mobileNavigationHeight } from '@/utils/mobileSafeArea';
+import { mobileNavigationHeight } from '../../../utils/mobileSafeArea';
 
 const slideUp = keyframes({
   from: { transform: 'translateY(100%)' },
