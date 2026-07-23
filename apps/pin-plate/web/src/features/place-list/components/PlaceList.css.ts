@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@pin-plate/ui';
+import { mobileNavigationHeight } from '@/utils/mobileSafeArea';
 
 export const container = style({
   width: '100%',
@@ -133,7 +134,7 @@ export const contentWrapper = style({
   flex: 1,
   minHeight: 0,
   overflowY: 'auto',
-  padding: '16px',
+  padding: `16px 16px calc(16px + ${mobileNavigationHeight})`,
   display: 'flex',
   '@media': {
     '(min-width: 768px)': {

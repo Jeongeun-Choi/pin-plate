@@ -1,5 +1,9 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@pin-plate/ui';
+import {
+  mobileNavigationHeight,
+  mobileSafeAreaInsetBottom,
+} from '@/utils/mobileSafeArea';
 
 // Mobile Container
 export const mobileContainer = style({
@@ -7,13 +11,14 @@ export const mobileContainer = style({
   bottom: 0,
   left: 0,
   right: 0,
-  height: 60,
+  height: mobileNavigationHeight,
   display: 'flex',
   justifyContent: 'space-around',
   alignItems: 'center',
   backgroundColor: vars.colors.common.white,
   borderTop: `1px solid #e5e5e5`,
-  paddingBottom: 'env(safe-area-inset-bottom)',
+  paddingBottom: mobileSafeAreaInsetBottom,
+  zIndex: 100,
 
   '@media': {
     '(min-width: 768px)': {
@@ -55,6 +60,7 @@ export const navItem = style({
   textDecoration: 'none',
   padding: 8,
   flex: 1,
+  height: '100%',
 });
 
 export const activeNavItem = style({
