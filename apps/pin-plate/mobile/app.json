@@ -1,11 +1,11 @@
 {
   "expo": {
     "jsEngine": "hermes",
-    "name": "mobile",
+    "name": "Pin plate",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.svg",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash-icon.png",
