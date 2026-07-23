@@ -6,13 +6,24 @@ export const redirectAfterLogin = async (
   router: ReturnType<typeof useRouter>,
 ) => {
   const nickname = await getUserNickname(userId);
+  const isMobileWebView =
+    typeof window !== 'undefined' && Boolean(window.ReactNativeWebView);
+
+  const redirectTo = (path: string) => {
+    if (isMobileWebView) {
+      window.location.assign(path);
+      return;
+    }
+
+    router.push(path);
+    router.refresh();
+  };
 
   if (!nickname) {
     document.cookie =
       'is_in_registration_flow=true; path=/sign-up/profile; max-age=300; SameSite=Lax';
-    router.push('/sign-up/profile');
+    redirectTo('/sign-up/profile');
   } else {
-    router.push('/');
-    router.refresh();
+    redirectTo('/');
   }
 };

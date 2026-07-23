@@ -67,9 +67,12 @@ const AuthCallbackContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isPopup = searchParams.get('popup') === 'true';
+  const authCode = searchParams.get('code');
 
   useEffect(() => {
     const supabase = createClient();
+    let hasCompletedAuth = false;
+    let unsubscribeAuthState: (() => void) | null = null;
     // 팝업 플로우(데스크톱)에서만 opener와 통신한다. 모바일 WebView 등
     // top-level 리다이렉트로 들어온 경우 opener가 없으므로 이 채널을 쓰지 않는다.
     const channel = isPopup
@@ -77,6 +80,9 @@ const AuthCallbackContent = () => {
       : null;
 
     const handleLoginSuccess = (userId: string) => {
+      if (hasCompletedAuth) return;
+      hasCompletedAuth = true;
+
       if (isPopup) {
         channel?.postMessage({ type: 'GOOGLE_LOGIN_SUCCESS' });
         channel?.close();
@@ -88,8 +94,17 @@ const AuthCallbackContent = () => {
     };
 
     const handleAuth = async () => {
-      // 1. URL search params에서 code 확인 (Supabase가 자동으로 처리하지만 명시적으로 한 번 더 체크 가능)
-      // Supabase 클라이언트가 초기화되면서 자동으로 해시나 쿼리 파라미터의 토큰을 세션으로 교환합니다.
+      if (authCode) {
+        const { data, error } =
+          await supabase.auth.exchangeCodeForSession(authCode);
+
+        if (error) throw new Error(error.message);
+
+        if (data.session) {
+          handleLoginSuccess(data.session.user.id);
+          return;
+        }
+      }
 
       const {
         data: { session },
@@ -110,14 +125,19 @@ const AuthCallbackContent = () => {
         }
       });
 
-      return () => {
-        subscription.unsubscribe();
-        channel?.close();
-      };
+      unsubscribeAuthState = () => subscription.unsubscribe();
     };
 
-    handleAuth();
-  }, [isPopup, router]);
+    handleAuth().catch((error: unknown) => {
+      console.error('Google callback failed:', error);
+      channel?.close();
+    });
+
+    return () => {
+      unsubscribeAuthState?.();
+      channel?.close();
+    };
+  }, [authCode, isPopup, router]);
 
   return <CallbackSpinner />;
 };
