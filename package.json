@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:pin-plate:web": "pnpm --filter web dev",
-    "dev:pin-plate:mobile": "npx --filter mobile expo start",
+    "dev:pin-plate:mobile": "pnpm --filter mobile start",
     "dev:ghost-web": "pnpm --filter ghostdev-web dev",
     "lint:fix": "pnpm --filter web --filter mobile lint --fix",
     "lint:check": "pnpm --filter web --filter mobile lint",

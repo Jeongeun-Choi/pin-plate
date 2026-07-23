@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@pin-plate/ui';
+import { mobileNavigationHeight } from '../../../utils/mobileSafeArea';
 
 const slideUp = keyframes({
   from: { transform: 'translateY(100%)' },
@@ -27,10 +28,9 @@ export const sheet = style({
   position: 'fixed',
   zIndex: 95,
   backgroundColor: vars.colors.common.white,
-  paddingBottom: 'env(safe-area-inset-bottom)',
 
   // 모바일: 바텀시트
-  bottom: 60,
+  bottom: mobileNavigationHeight,
   left: 0,
   right: 0,
   borderTopLeftRadius: vars.borderRadius['3xl'],

@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRef, useState, useEffect } from 'react';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
@@ -15,18 +15,19 @@ const isLocationRequestMessage = (
   return (message as { type: unknown }).type === 'REQ_LOCATION';
 };
 
-const LOCAL_URL = 'http://192.168.1.4:3000';
+const ANDROID_EMULATOR_URL = 'http://10.0.2.2:3000';
+const IOS_SIMULATOR_URL = 'http://localhost:3000';
 const PRODUCTION_URL = 'https://pinonplate.com';
 
+const getDevelopmentUrl = () =>
+  process.env.EXPO_PUBLIC_WEB_URL ??
+  (Platform.OS === 'android' ? ANDROID_EMULATOR_URL : IOS_SIMULATOR_URL);
+
 export default function App() {
-  // Use 10.0.2.2 for Android Emulator to access localhost
-  // const LOCAL_URL = Platform.OS === "android" ? "http://10.0.2.2:3000" : "http://192.168.1.4:3000";
-
-  const targetUrl = __DEV__ ? LOCAL_URL : PRODUCTION_URL;
-
   const [nativeLocation, setNativeLocation] =
     useState<Location.LocationObject | null>(null);
   const webViewRef = useRef<WebView>(null);
+  const targetUrl = __DEV__ ? getDevelopmentUrl() : PRODUCTION_URL;
 
   const injectLocation = (loc: Location.LocationObject) => {
     webViewRef.current?.postMessage(

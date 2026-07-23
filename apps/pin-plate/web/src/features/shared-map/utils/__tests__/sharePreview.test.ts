@@ -83,6 +83,9 @@ describe('share preview deployment config', () => {
     expect(sstConfig).toContain(
       'const supabaseApiKey = new sst.Secret("SupabaseApiKey")',
     );
+    expect(sstConfig).toContain(
+      'const supabaseSecretKey = new sst.Secret("SupabaseSecretKey")',
+    );
     expect(sstConfig).toContain('NEXT_PUBLIC_SUPABASE_URL: supabaseUrl.value');
     expect(sstConfig).toContain(
       'NEXT_PUBLIC_SUPABASE_API_KEY: supabaseApiKey.value',
@@ -90,6 +93,9 @@ describe('share preview deployment config', () => {
     expect(sstConfig).toContain('\n        SUPABASE_URL: supabaseUrl.value,');
     expect(sstConfig).toContain(
       '\n        SUPABASE_API_KEY: supabaseApiKey.value,',
+    );
+    expect(sstConfig).toContain(
+      '\n        SUPABASE_SECRET_KEY: supabaseSecretKey.value,',
     );
   });
 
@@ -138,11 +144,16 @@ describe('share preview deployment config', () => {
       ': "${SUPABASE_API_KEY:?Missing SUPABASE_API_KEY or NEXT_PUBLIC_SUPABASE_API_KEY GitHub secret}"',
     );
     expect(deployWorkflow).toContain(
+      ': "${SUPABASE_SECRET_KEY:?Missing SUPABASE_SECRET_KEY GitHub secret}"',
+    );
+    expect(deployWorkflow).toContain(
       'pnpm sst secret set SupabaseUrl "$SUPABASE_URL" --stage production',
     );
     expect(deployWorkflow).toContain(
       'pnpm sst secret set SupabaseApiKey "$SUPABASE_API_KEY" --stage production',
     );
-    expect(deployWorkflow).not.toContain('SupabaseSecretKey');
+    expect(deployWorkflow).toContain(
+      'pnpm sst secret set SupabaseSecretKey "$SUPABASE_SECRET_KEY" --stage production',
+    );
   });
 });
