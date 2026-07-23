@@ -88,6 +88,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_API_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           GOOGLE_MAPS_BROWSER_API_KEY: ${{ secrets.GOOGLE_MAPS_BROWSER_API_KEY }}
           GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID }}
@@ -101,6 +102,7 @@ jobs:
           fi
           : "${SUPABASE_URL:?Missing SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL GitHub secret}"
           : "${SUPABASE_API_KEY:?Missing SUPABASE_API_KEY or NEXT_PUBLIC_SUPABASE_API_KEY GitHub secret}"
+          : "${SUPABASE_SECRET_KEY:?Missing SUPABASE_SECRET_KEY GitHub secret}"
           : "${GOOGLE_MAPS_API_KEY:?Missing GOOGLE_MAPS_API_KEY GitHub secret}"
           : "${GOOGLE_MAPS_BROWSER_API_KEY:?Missing GOOGLE_MAPS_BROWSER_API_KEY GitHub secret}"
           : "${GOOGLE_MAPS_MAP_ID:?Missing GOOGLE_MAPS_MAP_ID GitHub secret}"
@@ -108,6 +110,7 @@ jobs:
           pnpm sst secret set CloudflareZoneId "$CLOUDFLARE_ZONE_ID" --stage production
           pnpm sst secret set SupabaseUrl "$SUPABASE_URL" --stage production
           pnpm sst secret set SupabaseApiKey "$SUPABASE_API_KEY" --stage production
+          pnpm sst secret set SupabaseSecretKey "$SUPABASE_SECRET_KEY" --stage production
           pnpm sst secret set GoogleMapsApiKey "$GOOGLE_MAPS_API_KEY" --stage production
           pnpm sst secret set GoogleMapsBrowserApiKey "$GOOGLE_MAPS_BROWSER_API_KEY" --stage production
           pnpm sst secret set GoogleMapsMapId "$GOOGLE_MAPS_MAP_ID" --stage production
