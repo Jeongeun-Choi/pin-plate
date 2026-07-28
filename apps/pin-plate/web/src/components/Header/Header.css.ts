@@ -166,42 +166,6 @@ export const rightSection = style({
   },
 });
 
-export const toggleContainer = style({
-  display: 'flex',
-  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  padding: 4,
-  borderRadius: 9999,
-  border: '1px solid rgba(255, 255, 255, 0.3)',
-  backdropFilter: 'blur(4px)',
-});
-
-export const toggleButton = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: 6,
-  padding: '6px 16px',
-  borderRadius: 9999,
-  fontSize: 12,
-  fontWeight: 'bold',
-  transition: 'all 0.2s ease',
-  border: 'none',
-  cursor: 'pointer',
-  color: 'rgba(255, 255, 255, 0.8)',
-  backgroundColor: 'transparent',
-  ':hover': {
-    color: vars.colors.common.white,
-  },
-});
-
-export const activeToggleButton = style({
-  backgroundColor: vars.colors.common.white,
-  color: '#FF9E7D',
-  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-  ':hover': {
-    color: '#FF9E7D',
-  },
-});
-
 export const writeButton = style({
   backgroundColor: vars.colors.common.white,
   color: '#FF9E7D',

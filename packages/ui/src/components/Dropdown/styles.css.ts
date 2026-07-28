@@ -1,19 +1,23 @@
-import { style } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from '../../styles/vars.css';
 
 export const container = style({
   position: 'relative',
-  width: '100%',
+});
+
+export const containerSize = styleVariants({
+  medium: {
+    width: '100%',
+  },
+  small: {
+    width: 'fit-content',
+  },
 });
 
 export const trigger = style({
-  width: '100%',
-  minHeight: 44,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: vars.spacing[3],
-  padding: `${vars.spacing[3]} ${vars.spacing[4]}`,
   border: `1px solid ${vars.colors.background.border}`,
   borderRadius: vars.borderRadius.xl,
   backgroundColor: vars.colors.common.white,
@@ -32,6 +36,25 @@ export const trigger = style({
     backgroundColor: vars.colors.background.bg,
     color: vars.colors.text.sub,
     cursor: 'not-allowed',
+  },
+});
+
+export const triggerSize = styleVariants({
+  medium: {
+    width: '100%',
+    minHeight: 44,
+    gap: vars.spacing[3],
+    padding: `${vars.spacing[3]} ${vars.spacing[4]}`,
+    fontSize: vars.fontSize.sm,
+  },
+  small: {
+    width: 'auto',
+    minHeight: 34,
+    gap: vars.spacing[1],
+    padding: `0 ${vars.spacing[3]}`,
+    borderRadius: vars.borderRadius.full,
+    fontSize: vars.fontSize.xs,
+    fontWeight: vars.fontWeight.bold,
   },
 });
 
@@ -75,12 +98,9 @@ export const menu = style({
 
 export const option = style({
   width: '100%',
-  minHeight: 44,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: vars.spacing[3],
-  padding: `${vars.spacing[3]} ${vars.spacing[4]}`,
   border: 'none',
   borderRadius: vars.borderRadius.xl,
   backgroundColor: 'transparent',
@@ -97,6 +117,21 @@ export const option = style({
   ':focus-visible': {
     outline: `2px solid ${vars.colors.primary.default}`,
     outlineOffset: 2,
+  },
+});
+
+export const optionSize = styleVariants({
+  medium: {
+    minHeight: 44,
+    gap: vars.spacing[3],
+    padding: `${vars.spacing[3]} ${vars.spacing[4]}`,
+    fontSize: vars.fontSize.sm,
+  },
+  small: {
+    minHeight: 36,
+    gap: vars.spacing[2],
+    padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
+    fontSize: vars.fontSize.xs,
   },
 });
 

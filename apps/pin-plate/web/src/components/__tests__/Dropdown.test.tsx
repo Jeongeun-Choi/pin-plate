@@ -107,4 +107,18 @@ describe('Dropdown', () => {
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
     expect(handleChange).not.toHaveBeenCalled();
   });
+
+  it('supports small size for compact toolbar controls', () => {
+    render(
+      <Dropdown
+        id="place-list-sort"
+        value="recommend"
+        options={OPTIONS}
+        onChange={vi.fn()}
+        size="small"
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: '다녀옴' })).toBeInTheDocument();
+  });
 });
