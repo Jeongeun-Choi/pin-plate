@@ -18,6 +18,8 @@ export interface DropdownOption {
   label: string;
 }
 
+type DropdownSize = 'medium' | 'small';
+
 interface Props {
   id: string;
   value: string;
@@ -25,6 +27,7 @@ interface Props {
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  size?: DropdownSize;
   className?: string;
   buttonClassName?: string;
   menuClassName?: string;
@@ -37,6 +40,7 @@ export const Dropdown = ({
   onChange,
   placeholder = '선택해 주세요',
   disabled = false,
+  size = 'medium',
   className,
   buttonClassName,
   menuClassName,
@@ -171,11 +175,14 @@ export const Dropdown = ({
   }, [closeMenu, isOpen]);
 
   return (
-    <div className={`${s.container} ${className || ''}`} ref={containerRef}>
+    <div
+      className={`${s.container} ${s.containerSize[size]} ${className || ''}`}
+      ref={containerRef}
+    >
       <button
         id={id}
         type="button"
-        className={`${s.trigger} ${buttonClassName || ''}`}
+        className={`${s.trigger} ${s.triggerSize[size]} ${buttonClassName || ''}`}
         aria-label={selectedOption?.label ?? placeholder}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -210,7 +217,9 @@ export const Dropdown = ({
               <button
                 key={option.value}
                 type="button"
-                className={`${s.option} ${isActive ? s.activeOption : ''} ${
+                className={`${s.option} ${s.optionSize[size]} ${
+                  isActive ? s.activeOption : ''
+                } ${
                   isSelected ? s.selectedOption : ''
                 }`}
                 role="option"
