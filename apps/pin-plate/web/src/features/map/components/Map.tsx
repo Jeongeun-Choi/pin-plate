@@ -30,6 +30,7 @@ import {
 import { getClientPosition } from '../utils/event';
 import CustomMarker from './CustomMarker';
 import { Spinner, vars } from '@pin-plate/ui';
+import { ViewModeToggle } from '@/components/ViewModeToggle';
 
 const SEOUL_DEFAULT: google.maps.LatLngLiteral = {
   lat: 37.3595704,
@@ -199,6 +200,9 @@ export const Map = () => {
 
   return (
     <div className={styles.mapWrapper}>
+      <div className={styles.viewModeOverlay}>
+        <ViewModeToggle className={styles.viewModeToggle} size="compact" />
+      </div>
       {initialCenter ? (
         <GoogleMap
           mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}

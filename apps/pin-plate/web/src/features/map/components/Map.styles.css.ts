@@ -1,4 +1,5 @@
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
+import { vars } from '@pin-plate/ui';
 
 export const mapWrapper = style({
   flex: 1,
@@ -10,6 +11,42 @@ export const mapWrapper = style({
 export const mapContainer = style({
   width: '100%',
   height: '100%',
+});
+
+export const viewModeOverlay = style({
+  position: 'absolute',
+  top: vars.spacing[3],
+  left: 0,
+  right: 0,
+  zIndex: 10,
+  display: 'flex',
+  justifyContent: 'center',
+  pointerEvents: 'none',
+  '@media': {
+    '(min-width: 768px)': {
+      display: 'none',
+    },
+  },
+});
+
+export const viewModeToggle = style({
+  pointerEvents: 'auto',
+});
+
+globalStyle(`${mapWrapper} .gmnoprint.gm-bundled-control`, {
+  '@media': {
+    '(max-width: 767px)': {
+      transform: 'translateY(-120px)',
+    },
+  },
+});
+
+globalStyle(`${mapWrapper} .gm-style-cc`, {
+  '@media': {
+    '(max-width: 767px)': {
+      transform: 'translateY(-88px)',
+    },
+  },
 });
 
 export const filterOverlay = style({

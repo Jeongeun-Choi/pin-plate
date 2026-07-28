@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { getImageProps } from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAtom, useAtomValue } from 'jotai';
-import { Card } from '@pin-plate/ui';
+import { Card, Dropdown } from '@pin-plate/ui';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { getPlaces } from '../../place/api/getPlaces';
 import { placeKeys } from '../../place/placeKeys';
@@ -15,6 +15,7 @@ import { searchQueryAtom } from '@/app/atoms';
 import { statusFilterAtom } from '@/features/map/atoms';
 import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
 import type { User } from '@supabase/supabase-js';
+import { ViewModeToggle } from '@/components/ViewModeToggle';
 
 const CARD_IMAGE_WIDTH = 360;
 const CARD_IMAGE_HEIGHT = 240;
@@ -26,6 +27,14 @@ const PLACE_LIST_STATUS_FILTER_OPTIONS = [
   { value: 'wish' as const, label: '가볼 곳' },
   { value: 'visited' as const, label: '기록한 곳' },
 ];
+
+const PLACE_LIST_SORT_OPTIONS = [
+  { value: 'latest', label: '최근순' },
+  { value: 'rating', label: '별점순' },
+];
+
+const isPlaceListSortType = (value: string): value is SortType =>
+  value === 'latest' || value === 'rating';
 
 const getOptimizedCardImageProps = (
   imageUrl: string | null | undefined,
@@ -100,12 +109,33 @@ const AuthenticatedPlaceList = ({ user }: AuthenticatedPlaceListProps) => {
           <div className={styles.reviewCount}>
             총 {visiblePlaces.length}개의 장소
           </div>
+          <div className={styles.filterTopActions}>
+            <Dropdown
+              id="place-list-sort"
+              value={sortBy}
+              options={PLACE_LIST_SORT_OPTIONS}
+              onChange={(value) => {
+                if (isPlaceListSortType(value)) {
+                  setSortBy(value);
+                }
+              }}
+              size="small"
+              className={styles.sortDropdown}
+              menuClassName={styles.sortDropdownMenu}
+            />
+            <ViewModeToggle
+              className={styles.mobileViewModeToggle}
+              showLabels={false}
+              size="compact"
+            />
+          </div>
         </div>
 
         <div className={styles.filterControlRow}>
           <div className={styles.filterButtonGroup}>
             {PLACE_LIST_STATUS_FILTER_OPTIONS.map((option) => (
               <button
+                type="button"
                 key={option.value}
                 className={`${styles.filterButton} ${statusFilter === option.value ? styles.activeFilterButton : ''}`}
                 onClick={() => setStatusFilter(option.value)}
@@ -113,21 +143,6 @@ const AuthenticatedPlaceList = ({ user }: AuthenticatedPlaceListProps) => {
                 {option.label}
               </button>
             ))}
-          </div>
-
-          <div className={styles.sortButtonGroup}>
-            <button
-              className={`${styles.filterButton} ${sortBy === 'latest' ? styles.activeFilterButton : ''}`}
-              onClick={() => setSortBy('latest')}
-            >
-              최근 기록순
-            </button>
-            <button
-              className={`${styles.filterButton} ${sortBy === 'rating' ? styles.activeFilterButton : ''}`}
-              onClick={() => setSortBy('rating')}
-            >
-              별점순
-            </button>
           </div>
         </div>
       </div>

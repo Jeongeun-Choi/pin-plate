@@ -2,19 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSetAtom, useAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { Input } from '@pin-plate/ui';
 import {
   IcSearch,
-  IcMap,
   IcPlus,
   IcUser,
-  IcList,
   IcDismiss,
   IcShare,
 } from '@pin-plate/ui/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { viewModeAtom, searchQueryAtom } from '@/app/atoms';
+import { searchQueryAtom } from '@/app/atoms';
 import * as styles from './Header.css';
 import { isPostModalOpenAtom } from '@/features/post/atoms';
 import { AccountPopover } from './AccountPopover';
@@ -23,6 +21,7 @@ import { useSearchPlaces } from '@/features/map/hooks/useSearchPlaces';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import { ShareMapDialog } from '@/features/shared-map/components/ShareMapDialog';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
+import { ViewModeToggle } from '@/components/ViewModeToggle';
 
 export const Header = () => {
   const [searchInputValue, setSearchInputValue] = useState('');
@@ -30,7 +29,6 @@ export const Header = () => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [isShareMapDialogOpen, setIsShareMapDialogOpen] = useState(false);
 
-  const [viewMode, setViewMode] = useAtom(viewModeAtom);
   const setSearchQuery = useSetAtom(searchQueryAtom);
   const router = useRouter();
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
@@ -143,22 +141,7 @@ export const Header = () => {
 
         <div className={styles.rightSection}>
           {/* Toggle */}
-          <div className={styles.toggleContainer}>
-            <button
-              className={`${styles.toggleButton} ${viewMode === 'map' ? styles.activeToggleButton : ''}`}
-              onClick={() => setViewMode('map')}
-            >
-              <IcMap width={14} height={14} color="currentColor" />
-              <span>지도</span>
-            </button>
-            <button
-              className={`${styles.toggleButton} ${viewMode === 'list' ? styles.activeToggleButton : ''}`}
-              onClick={() => setViewMode('list')}
-            >
-              <IcList width={14} height={14} color="currentColor" />
-              <span>리스트</span>
-            </button>
-          </div>
+          <ViewModeToggle tone="header" />
 
           {/* Write Button */}
           <button

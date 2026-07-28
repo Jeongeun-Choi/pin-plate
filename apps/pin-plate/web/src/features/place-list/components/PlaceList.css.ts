@@ -17,13 +17,23 @@ export const filterBar = style({
   flexShrink: 0,
   backgroundColor: vars.colors.common.white,
   borderBottom: '4px solid #ffe4d6',
-  padding: '16px',
+  padding: `${vars.spacing[4]} ${vars.spacing[4]} ${vars.spacing[3]}`,
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
+  gap: vars.spacing[2],
   '@media': {
     '(min-width: 768px)': {
       padding: '20px 24px',
+      gap: vars.spacing[3],
+    },
+  },
+});
+
+export const mobileViewModeToggle = style({
+  flexShrink: 0,
+  '@media': {
+    '(min-width: 768px)': {
+      display: 'none',
     },
   },
 });
@@ -35,11 +45,28 @@ export const filterTopRow = style({
   gap: '12px',
 });
 
+export const filterTopActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: vars.spacing[2],
+  flexShrink: 0,
+});
+
+export const sortDropdown = style({
+  flexShrink: 0,
+});
+
+export const sortDropdownMenu = style({
+  minWidth: '96px',
+  left: 'auto',
+});
+
 export const filterControlRow = style({
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
-  gap: '12px',
+  alignItems: 'stretch',
+  gap: vars.spacing[2],
   '@media': {
     '(min-width: 768px)': {
       flexDirection: 'row',
@@ -79,21 +106,6 @@ export const filterButtonGroup = style({
   scrollbarWidth: 'none',
   '::-webkit-scrollbar': {
     display: 'none',
-  },
-});
-
-export const sortButtonGroup = style({
-  display: 'flex',
-  gap: '8px',
-  overflowX: 'auto',
-  scrollbarWidth: 'none',
-  '::-webkit-scrollbar': {
-    display: 'none',
-  },
-  '@media': {
-    '(min-width: 768px)': {
-      justifyContent: 'flex-end',
-    },
   },
 });
 
