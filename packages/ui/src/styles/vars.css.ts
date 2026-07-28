@@ -150,6 +150,7 @@ export const vars = createGlobalTheme(':root', {
   zIndex: {
     header: '50',
     bottomSheet: '100',
+    modal: '150',
     toast: '200',
   },
 });
