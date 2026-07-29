@@ -90,7 +90,7 @@ export const scrollArea = style({
   display: 'flex',
   flexDirection: 'column',
   // Make sure scroll works properly in bottom sheet
-  paddingBottom: 'safe-area-inset-bottom',
+  paddingBottom: 'env(safe-area-inset-bottom)',
 
   '@media': {
     'screen and (min-width: 768px)': {

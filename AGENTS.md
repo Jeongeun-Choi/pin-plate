@@ -194,3 +194,12 @@ pnpm tsc
 - 의미있는 컴포넌트로 분리를 한다.
 - 모든 컴포넌트를 분리하진 않는다.
 - Nextjs를 사용하는만큼 최대한 활용한다.
+
+---
+
+## Design System
+
+Always read `DESIGN.md` before making any visual or UI decisions.
+All font choices, colors, spacing, and aesthetic direction are defined there.
+Do not deviate without explicit user approval.
+In QA mode, flag any code that doesn't match `DESIGN.md`.

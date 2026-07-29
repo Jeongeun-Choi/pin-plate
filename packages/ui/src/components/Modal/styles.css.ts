@@ -20,7 +20,7 @@ export const overlay = style({
   backgroundColor: vars.colors.overlay, // Use token
   display: 'flex',
   justifyContent: 'center',
-  zIndex: 1,
+  zIndex: vars.zIndex.modal,
   animation: `${fadeIn} 0.2s ease-out`,
 
   // Mobile: Full screen logic
@@ -127,7 +127,7 @@ export const content = style({
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',
-  paddingBottom: 'safe-area-inset-bottom',
+  paddingBottom: 'env(safe-area-inset-bottom)',
 
   '@media': {
     'screen and (min-width: 768px)': {
