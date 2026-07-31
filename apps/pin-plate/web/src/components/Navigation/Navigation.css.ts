@@ -5,36 +5,19 @@ import { mobileSafeAreaInsetBottom } from '../../utils/mobileSafeArea';
 // Mobile Container
 export const mobileContainer = style({
   position: 'fixed',
-  bottom: `calc(${mobileSafeAreaInsetBottom} - ${vars.spacing[2]})`,
-  left: vars.spacing[5],
-  right: vars.spacing[5],
-  height: 76,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  height: `calc(72px + ${mobileSafeAreaInsetBottom})`,
   display: 'flex',
   justifyContent: 'space-around',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   backgroundColor: 'rgba(255, 255, 255, 0.96)',
-  border: 'none',
-  borderRadius: vars.borderRadius['3xl'],
-  boxShadow: vars.boxShadow.float,
-  padding: `${vars.spacing[2]} ${vars.spacing[4]}`,
+  borderTop: `1px solid ${vars.colors.background.border}`,
+  boxShadow: '0 -8px 24px rgba(139, 69, 19, 0.06)',
+  padding: `${vars.spacing[2]} ${vars.spacing[6]} calc(${vars.spacing[2]} + ${mobileSafeAreaInsetBottom})`,
   backdropFilter: 'blur(12px)',
   zIndex: 100,
-
-  selectors: {
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: -18,
-      left: '50%',
-      width: 104,
-      height: 50,
-      backgroundColor: 'rgba(255, 255, 255, 0.96)',
-      borderRadius: `${vars.borderRadius['3xl']} ${vars.borderRadius['3xl']} 0 0`,
-      transform: 'translateX(-50%)',
-      pointerEvents: 'none',
-      zIndex: 0,
-    },
-  },
 
   '@media': {
     '(min-width: 768px)': {
@@ -75,7 +58,7 @@ export const navItem = style({
   textDecoration: 'none',
   padding: 0,
   flex: 1,
-  height: '100%',
+  height: 56,
   minWidth: 0,
   position: 'relative',
   zIndex: 1,
@@ -96,8 +79,8 @@ export const activeNavItem = style({
 });
 
 export const navContent = style({
-  minWidth: 68,
-  minHeight: 58,
+  minWidth: 72,
+  minHeight: 56,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -109,7 +92,6 @@ export const navContent = style({
 
   selectors: {
     [`${activeNavItem} &`]: {
-      backgroundColor: vars.colors.primary.light,
       transform: 'translateY(-1px)',
     },
   },
@@ -123,8 +105,8 @@ export const label = style({
 });
 
 export const icon = style({
-  width: 24,
-  height: 24,
+  width: 26,
+  height: 26,
   flexShrink: 0,
 });
 
@@ -132,16 +114,16 @@ export const icon = style({
 // Desktop styles removed
 
 export const writeIconWrapper = style({
-  width: 50,
-  height: 50,
-  borderRadius: '50%',
+  width: 56,
+  height: 56,
+  borderRadius: vars.borderRadius['2xl'],
   backgroundColor: vars.colors.primary.default,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   color: vars.colors.common.white,
   flexShrink: 0,
-  boxShadow: `0 8px 18px ${vars.colors.shadow.primary}`,
+  boxShadow: `4px 4px 0 rgba(241, 214, 200, 0.95), 0 8px 14px rgba(255, 160, 122, 0.28)`,
   transition:
     'background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease',
 
@@ -154,14 +136,12 @@ export const writeIconWrapper = style({
 });
 
 export const writeIcon = style({
-  width: 26,
-  height: 26,
+  width: 30,
+  height: 30,
 });
 
 export const writeNavItem = style({
   alignSelf: 'flex-start',
-  height: 78,
-  transform: 'translateY(-18px)',
-  gap: vars.spacing[1],
+  height: 56,
   color: vars.colors.text.body,
 });

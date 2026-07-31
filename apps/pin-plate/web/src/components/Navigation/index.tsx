@@ -13,7 +13,9 @@ export const Navigation = () => {
   const setIsPostModalOpen = useSetAtom(isPostModalOpenAtom);
   const setViewMode = useSetAtom(viewModeAtom);
 
-  const isActive = (path: string) => pathname === path;
+  const isHomeActive = pathname === '/';
+  const isMyPageActive =
+    pathname === '/my-page' || pathname.startsWith('/my-page/');
 
   const handleHomeClick = () => {
     if (pathname !== '/') {
@@ -31,8 +33,9 @@ export const Navigation = () => {
       {/* Mobile Navigation */}
       <nav className={styles.mobileContainer}>
         <button
-          className={`${styles.navItem} ${isActive('/') ? styles.activeNavItem : ''}`}
+          className={`${styles.navItem} ${isHomeActive ? styles.activeNavItem : ''}`}
           onClick={handleHomeClick}
+          aria-current={isHomeActive ? 'page' : undefined}
           aria-label="홈으로 이동"
         >
           <span className={styles.navContent}>
@@ -49,12 +52,12 @@ export const Navigation = () => {
           <span className={styles.writeIconWrapper}>
             <IcPlus className={styles.writeIcon} color="currentColor" />
           </span>
-          <span className={styles.label}>작성</span>
         </button>
 
         <button
-          className={`${styles.navItem} ${isActive('/my-page') ? styles.activeNavItem : ''}`}
+          className={`${styles.navItem} ${isMyPageActive ? styles.activeNavItem : ''}`}
           onClick={() => router.push('/my-page')}
+          aria-current={isMyPageActive ? 'page' : undefined}
           aria-label="마이페이지"
         >
           <span className={styles.navContent}>
