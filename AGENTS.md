@@ -150,6 +150,12 @@ const isDetectingMonorepo = useIsFetching(...) > 0;
 
 ---
 
+## Git Workflow
+
+- 새 작업 브랜치를 만들 때 기본 prefix는 `feature/`를 사용한다.
+
+---
+
 ## Lint & Formatting
 
 코드 추가·수정 후 반드시 아래 명령을 실행해 린트와 포매팅을 맞춘다:
