@@ -4,6 +4,11 @@ import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { redirectAfterLogin } from '@/features/sign-in/lib/redirectAfterLogin';
+import {
+  GOOGLE_LOGIN_CHANNEL,
+  createGoogleLoginCallbackMessage,
+  createGoogleLoginFailureMessage,
+} from '@/features/sign-in/lib/googleLoginMessage';
 
 const CallbackSpinner = () => (
   <div
@@ -68,6 +73,7 @@ const AuthCallbackContent = () => {
   const searchParams = useSearchParams();
   const isPopup = searchParams.get('popup') === 'true';
   const authCode = searchParams.get('code');
+  const authError = searchParams.get('error_description');
 
   useEffect(() => {
     const supabase = createClient();
@@ -75,25 +81,40 @@ const AuthCallbackContent = () => {
     let unsubscribeAuthState: (() => void) | null = null;
     // 팝업 플로우(데스크톱)에서만 opener와 통신한다. 모바일 WebView 등
     // top-level 리다이렉트로 들어온 경우 opener가 없으므로 이 채널을 쓰지 않는다.
-    const channel = isPopup
-      ? new BroadcastChannel('google_login_channel')
-      : null;
+    const channel =
+      isPopup && typeof BroadcastChannel !== 'undefined'
+        ? new BroadcastChannel(GOOGLE_LOGIN_CHANNEL)
+        : null;
+
+    const notifyPopupOpener = (message: unknown) => {
+      channel?.postMessage(message);
+      window.opener?.postMessage(message, window.location.origin);
+      channel?.close();
+      window.setTimeout(() => window.close(), 0);
+    };
 
     const handleLoginSuccess = (userId: string) => {
       if (hasCompletedAuth) return;
       hasCompletedAuth = true;
 
-      if (isPopup) {
-        channel?.postMessage({ type: 'GOOGLE_LOGIN_SUCCESS' });
-        channel?.close();
-        window.close();
-        return;
-      }
-
       redirectAfterLogin(userId, router);
     };
 
     const handleAuth = async () => {
+      if (isPopup) {
+        if (authCode) {
+          notifyPopupOpener(createGoogleLoginCallbackMessage(authCode));
+          return;
+        }
+
+        notifyPopupOpener(
+          createGoogleLoginFailureMessage(
+            authError ?? 'Google login callback did not include an auth code.',
+          ),
+        );
+        return;
+      }
+
       if (authCode) {
         const { data, error } =
           await supabase.auth.exchangeCodeForSession(authCode);
@@ -137,7 +158,7 @@ const AuthCallbackContent = () => {
       unsubscribeAuthState?.();
       channel?.close();
     };
-  }, [authCode, isPopup, router]);
+  }, [authCode, authError, isPopup, router]);
 
   return <CallbackSpinner />;
 };
