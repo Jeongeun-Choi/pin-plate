@@ -59,9 +59,34 @@ describe('auth.service', () => {
 
 describe('loginWithGoogle', () => {
   const originalLocation = window.location;
+  const originalBroadcastChannel = globalThis.BroadcastChannel;
+  const googleOAuthUrl = 'https://accounts.google.com/o/oauth2/auth';
+
+  class MockBroadcastChannel extends EventTarget {
+    static instances: MockBroadcastChannel[] = [];
+
+    close = vi.fn();
+    name: string;
+
+    constructor(name: string) {
+      super();
+      this.name = name;
+      MockBroadcastChannel.instances.push(this);
+    }
+
+    postMessage(message: unknown) {
+      this.dispatchEvent(new MessageEvent('message', { data: message }));
+    }
+
+    emitMessage(message: unknown) {
+      this.dispatchEvent(new MessageEvent('message', { data: message }));
+    }
+  }
 
   beforeEach(() => {
     vi.clearAllMocks();
+    MockBroadcastChannel.instances = [];
+    vi.stubGlobal('BroadcastChannel', MockBroadcastChannel);
     delete (window as { ReactNativeWebView?: unknown }).ReactNativeWebView;
     Object.defineProperty(window, 'location', {
       configurable: true,
@@ -74,6 +99,7 @@ describe('loginWithGoogle', () => {
       configurable: true,
       value: originalLocation,
     });
+    vi.stubGlobal('BroadcastChannel', originalBroadcastChannel);
   });
 
   it('redirects the current page instead of opening a popup inside the mobile WebView', async () => {
@@ -81,7 +107,7 @@ describe('loginWithGoogle', () => {
       postMessage: vi.fn(),
     };
     const mockSignInWithOAuth = vi.fn().mockResolvedValue({
-      data: { url: 'https://accounts.google.com/o/oauth2/auth' },
+      data: { url: googleOAuthUrl },
       error: null,
     });
     const mockOpen = vi.spyOn(window, 'open').mockReturnValue(null);
@@ -99,24 +125,59 @@ describe('loginWithGoogle', () => {
         }),
       }),
     );
-    expect(window.location.href).toBe(
-      'https://accounts.google.com/o/oauth2/auth',
-    );
+    expect(window.location.href).toBe(googleOAuthUrl);
     expect(mockOpen).not.toHaveBeenCalled();
   });
 
-  it('opens a popup and waits on BroadcastChannel outside the mobile WebView', async () => {
+  it('falls back to current page redirect when the desktop popup is blocked', async () => {
     const mockSignInWithOAuth = vi.fn().mockResolvedValue({
-      data: { url: 'https://accounts.google.com/o/oauth2/auth' },
+      data: { url: googleOAuthUrl },
       error: null,
     });
-    const mockOpen = vi.spyOn(window, 'open').mockReturnValue(null);
+
+    vi.spyOn(window, 'open').mockReturnValue(null);
 
     (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       auth: { signInWithOAuth: mockSignInWithOAuth },
     });
 
-    void loginWithGoogle();
+    await loginWithGoogle();
+
+    expect(mockSignInWithOAuth).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          redirectTo: expect.not.stringContaining('popup=true'),
+        }),
+      }),
+    );
+    expect(window.location.href).toBe(googleOAuthUrl);
+  });
+
+  it('opens a popup synchronously and exchanges the callback code in the opener', async () => {
+    const mockSignInWithOAuth = vi.fn().mockResolvedValue({
+      data: { url: googleOAuthUrl },
+      error: null,
+    });
+    const mockExchangeCodeForSession = vi.fn().mockResolvedValue({
+      data: { session: { user: { id: 'user-1' } } },
+      error: null,
+    });
+    const mockPopupWindow = {
+      close: vi.fn(),
+      closed: false,
+      location: { href: '' },
+    } as unknown as Window;
+    const mockOpen = vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      auth: {
+        signInWithOAuth: mockSignInWithOAuth,
+        exchangeCodeForSession: mockExchangeCodeForSession,
+      },
+    });
+
+    const loginPromise = loginWithGoogle();
+
     await vi.waitFor(() => {
       expect(mockOpen).toHaveBeenCalled();
     });
@@ -128,6 +189,60 @@ describe('loginWithGoogle', () => {
         }),
       }),
     );
+    expect(mockPopupWindow.location.href).toBe(googleOAuthUrl);
+
+    MockBroadcastChannel.instances[0]?.emitMessage({
+      type: 'GOOGLE_LOGIN_CALLBACK',
+      code: 'google-auth-code',
+    });
+
+    await expect(loginPromise).resolves.toBeUndefined();
+    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('google-auth-code');
+    expect(mockPopupWindow.close).toHaveBeenCalled();
+    expect(MockBroadcastChannel.instances[0]?.close).toHaveBeenCalled();
+    expect(window.location.href).toBe('');
+  });
+
+  it('exchanges the callback code when the callback sends a window message', async () => {
+    const mockSignInWithOAuth = vi.fn().mockResolvedValue({
+      data: { url: googleOAuthUrl },
+      error: null,
+    });
+    const mockExchangeCodeForSession = vi.fn().mockResolvedValue({
+      data: { session: { user: { id: 'user-1' } } },
+      error: null,
+    });
+    const mockPopupWindow = {
+      close: vi.fn(),
+      closed: false,
+      location: { href: '' },
+    } as unknown as Window;
+
+    vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      auth: {
+        signInWithOAuth: mockSignInWithOAuth,
+        exchangeCodeForSession: mockExchangeCodeForSession,
+      },
+    });
+
+    const loginPromise = loginWithGoogle();
+
+    await vi.waitFor(() => {
+      expect(mockSignInWithOAuth).toHaveBeenCalled();
+    });
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: { type: 'GOOGLE_LOGIN_CALLBACK', code: 'google-auth-code' },
+        origin: window.location.origin,
+      }),
+    );
+
+    await expect(loginPromise).resolves.toBeUndefined();
+    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('google-auth-code');
+    expect(mockPopupWindow.close).toHaveBeenCalled();
     expect(window.location.href).toBe('');
   });
 });
