@@ -83,6 +83,21 @@ describe('loginWithGoogle', () => {
     }
   }
 
+  const createMockPopupWindow = (close = vi.fn()) => {
+    const mockPopupWindow = {
+      close,
+      location: { href: '' },
+    };
+
+    Object.defineProperty(mockPopupWindow, 'closed', {
+      get: () => {
+        throw new Error('window.closed should not be read during OAuth.');
+      },
+    });
+
+    return mockPopupWindow as unknown as Window;
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     MockBroadcastChannel.instances = [];
@@ -162,11 +177,7 @@ describe('loginWithGoogle', () => {
       data: { session: { user: { id: 'user-1' } } },
       error: null,
     });
-    const mockPopupWindow = {
-      close: vi.fn(),
-      closed: false,
-      location: { href: '' },
-    } as unknown as Window;
+    const mockPopupWindow = createMockPopupWindow();
     const mockOpen = vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
 
     (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -212,11 +223,10 @@ describe('loginWithGoogle', () => {
       data: { session: { user: { id: 'user-1' } } },
       error: null,
     });
-    const mockPopupWindow = {
-      close: vi.fn(),
-      closed: false,
-      location: { href: '' },
-    } as unknown as Window;
+    const mockPopupClose = vi.fn(() => {
+      throw new Error('COOP blocked close.');
+    });
+    const mockPopupWindow = createMockPopupWindow(mockPopupClose);
 
     vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
 
@@ -242,7 +252,7 @@ describe('loginWithGoogle', () => {
 
     await expect(loginPromise).resolves.toBeUndefined();
     expect(mockExchangeCodeForSession).toHaveBeenCalledWith('google-auth-code');
-    expect(mockPopupWindow.close).toHaveBeenCalled();
+    expect(mockPopupClose).toHaveBeenCalled();
     expect(window.location.href).toBe('');
   });
 });

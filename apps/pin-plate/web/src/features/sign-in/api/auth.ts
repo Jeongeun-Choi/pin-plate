@@ -7,6 +7,8 @@ import {
   isGoogleLoginSuccessMessage,
 } from '../lib/googleLoginMessage';
 
+const GOOGLE_LOGIN_TIMEOUT_MS = 120000;
+
 export interface LoginParams {
   email: string;
   password: string;
@@ -77,7 +79,7 @@ export const loginWithGoogle = async () => {
 
   return new Promise<void>((resolve, reject) => {
     let hasCompletedGoogleLogin = false;
-    let popupClosedTimerId: number | null = null;
+    let googleLoginTimeoutTimerId: number | null = null;
     const channel =
       typeof BroadcastChannel === 'undefined'
         ? null
@@ -87,8 +89,16 @@ export const loginWithGoogle = async () => {
       channel?.close();
       window.removeEventListener('message', handleWindowMessage);
 
-      if (popupClosedTimerId !== null) {
-        window.clearInterval(popupClosedTimerId);
+      if (googleLoginTimeoutTimerId !== null) {
+        window.clearTimeout(googleLoginTimeoutTimerId);
+      }
+    };
+
+    const closePopupWindow = () => {
+      try {
+        popupWindow.close();
+      } catch {
+        // COOP can block popup references after Google redirects.
       }
     };
 
@@ -97,7 +107,7 @@ export const loginWithGoogle = async () => {
       hasCompletedGoogleLogin = true;
 
       cleanupGoogleLoginListeners();
-      popupWindow.close();
+      closePopupWindow();
       supabase.auth.getSession().then(() => resolve(), reject);
     };
 
@@ -111,12 +121,12 @@ export const loginWithGoogle = async () => {
           if (error) throw new Error(error.message);
 
           cleanupGoogleLoginListeners();
-          popupWindow.close();
+          closePopupWindow();
           resolve();
         })
         .catch((error: unknown) => {
           cleanupGoogleLoginListeners();
-          popupWindow.close();
+          closePopupWindow();
           reject(error);
         });
     };
@@ -126,7 +136,7 @@ export const loginWithGoogle = async () => {
       hasCompletedGoogleLogin = true;
 
       cleanupGoogleLoginListeners();
-      popupWindow.close();
+      closePopupWindow();
       reject(new Error(message));
     };
 
@@ -166,12 +176,9 @@ export const loginWithGoogle = async () => {
 
     channel?.addEventListener('message', handleChannelMessage);
     window.addEventListener('message', handleWindowMessage);
-    popupClosedTimerId = window.setInterval(() => {
-      if (!popupWindow.closed) return;
-
-      cleanupGoogleLoginListeners();
-      reject(new Error('Google login popup was closed before completion.'));
-    }, 500);
+    googleLoginTimeoutTimerId = window.setTimeout(() => {
+      failGoogleLogin('Google login timed out before completion.');
+    }, GOOGLE_LOGIN_TIMEOUT_MS);
   });
 };
 
