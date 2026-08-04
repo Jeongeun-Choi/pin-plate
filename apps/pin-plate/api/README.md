@@ -97,6 +97,67 @@ This checks that `/auth/sign-in/social` returns an OAuth URL with:
 - `state`
 - PKCE `code_challenge`
 
+## Supabase Auth Migration
+
+The migration keeps existing Pin Plate data connected by preserving Supabase
+Auth user IDs as Better Auth user IDs. It does not move `posts`, `places`, or
+`profiles`; those rows already live in `public` tables and continue to point at
+the same user UUID values.
+
+Run the dry-run first:
+
+```bash
+pnpm --filter api migrate:supabase-auth
+```
+
+The dry-run reports:
+
+- Supabase Auth users scanned
+- Better Auth users that would be inserted
+- Google accounts that would be linked
+- existing `posts`, `places`, and `profiles` that stay connected by user id
+- user/email or Google account conflicts that must be resolved first
+
+Apply only after the dry-run is clean:
+
+```bash
+pnpm --filter api migrate:supabase-auth -- --apply
+```
+
+Useful options:
+
+```bash
+pnpm --filter api migrate:supabase-auth -- --limit=10
+pnpm --filter api migrate:supabase-auth -- --skip-google
+pnpm --filter api migrate:supabase-auth -- --merge-conflicting-better-auth-users
+pnpm --filter api migrate:supabase-auth -- --json
+pnpm --filter api migrate:supabase-auth -- --env-file=apps/pin-plate/api/.dev.vars
+```
+
+If the dry-run shows a `same_email_different_id` conflict from a Better Auth
+test login, review the conflict output first. Then apply with the merge flag:
+
+```bash
+pnpm --filter api migrate:supabase-auth -- --apply --merge-conflicting-better-auth-users
+```
+
+Safety notes:
+
+- `--apply` runs inside a transaction and takes a Postgres advisory lock.
+- Existing Better Auth users with the same id are left untouched.
+- Same-email/different-id conflicts block `--apply`.
+- `--merge-conflicting-better-auth-users` allows only reviewed
+  same-email/different-id conflicts. It creates the Better Auth user with the
+  Supabase Auth id, moves Better Auth foreign-key references such as `account`
+  and `session`, then deletes the generated Better Auth test user. If Better
+  Auth already has the same email, the old row's email is moved to a temporary
+  local address inside the same transaction before deletion.
+- Google identities are inserted into Better Auth `account` rows only when the
+  Google account is not already linked to a different user.
+- Supabase email/password hashes are not migrated. Password users should use the
+  Better Auth password reset flow after the migration.
+- Existing Supabase Auth sessions are not migrated. Users should sign in again.
+
 `wrangler.jsonc` already defines local non-secret vars:
 
 ```txt

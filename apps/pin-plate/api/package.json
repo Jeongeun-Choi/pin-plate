@@ -7,6 +7,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "lint": "eslint '**/*.ts'",
+    "migrate:supabase-auth": "node scripts/migrate-supabase-auth.mjs",
     "typecheck": "tsc --noEmit",
     "prettier": "prettier '**/*.{ts,md,json,jsonc,mjs}'",
     "smoke:auth": "node scripts/smoke-auth.mjs"
