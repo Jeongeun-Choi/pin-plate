@@ -138,6 +138,35 @@ export const dividerText = style({
   whiteSpace: 'nowrap',
 });
 
+export const emailLoginToggleButton = style({
+  width: '100%',
+  minHeight: 50,
+  borderRadius: vars.borderRadius.xl,
+  border: `1px solid ${vars.colors.primary.default}`,
+  backgroundColor: vars.colors.background.surface,
+  color: vars.colors.text.primary,
+  fontFamily: vars.fontFamily.body,
+  fontSize: vars.fontSize.base,
+  fontWeight: vars.fontWeight.bold,
+  cursor: 'pointer',
+  transition: 'background-color 0.2s ease, border-color 0.2s ease',
+  ':hover': {
+    backgroundColor: vars.colors.primary.light,
+    borderColor: vars.colors.primary.hover,
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.colors.primary.hover}`,
+    outlineOffset: vars.spacing[1],
+  },
+});
+
+export const emailLoginPanel = style({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.spacing[4],
+});
+
 export const fieldsWrap = style({
   display: 'flex',
   flexDirection: 'column',
@@ -148,13 +177,6 @@ export const field = style({
   display: 'flex',
   flexDirection: 'column',
   gap: vars.spacing[2],
-});
-
-export const fieldHeader = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: vars.spacing[3],
 });
 
 export const label = style({
@@ -181,7 +203,6 @@ export const emailInput = style({
 export const loginButton = style({
   width: '100%',
   height: 50,
-  marginTop: vars.spacing[4],
   borderRadius: 14,
   backgroundColor: vars.colors.primary.default,
   color: '#fff',
@@ -235,6 +256,14 @@ export const inlineTextLink = style({
     },
   },
 });
+
+export const forgotPasswordLink = style([
+  inlineTextLink,
+  {
+    alignSelf: 'center',
+    marginTop: `-${vars.spacing[2]}`,
+  },
+]);
 
 export const signupLink = style({
   width: '100%',

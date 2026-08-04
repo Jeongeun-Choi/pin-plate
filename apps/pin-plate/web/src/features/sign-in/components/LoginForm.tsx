@@ -60,9 +60,15 @@ const getLoginValidationResult = (formData: FormData) => {
 
 export function LoginForm() {
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
+  const [isEmailLoginExpanded, setIsEmailLoginExpanded] = useState(false);
 
   const { mutate: loginWithEmail, isPending: isEmailLoginPending } = useLogin();
   const { mutate: loginWithGoogle } = useGoogleLogin();
+
+  const handleShowEmailLogin = () => {
+    setFieldErrors({});
+    setIsEmailLoginExpanded(true);
+  };
 
   const handleEmailLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -105,85 +111,6 @@ export function LoginForm() {
 
   return (
     <div className={styles.form}>
-      <form onSubmit={handleEmailLogin}>
-        <div className={styles.fieldsWrap}>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="email">
-              이메일
-            </label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              className={styles.emailInput}
-              placeholder="example@email.com"
-              disabled={isEmailLoginPending}
-              autoComplete="email"
-              aria-invalid={Boolean(fieldErrors.email)}
-              aria-describedby={fieldErrors.email ? 'email-error' : undefined}
-              required
-            />
-            {fieldErrors.email && (
-              <p
-                id="email-error"
-                className={styles.fieldErrorText}
-                role="alert"
-              >
-                {fieldErrors.email}
-              </p>
-            )}
-          </div>
-
-          <div className={styles.field}>
-            <div className={styles.fieldHeader}>
-              <label className={styles.label} htmlFor="password">
-                비밀번호
-              </label>
-              <Link className={styles.inlineTextLink} href="/forgot-password">
-                비밀번호 찾기
-              </Link>
-            </div>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              className={styles.emailInput}
-              placeholder="••••••••"
-              disabled={isEmailLoginPending}
-              autoComplete="current-password"
-              aria-invalid={Boolean(fieldErrors.password)}
-              aria-describedby={
-                fieldErrors.password ? 'password-error' : undefined
-              }
-              required
-            />
-            {fieldErrors.password && (
-              <p
-                id="password-error"
-                className={styles.fieldErrorText}
-                role="alert"
-              >
-                {fieldErrors.password}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className={styles.loginButton}
-          disabled={isEmailLoginPending}
-        >
-          {isEmailLoginPending ? '로그인 중…' : '로그인'}
-        </button>
-      </form>
-
-      <div className={styles.dividerWrap}>
-        <div className={styles.dividerLine} />
-        <span className={styles.dividerText}>또는</span>
-        <div className={styles.dividerLine} />
-      </div>
-
       <button
         type="button"
         className={styles.googleButton}
@@ -198,6 +125,100 @@ export function LoginForm() {
         />
         <span className={styles.buttonText}>Google로 계속하기</span>
       </button>
+
+      <div className={styles.dividerWrap}>
+        <div className={styles.dividerLine} />
+        <span className={styles.dividerText}>또는</span>
+        <div className={styles.dividerLine} />
+      </div>
+
+      {!isEmailLoginExpanded ? (
+        <button
+          type="button"
+          className={styles.emailLoginToggleButton}
+          aria-expanded={false}
+          aria-controls="email-login-panel"
+          onClick={handleShowEmailLogin}
+        >
+          이메일로 로그인
+        </button>
+      ) : (
+        <form
+          id="email-login-panel"
+          className={styles.emailLoginPanel}
+          onSubmit={handleEmailLogin}
+        >
+          <div className={styles.fieldsWrap}>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="email">
+                이메일
+              </label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                className={styles.emailInput}
+                placeholder="example@email.com"
+                disabled={isEmailLoginPending}
+                autoComplete="email"
+                aria-invalid={Boolean(fieldErrors.email)}
+                aria-describedby={fieldErrors.email ? 'email-error' : undefined}
+                required
+              />
+              {fieldErrors.email && (
+                <p
+                  id="email-error"
+                  className={styles.fieldErrorText}
+                  role="alert"
+                >
+                  {fieldErrors.email}
+                </p>
+              )}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="password">
+                비밀번호
+              </label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                className={styles.emailInput}
+                placeholder="••••••••"
+                disabled={isEmailLoginPending}
+                autoComplete="current-password"
+                aria-invalid={Boolean(fieldErrors.password)}
+                aria-describedby={
+                  fieldErrors.password ? 'password-error' : undefined
+                }
+                required
+              />
+              {fieldErrors.password && (
+                <p
+                  id="password-error"
+                  className={styles.fieldErrorText}
+                  role="alert"
+                >
+                  {fieldErrors.password}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className={styles.loginButton}
+            disabled={isEmailLoginPending}
+          >
+            {isEmailLoginPending ? '로그인 중…' : '로그인'}
+          </button>
+
+          <Link className={styles.forgotPasswordLink} href="/forgot-password">
+            비밀번호 찾기
+          </Link>
+        </form>
+      )}
 
       <a href="/sign-up" className={styles.signupLink}>
         아직 계정이 없으신가요? 회원가입
