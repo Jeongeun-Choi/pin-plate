@@ -97,6 +97,29 @@ This checks that `/auth/sign-in/social` returns an OAuth URL with:
 - `state`
 - PKCE `code_challenge`
 
+## Edge Security Controls
+
+The Worker applies basic edge protections before handing `/auth/*` requests to
+Better Auth:
+
+- `GET /auth/get-session`: 240 requests per IP per minute.
+- Sensitive auth starts such as sign-in, sign-up, password reset, and social
+  sign-in: 20 requests per IP per 10 minutes.
+- Email-bearing sensitive requests: 5 requests per normalized email per 10
+  minutes.
+- Other `/auth/*` requests: 60 requests per IP per minute.
+
+Rate-limited responses return `429` with `Retry-After`, `X-RateLimit-Limit`,
+`X-RateLimit-Remaining`, `X-RateLimit-Reset`, and `X-RateLimit-Scope` headers.
+
+All Worker responses include API-oriented security headers such as
+`Content-Security-Policy`, `Permissions-Policy`, `Referrer-Policy`,
+`X-Content-Type-Options`, `X-Frame-Options`, and
+`X-Permitted-Cross-Domain-Policies`. HTTPS requests also receive HSTS.
+
+CORS is credential-aware and only echoes the configured `FRONTEND_ORIGIN`. Local
+origins are accepted only when `FRONTEND_ORIGIN` is itself local.
+
 ## Supabase Auth Migration
 
 The migration keeps existing Pin Plate data connected by preserving Supabase
