@@ -1,0 +1,30 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "lint": "eslint '**/*.ts'",
+    "migrate:supabase-auth": "node scripts/migrate-supabase-auth.mjs",
+    "typecheck": "tsc --noEmit",
+    "prettier": "prettier '**/*.{ts,md,json,jsonc,mjs}'",
+    "smoke:auth": "node scripts/smoke-auth.mjs"
+  },
+  "dependencies": {
+    "better-auth": "^1.4.0",
+    "pg": "^8.16.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260801.1",
+    "@pin-plate/eslint-config": "workspace:*",
+    "@pin-plate/prettier-config": "workspace:*",
+    "@types/pg": "^8.16.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.5.3",
+    "wrangler": "^4.50.0"
+  }
+}

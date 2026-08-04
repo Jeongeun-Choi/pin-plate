@@ -150,6 +150,13 @@ export const field = style({
   gap: vars.spacing[2],
 });
 
+export const fieldHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: vars.spacing[3],
+});
+
 export const label = style({
   fontFamily: vars.fontFamily.body,
   fontSize: vars.fontSize.sm,
@@ -206,6 +213,29 @@ export const fieldErrorText = style({
   textAlign: 'left',
 });
 
+export const inlineTextLink = style({
+  minHeight: 44,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: vars.colors.primary.hover,
+  fontFamily: vars.fontFamily.body,
+  fontSize: vars.fontSize.sm,
+  fontWeight: vars.fontWeight.medium,
+  textDecoration: 'underline',
+  textUnderlineOffset: vars.spacing[1],
+  selectors: {
+    '&:visited': {
+      color: vars.colors.primary.textSoft,
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.colors.primary.hover}`,
+      outlineOffset: vars.spacing[1],
+      borderRadius: vars.borderRadius.xl,
+    },
+  },
+});
+
 export const signupLink = style({
   width: '100%',
   textAlign: 'center',
@@ -215,4 +245,58 @@ export const signupLink = style({
   fontWeight: vars.fontWeight.medium,
   cursor: 'pointer',
   textDecoration: 'none',
+});
+
+export const supportText = style({
+  margin: 0,
+  color: vars.colors.text.body,
+  fontFamily: vars.fontFamily.body,
+  fontSize: vars.fontSize.sm,
+  lineHeight: vars.lineHeight.body,
+  textAlign: 'center',
+});
+
+export const passwordHelperList = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: vars.spacing[2],
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+});
+
+export const passwordHelperItem = style({
+  color: vars.colors.text.sub,
+  fontFamily: vars.fontFamily.body,
+  fontSize: vars.fontSize.xs,
+  lineHeight: vars.lineHeight.body,
+});
+
+export const passwordHelperItemInvalid = style([
+  passwordHelperItem,
+  {
+    color: vars.colors.brand.secondary,
+  },
+]);
+
+export const statusMessage = style({
+  width: '100%',
+  borderRadius: vars.borderRadius['2xl'],
+  padding: vars.spacing[4],
+  border: `1px solid ${vars.colors.background.border}`,
+  backgroundColor: vars.colors.primary.light,
+  color: vars.colors.text.primary,
+  fontFamily: vars.fontFamily.body,
+  fontSize: vars.fontSize.sm,
+  lineHeight: vars.lineHeight.body,
+});
+
+export const statusTitle = style({
+  margin: `0 0 ${vars.spacing[1]}`,
+  fontWeight: vars.fontWeight.bold,
+});
+
+export const statusBody = style({
+  margin: 0,
+  color: vars.colors.text.body,
 });

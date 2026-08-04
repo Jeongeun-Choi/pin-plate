@@ -1,8 +1,7 @@
-import { createClient } from '@/utils/supabase/client';
-
 export const deletePost = async (id: number): Promise<void> => {
-  const supabase = createClient();
-  const { error } = await supabase.from('posts').delete().eq('id', id);
+  const response = await fetch(`/api/posts?id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
 
-  if (error) throw error;
+  if (!response.ok) throw new Error('post_delete_failed');
 };

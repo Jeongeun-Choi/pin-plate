@@ -3,11 +3,13 @@
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { getBetterAuthSession } from '@/features/sign-in/api/auth';
 import { redirectAfterLogin } from '@/features/sign-in/lib/redirectAfterLogin';
 import {
   GOOGLE_LOGIN_CHANNEL,
   createGoogleLoginCallbackMessage,
   createGoogleLoginFailureMessage,
+  GOOGLE_LOGIN_SUCCESS_MESSAGE,
 } from '@/features/sign-in/lib/googleLoginMessage';
 
 const CallbackSpinner = () => (
@@ -72,8 +74,10 @@ const AuthCallbackContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isPopup = searchParams.get('popup') === 'true';
+  const isBetterAuthCallback = searchParams.get('provider') === 'better-auth';
   const authCode = searchParams.get('code');
   const authError = searchParams.get('error_description');
+  const nextPath = searchParams.get('next');
 
   useEffect(() => {
     const supabase = createClient();
@@ -97,10 +101,31 @@ const AuthCallbackContent = () => {
       if (hasCompletedAuth) return;
       hasCompletedAuth = true;
 
+      if (nextPath === '/reset-password') {
+        router.replace(nextPath);
+        return;
+      }
+
       redirectAfterLogin(userId, router);
     };
 
     const handleAuth = async () => {
+      if (isBetterAuthCallback) {
+        const betterAuthSession = await getBetterAuthSession();
+
+        if (!betterAuthSession) {
+          throw new Error('Better Auth session was not created.');
+        }
+
+        if (isPopup) {
+          notifyPopupOpener(GOOGLE_LOGIN_SUCCESS_MESSAGE);
+          return;
+        }
+
+        handleLoginSuccess(betterAuthSession.user.id);
+        return;
+      }
+
       if (isPopup) {
         if (authCode) {
           notifyPopupOpener(createGoogleLoginCallbackMessage(authCode));
@@ -141,7 +166,10 @@ const AuthCallbackContent = () => {
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session) {
+        if (
+          (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') &&
+          session
+        ) {
           handleLoginSuccess(session.user.id);
         }
       });
@@ -158,7 +186,7 @@ const AuthCallbackContent = () => {
       unsubscribeAuthState?.();
       channel?.close();
     };
-  }, [authCode, authError, isPopup, router]);
+  }, [authCode, authError, isBetterAuthCallback, isPopup, nextPath, router]);
 
   return <CallbackSpinner />;
 };

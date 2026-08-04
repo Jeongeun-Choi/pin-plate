@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 import { IcLogout, IcTrash, IcEdit } from '@pin-plate/ui/icons';
 import { WithdrawalModal } from './WithdrawalModal';
 import * as styles from './MyPageMenu.css';
+import { logout } from '@/features/sign-in/api/auth';
 
 interface MenuItem {
   label: string;
@@ -23,8 +23,7 @@ export const MyPageMenu = ({ className }: MyPageMenuProps) => {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await logout();
     router.replace('/sign-in');
   };
 

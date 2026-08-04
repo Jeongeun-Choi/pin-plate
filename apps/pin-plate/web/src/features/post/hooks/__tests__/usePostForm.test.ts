@@ -4,13 +4,17 @@ import { usePostForm } from '../usePostForm';
 import { createWrapper } from '@/test-utils';
 import { Place } from '../../types/search';
 
-const { mockCreatePost, mockGetUser, mockGetPlaceByKakaoId, mockCreatePlace } =
-  vi.hoisted(() => ({
-    mockCreatePost: vi.fn(),
-    mockGetUser: vi.fn(),
-    mockGetPlaceByKakaoId: vi.fn(),
-    mockCreatePlace: vi.fn(),
-  }));
+const {
+  mockCreatePost,
+  mockGetCurrentUser,
+  mockGetPlaceByKakaoId,
+  mockCreatePlace,
+} = vi.hoisted(() => ({
+  mockCreatePost: vi.fn(),
+  mockGetCurrentUser: vi.fn(),
+  mockGetPlaceByKakaoId: vi.fn(),
+  mockCreatePlace: vi.fn(),
+}));
 
 // Mock dependencies
 vi.mock('../useCreatePost', () => ({
@@ -19,12 +23,14 @@ vi.mock('../useCreatePost', () => ({
   }),
 }));
 
-vi.mock('@/utils/supabase/client', () => ({
-  createClient: () => ({
-    auth: {
-      getUser: mockGetUser,
-    },
+vi.mock('../usePosts', () => ({
+  usePosts: () => ({
+    data: [],
   }),
+}));
+
+vi.mock('@/utils/supabase/getCurrentUser', () => ({
+  getCurrentUser: mockGetCurrentUser,
 }));
 
 vi.mock('@/features/place/api/getPlaceByKakaoId', () => ({
@@ -69,7 +75,8 @@ describe('usePostForm', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', mockFetch);
     mockCreatePost.mockReset();
-    mockGetUser.mockReset();
+    mockGetCurrentUser.mockReset();
+    mockGetCurrentUser.mockResolvedValue(null);
     mockGetPlaceByKakaoId.mockReset();
     mockCreatePlace.mockReset();
     mockFetch.mockReset();
@@ -286,9 +293,7 @@ describe('usePostForm', () => {
 
   it('유효한 데이터로 submit하면 createPost를 호출하고 폼을 초기화한다', async () => {
     const mockOnSuccess = vi.fn();
-    mockGetUser.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-    });
+    mockGetCurrentUser.mockResolvedValue({ id: 'user-123' });
     mockGetPlaceByKakaoId.mockResolvedValueOnce(null);
     mockCreatePlace.mockResolvedValueOnce({ id: 'place-456' });
     mockCreatePost.mockResolvedValueOnce({});

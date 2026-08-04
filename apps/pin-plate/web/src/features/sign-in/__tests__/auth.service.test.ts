@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { login, loginWithGoogle } from '../api/auth';
+import {
+  login,
+  loginWithGoogle,
+  requestPasswordReset,
+  updatePassword,
+} from '../api/auth';
 import { createClient } from '@/utils/supabase/client';
 
 // 모듈 전체를 Mocking하되, createClient를 vi.fn()으로 정의하여
@@ -55,12 +60,65 @@ describe('auth.service', () => {
       login({ email: 'test@test.com', password: 'wrong' }),
     ).rejects.toThrow('Invalid credentials');
   });
+
+  it('requests a password reset email with the reset callback URL', async () => {
+    const mockResetPasswordForEmail = vi.fn().mockResolvedValue({
+      data: {},
+      error: null,
+    });
+
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        href: 'http://localhost:3000/sign-in',
+        hostname: 'localhost',
+        origin: 'http://localhost:3000',
+      },
+    });
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      auth: {
+        resetPasswordForEmail: mockResetPasswordForEmail,
+      },
+    });
+
+    await requestPasswordReset({ email: 'user@example.com' });
+
+    expect(mockResetPasswordForEmail).toHaveBeenCalledWith('user@example.com', {
+      redirectTo: 'http://localhost:3000/auth/callback?next=%2Freset-password',
+    });
+  });
+
+  it('updates the authenticated recovery session password', async () => {
+    const mockUpdateUser = vi.fn().mockResolvedValue({
+      data: { user: { id: 'user-1' } },
+      error: null,
+    });
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      auth: {
+        updateUser: mockUpdateUser,
+      },
+    });
+
+    await updatePassword({ password: 'newPassword1' });
+
+    expect(mockUpdateUser).toHaveBeenCalledWith({
+      password: 'newPassword1',
+    });
+  });
 });
 
 describe('loginWithGoogle', () => {
   const originalLocation = window.location;
   const originalBroadcastChannel = globalThis.BroadcastChannel;
+  const originalFetch = globalThis.fetch;
   const googleOAuthUrl = 'https://accounts.google.com/o/oauth2/auth';
+  const createJsonResponse = (body: unknown, init?: ResponseInit) =>
+    new Response(JSON.stringify(body), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 200,
+      ...init,
+    });
 
   class MockBroadcastChannel extends EventTarget {
     static instances: MockBroadcastChannel[] = [];
@@ -102,6 +160,10 @@ describe('loginWithGoogle', () => {
     vi.clearAllMocks();
     MockBroadcastChannel.instances = [];
     vi.stubGlobal('BroadcastChannel', MockBroadcastChannel);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(createJsonResponse({ url: googleOAuthUrl })),
+    );
     delete (window as { ReactNativeWebView?: unknown }).ReactNativeWebView;
     Object.defineProperty(window, 'location', {
       configurable: true,
@@ -110,34 +172,33 @@ describe('loginWithGoogle', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     Object.defineProperty(window, 'location', {
       configurable: true,
       value: originalLocation,
     });
     vi.stubGlobal('BroadcastChannel', originalBroadcastChannel);
+    vi.stubGlobal('fetch', originalFetch);
   });
 
   it('redirects the current page instead of opening a popup inside the mobile WebView', async () => {
     (window as { ReactNativeWebView?: unknown }).ReactNativeWebView = {
       postMessage: vi.fn(),
     };
-    const mockSignInWithOAuth = vi.fn().mockResolvedValue({
-      data: { url: googleOAuthUrl },
-      error: null,
-    });
     const mockOpen = vi.spyOn(window, 'open').mockReturnValue(null);
-
-    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      auth: { signInWithOAuth: mockSignInWithOAuth },
-    });
 
     await loginWithGoogle();
 
-    expect(mockSignInWithOAuth).toHaveBeenCalledWith(
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:8787/auth/sign-in/social',
       expect.objectContaining({
-        options: expect.objectContaining({
-          redirectTo: expect.not.stringContaining('popup=true'),
-        }),
+        body: expect.stringContaining('/auth/callback?provider=better-auth'),
+      }),
+    );
+    expect(fetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        body: expect.not.stringContaining('popup=true'),
       }),
     );
     expect(window.location.href).toBe(googleOAuthUrl);
@@ -145,47 +206,79 @@ describe('loginWithGoogle', () => {
   });
 
   it('falls back to current page redirect when the desktop popup is blocked', async () => {
-    const mockSignInWithOAuth = vi.fn().mockResolvedValue({
-      data: { url: googleOAuthUrl },
-      error: null,
-    });
-
     vi.spyOn(window, 'open').mockReturnValue(null);
-
-    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      auth: { signInWithOAuth: mockSignInWithOAuth },
-    });
 
     await loginWithGoogle();
 
-    expect(mockSignInWithOAuth).toHaveBeenCalledWith(
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:8787/auth/sign-in/social',
       expect.objectContaining({
-        options: expect.objectContaining({
-          redirectTo: expect.not.stringContaining('popup=true'),
-        }),
+        body: expect.not.stringContaining('popup=true'),
       }),
     );
     expect(window.location.href).toBe(googleOAuthUrl);
   });
 
-  it('opens a popup synchronously and exchanges the callback code in the opener', async () => {
-    const mockSignInWithOAuth = vi.fn().mockResolvedValue({
-      data: { url: googleOAuthUrl },
-      error: null,
-    });
-    const mockExchangeCodeForSession = vi.fn().mockResolvedValue({
-      data: { session: { user: { id: 'user-1' } } },
-      error: null,
-    });
-    const mockPopupWindow = createMockPopupWindow();
-    const mockOpen = vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
-
-    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      auth: {
-        signInWithOAuth: mockSignInWithOAuth,
-        exchangeCodeForSession: mockExchangeCodeForSession,
+  it('uses the matching local Worker URL when the page runs on 127.0.0.1', async () => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        ...originalLocation,
+        hostname: '127.0.0.1',
+        href: '',
+        origin: 'http://127.0.0.1:3000',
       },
     });
+    vi.spyOn(window, 'open').mockReturnValue(null);
+
+    await loginWithGoogle();
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://127.0.0.1:8787/auth/sign-in/social',
+      expect.objectContaining({
+        body: expect.stringContaining('http://127.0.0.1:3000/auth/callback'),
+      }),
+    );
+    expect(window.location.href).toBe(googleOAuthUrl);
+  });
+
+  it('throws an actionable error when the Worker auth server is unreachable', async () => {
+    vi.mocked(fetch).mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    vi.spyOn(window, 'open').mockReturnValue(null);
+
+    await expect(loginWithGoogle()).rejects.toThrow(
+      '인증 서버에 연결하지 못했습니다.',
+    );
+  });
+
+  it('does not inspect cross-origin popup closed state while waiting for Google', async () => {
+    vi.useFakeTimers();
+    const mockPopupWindow = createMockPopupWindow();
+
+    vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
+
+    const loginPromise = loginWithGoogle();
+
+    await vi.waitFor(() => {
+      expect(mockPopupWindow.location.href).toBe(googleOAuthUrl);
+    });
+
+    await vi.advanceTimersByTimeAsync(5 * 60 * 1_000);
+
+    await expect(loginPromise).resolves.toBeUndefined();
+    expect(mockPopupWindow.close).not.toHaveBeenCalled();
+
+    vi.useRealTimers();
+  });
+
+  it('opens a popup synchronously and resolves when the Worker callback succeeds', async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(createJsonResponse({ url: googleOAuthUrl }))
+      .mockResolvedValueOnce(
+        createJsonResponse({ user: { id: 'user-1', email: 'user@test.com' } }),
+      );
+    const mockPopupWindow = createMockPopupWindow();
+    const mockOpen = vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
 
     const loginPromise = loginWithGoogle();
 
@@ -193,36 +286,36 @@ describe('loginWithGoogle', () => {
       expect(mockOpen).toHaveBeenCalled();
     });
 
-    expect(mockSignInWithOAuth).toHaveBeenCalledWith(
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:8787/auth/sign-in/social',
       expect.objectContaining({
-        options: expect.objectContaining({
-          redirectTo: expect.stringContaining('popup=true'),
-        }),
+        body: expect.stringContaining('popup=true'),
       }),
     );
-    expect(mockPopupWindow.location.href).toBe(googleOAuthUrl);
+    await vi.waitFor(() => {
+      expect(mockPopupWindow.location.href).toBe(googleOAuthUrl);
+    });
 
     MockBroadcastChannel.instances[0]?.emitMessage({
-      type: 'GOOGLE_LOGIN_CALLBACK',
-      code: 'google-auth-code',
+      type: 'GOOGLE_LOGIN_SUCCESS',
     });
 
     await expect(loginPromise).resolves.toBeUndefined();
-    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('google-auth-code');
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:8787/auth/get-session',
+      expect.objectContaining({ credentials: 'include' }),
+    );
     expect(mockPopupWindow.close).toHaveBeenCalled();
     expect(MockBroadcastChannel.instances[0]?.close).toHaveBeenCalled();
     expect(window.location.href).toBe('');
   });
 
-  it('exchanges the callback code when the callback sends a window message', async () => {
-    const mockSignInWithOAuth = vi.fn().mockResolvedValue({
-      data: { url: googleOAuthUrl },
-      error: null,
-    });
-    const mockExchangeCodeForSession = vi.fn().mockResolvedValue({
-      data: { session: { user: { id: 'user-1' } } },
-      error: null,
-    });
+  it('resolves when the callback sends a window success message', async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(createJsonResponse({ url: googleOAuthUrl }))
+      .mockResolvedValueOnce(
+        createJsonResponse({ user: { id: 'user-1', email: 'user@test.com' } }),
+      );
     const mockPopupClose = vi.fn(() => {
       throw new Error('COOP blocked close.');
     });
@@ -230,28 +323,28 @@ describe('loginWithGoogle', () => {
 
     vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
 
-    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      auth: {
-        signInWithOAuth: mockSignInWithOAuth,
-        exchangeCodeForSession: mockExchangeCodeForSession,
-      },
-    });
-
     const loginPromise = loginWithGoogle();
 
     await vi.waitFor(() => {
-      expect(mockSignInWithOAuth).toHaveBeenCalled();
+      expect(fetch).toHaveBeenCalledWith(
+        'http://localhost:8787/auth/sign-in/social',
+        expect.any(Object),
+      );
+      expect(mockPopupWindow.location.href).toBe(googleOAuthUrl);
     });
 
     window.dispatchEvent(
       new MessageEvent('message', {
-        data: { type: 'GOOGLE_LOGIN_CALLBACK', code: 'google-auth-code' },
+        data: { type: 'GOOGLE_LOGIN_SUCCESS' },
         origin: window.location.origin,
       }),
     );
 
     await expect(loginPromise).resolves.toBeUndefined();
-    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('google-auth-code');
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:8787/auth/get-session',
+      expect.objectContaining({ credentials: 'include' }),
+    );
     expect(mockPopupClose).toHaveBeenCalled();
     expect(window.location.href).toBe('');
   });

@@ -261,5 +261,6 @@ pin-plate/
 ### 인프라
 
 - **데이터베이스 마이그레이션 관리**: Drizzle ORM 또는 Supabase Migrations로 스키마 변경 이력 관리
+- **Worker Auth 백엔드 전환**: Supabase Auth 대신 Cloudflare Worker + Better Auth로 인증을 소유하는 구조 검토 ([설계 문서](docs/superpowers/specs/2026-08-04-worker-auth-backend-design.md))
 - **모니터링**: Sentry 에러 트래킹 및 Vercel Analytics(또는 AWS CloudWatch) 성능 모니터링 도입
 - **CI/CD 개선**: GitHub Actions에서 E2E 테스트 자동 실행 후 배포하는 파이프라인 구성

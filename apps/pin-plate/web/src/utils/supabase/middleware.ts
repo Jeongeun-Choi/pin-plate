@@ -1,12 +1,94 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_PATH_PREFIXES = ['/sign-in', '/sign-up', '/auth', '/share'];
+const PUBLIC_PATH_PREFIXES = [
+  '/sign-in',
+  '/sign-up',
+  '/forgot-password',
+  '/reset-password',
+  '/auth',
+  '/share',
+];
+
+interface BetterAuthUser {
+  id: string;
+}
+
+const getAuthApiBaseUrl = (request: NextRequest): string => {
+  const configuredAuthApiUrl = process.env.NEXT_PUBLIC_AUTH_API_URL?.replace(
+    /\/+$/g,
+    '',
+  );
+
+  if (configuredAuthApiUrl) return configuredAuthApiUrl;
+
+  const localHostnames = new Set(['localhost', '127.0.0.1', '0.0.0.0']);
+
+  if (localHostnames.has(request.nextUrl.hostname)) {
+    return `http://${request.nextUrl.hostname}:8787`;
+  }
+
+  return 'https://api.pinonplate.com';
+};
+
+const parseBetterAuthUser = (value: unknown): BetterAuthUser | null => {
+  if (typeof value !== 'object' || value === null) return null;
+
+  const response = value as { user?: unknown };
+
+  if (typeof response.user !== 'object' || response.user === null) return null;
+
+  const user = response.user as { id?: unknown };
+
+  if (typeof user.id !== 'string') return null;
+
+  return { id: user.id };
+};
+
+const getBetterAuthUser = async (
+  request: NextRequest,
+): Promise<BetterAuthUser | null> => {
+  const cookieHeader = request.headers.get('cookie');
+
+  if (!cookieHeader) return null;
+
+  try {
+    const response = await fetch(
+      `${getAuthApiBaseUrl(request)}/auth/get-session`,
+      {
+        headers: {
+          Accept: 'application/json',
+          Cookie: cookieHeader,
+        },
+      },
+    );
+
+    if (!response.ok) return null;
+
+    return parseBetterAuthUser(await response.json());
+  } catch {
+    return null;
+  }
+};
 
 export async function updateSession(request: NextRequest) {
   const isPublicPath = PUBLIC_PATH_PREFIXES.some((prefix) =>
     request.nextUrl.pathname.startsWith(prefix),
   );
+  const betterAuthUser = await getBetterAuthUser(request);
+
+  if (betterAuthUser) {
+    if (
+      request.nextUrl.pathname.startsWith('/sign-in') ||
+      request.nextUrl.pathname.startsWith('/sign-up')
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+
+    return NextResponse.next({ request });
+  }
 
   try {
     let supabaseResponse = NextResponse.next({
@@ -73,42 +155,11 @@ export async function updateSession(request: NextRequest) {
     if (
       user &&
       (request.nextUrl.pathname.startsWith('/sign-in') ||
-        request.nextUrl.pathname.startsWith('/sign-up')) &&
-      // 단, 프로필 설정 페이지는 제외 (아래에서 별도 체크)
-      !request.nextUrl.pathname.startsWith('/sign-up/profile')
+        request.nextUrl.pathname.startsWith('/sign-up'))
     ) {
       const url = request.nextUrl.clone();
       url.pathname = '/';
       return NextResponse.redirect(url);
-    }
-
-    // 2. 프로필 설정 페이지(`/sign-up/profile`) 접근 제어
-    if (user && request.nextUrl.pathname.startsWith('/sign-up/profile')) {
-      const isInRegistrationFlow =
-        request.cookies.get('is_in_registration_flow')?.value === 'true';
-
-      if (!isInRegistrationFlow) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/';
-        return NextResponse.redirect(url);
-      }
-
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('nickname')
-          .eq('id', user.id)
-          .single();
-
-        // 이미 닉네임이 있는(온보딩 완료된) 유저는 메인으로 보냄
-        if (profile?.nickname) {
-          const url = request.nextUrl.clone();
-          url.pathname = '/';
-          return NextResponse.redirect(url);
-        }
-      } catch {
-        // profiles 쿼리 실패 시 /sign-up/profile 접근 허용
-      }
     }
 
     // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

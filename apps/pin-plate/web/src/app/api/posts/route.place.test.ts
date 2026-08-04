@@ -1,12 +1,17 @@
 import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { POST } from './route';
 
 vi.mock('@/utils/supabase/server', () => ({
   createClient: vi.fn(),
 }));
+vi.mock('@/utils/supabase/admin', () => ({
+  createAdminClient: vi.fn(),
+}));
 
 const mockCreateClient = vi.mocked(createClient);
+const mockCreateAdminClient = vi.mocked(createAdminClient);
 
 const {
   mockGetUser,
@@ -84,6 +89,8 @@ describe('POST /api/posts place persistence', () => {
     );
     mockCreateClient.mockResolvedValue({
       auth: { getUser: mockGetUser },
+    } as never);
+    mockCreateAdminClient.mockReturnValue({
       from: mockFrom,
     } as never);
   });

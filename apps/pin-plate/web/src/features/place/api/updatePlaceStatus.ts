@@ -1,18 +1,16 @@
-import { createClient } from '@/utils/supabase/client';
 import type { Place, PlaceStatus } from '../types/place';
 
 export const updatePlaceStatus = async (
   placeId: string,
   status: PlaceStatus,
 ): Promise<Place> => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('places')
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq('id', placeId)
-    .select()
-    .single();
+  const response = await fetch('/api/places', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ placeId, status }),
+  });
 
-  if (error) throw error;
-  return data as Place;
+  if (!response.ok) throw new Error('place_update_failed');
+
+  return (await response.json()) as Place;
 };

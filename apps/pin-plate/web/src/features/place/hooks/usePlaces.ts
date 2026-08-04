@@ -13,7 +13,7 @@ export const usePlaces = (): UseQueryResult<PlaceWithStats[], Error> => {
 
   return useQuery({
     queryKey: placeKeys.lists(userId),
-    queryFn: () => getPlaces(userId!),
+    queryFn: getPlaces,
     enabled: !!userId,
   });
 };
