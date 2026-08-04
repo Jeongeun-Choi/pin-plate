@@ -5,6 +5,7 @@ build/
 *.tsbuildinfo
 *.log
 .env*
+.dev.vars*
 coverage/
 .npmrc
 test-results/
