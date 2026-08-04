@@ -1,13 +1,14 @@
-import { createClient } from '@/utils/supabase/client';
 import { Post } from '../types/post';
 
-export const getPosts = async (userId: string): Promise<Post[]> => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('user_id', userId);
+export const getPosts = async (): Promise<Post[]> => {
+  const response = await fetch('/api/posts', {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
 
-  if (error) throw error;
-  return data as unknown as Post[];
+  if (response.status === 401) return [];
+  if (!response.ok) throw new Error('posts_fetch_failed');
+
+  return (await response.json()) as Post[];
 };

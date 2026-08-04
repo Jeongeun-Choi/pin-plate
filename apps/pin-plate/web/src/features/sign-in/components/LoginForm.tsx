@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Input } from '@pin-plate/ui';
 import { z } from 'zod';
 import * as styles from './LoginForm.styles.css';
@@ -134,9 +135,14 @@ export function LoginForm() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="password">
-              비밀번호
-            </label>
+            <div className={styles.fieldHeader}>
+              <label className={styles.label} htmlFor="password">
+                비밀번호
+              </label>
+              <Link className={styles.inlineTextLink} href="/forgot-password">
+                비밀번호 찾기
+              </Link>
+            </div>
             <Input
               id="password"
               name="password"
@@ -168,7 +174,7 @@ export function LoginForm() {
           className={styles.loginButton}
           disabled={isEmailLoginPending}
         >
-          {isEmailLoginPending ? '로그인 중...' : '로그인'}
+          {isEmailLoginPending ? '로그인 중…' : '로그인'}
         </button>
       </form>
 

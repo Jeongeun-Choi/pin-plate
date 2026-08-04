@@ -11,6 +11,14 @@ export interface LoginParams {
   password: string;
 }
 
+export interface PasswordResetRequestParams {
+  email: string;
+}
+
+export interface PasswordUpdateParams {
+  password: string;
+}
+
 interface BetterAuthUser {
   id: string;
   email?: string;
@@ -27,6 +35,15 @@ interface BetterAuthSocialSignInResponse {
 }
 
 const GOOGLE_LOGIN_POPUP_TIMEOUT_MS = 5 * 60 * 1_000;
+
+const getPasswordResetRedirectUrl = () => {
+  if (typeof window === 'undefined') return undefined;
+
+  const redirectUrl = new URL('/auth/callback', window.location.origin);
+  redirectUrl.searchParams.set('next', '/reset-password');
+
+  return redirectUrl.toString();
+};
 
 const getAuthApiBaseUrl = () => {
   const configuredAuthApiUrl = process.env.NEXT_PUBLIC_AUTH_API_URL?.replace(
@@ -99,6 +116,21 @@ export const getBetterAuthSession =
     return parseBetterAuthSession(await response.json());
   };
 
+export const logout = async () => {
+  const supabase = createClient();
+
+  await Promise.allSettled([
+    fetch(`${getAuthApiBaseUrl()}/auth/sign-out`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    }),
+    supabase.auth.signOut(),
+  ]);
+};
+
 export const login = async (
   params: LoginParams,
 ): Promise<AuthTokenResponsePassword['data']> => {
@@ -107,6 +139,26 @@ export const login = async (
     email: params.email,
     password: params.password,
   });
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+export const requestPasswordReset = async ({
+  email,
+}: PasswordResetRequestParams) => {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: getPasswordResetRedirectUrl(),
+  });
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+export const updatePassword = async ({ password }: PasswordUpdateParams) => {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.updateUser({ password });
 
   if (error) throw new Error(error.message);
   return data;

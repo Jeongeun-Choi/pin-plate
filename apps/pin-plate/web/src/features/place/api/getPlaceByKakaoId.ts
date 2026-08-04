@@ -1,18 +1,18 @@
-import { createClient } from '@/utils/supabase/client';
 import type { Place } from '../types/place';
 
 export const getPlaceByKakaoId = async (
-  userId: string,
+  _userId: string,
   kakaoPlaceId: string,
 ): Promise<Place | null> => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('places')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('kakao_place_id', kakaoPlaceId)
-    .maybeSingle();
+  const searchParams = new URLSearchParams({ kakaoPlaceId });
+  const response = await fetch(`/api/places?${searchParams.toString()}`, {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
 
-  if (error) throw error;
-  return data as Place | null;
+  if (response.status === 401) return null;
+  if (!response.ok) throw new Error('place_by_kakao_id_fetch_failed');
+
+  return (await response.json()) as Place | null;
 };

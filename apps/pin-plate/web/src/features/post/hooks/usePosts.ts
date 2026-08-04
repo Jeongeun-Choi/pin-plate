@@ -14,7 +14,7 @@ export const usePosts = (): UseQueryResult<Post[], Error> => {
 
   return useQuery({
     queryKey: postKeys.lists(userId),
-    queryFn: () => getPosts(userId!),
+    queryFn: getPosts,
     enabled: !!userId,
   });
 };

@@ -1,17 +1,16 @@
-import { createClient } from '@/utils/supabase/client';
 import type { CreatePlacePayload, Place } from '../types/place';
 
 export const createPlace = async (
   userId: string,
   payload: CreatePlacePayload,
 ): Promise<Place> => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('places')
-    .insert({ ...payload, user_id: userId })
-    .select()
-    .single();
+  const response = await fetch('/api/places', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
 
-  if (error) throw error;
-  return data as Place;
+  if (!response.ok) throw new Error('place_create_failed');
+
+  return (await response.json()) as Place;
 };

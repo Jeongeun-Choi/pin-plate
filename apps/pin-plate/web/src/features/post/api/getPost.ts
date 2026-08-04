@@ -1,14 +1,13 @@
-import { createClient } from '@/utils/supabase/client';
 import { Post } from '../types/post';
 
 export const getPost = async (id: number): Promise<Post> => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('id', id)
-    .single();
+  const response = await fetch(`/api/posts?id=${encodeURIComponent(id)}`, {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
 
-  if (error) throw error;
-  return data as unknown as Post;
+  if (!response.ok) throw new Error('post_fetch_failed');
+
+  return (await response.json()) as Post;
 };

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { S3Client } from '@aws-sdk/client-s3';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
-import { createClient } from '@/utils/supabase/server';
+import { getAuthenticatedUser } from '@/app/api/_utils/auth';
 import { buildPublicImageUrl } from '@/features/image/utils/imageReference';
 
 const client = new S3Client({
@@ -54,14 +54,9 @@ const checkRateLimit = (ip: string): boolean => {
   return true;
 };
 
-const resolveUploadActor = async (): Promise<UploadActor | null> => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  return user ? { id: user.id } : null;
-};
+const resolveUploadActor = async (
+  request: NextRequest,
+): Promise<UploadActor | null> => getAuthenticatedUser(request);
 
 const isUploadFile = (file: unknown): file is UploadFile => {
   if (!file || typeof file !== 'object') return false;
@@ -101,7 +96,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const actor = await resolveUploadActor();
+  const actor = await resolveUploadActor(request);
 
   if (!actor) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

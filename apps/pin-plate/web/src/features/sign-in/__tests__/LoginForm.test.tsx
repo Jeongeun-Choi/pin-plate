@@ -56,6 +56,15 @@ describe('LoginForm', () => {
     expect(screen.getByText(/서비스 약관 및/)).toBeInTheDocument();
   });
 
+  it('비밀번호 찾기 링크를 로그인 폼 안에 표시한다', () => {
+    renderComponent();
+
+    expect(screen.getByRole('link', { name: '비밀번호 찾기' })).toHaveAttribute(
+      'href',
+      '/forgot-password',
+    );
+  });
+
   it('Google 버튼 클릭 시 loginWithGoogle을 호출한다', () => {
     vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
       mutate: mockLoginWithGoogle,

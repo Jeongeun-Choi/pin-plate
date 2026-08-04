@@ -10,11 +10,13 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { getPlaces } from '../../place/api/getPlaces';
 import { placeKeys } from '../../place/placeKeys';
 import type { PlaceWithStats } from '../../place/types/place';
-import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
+import {
+  getCurrentUser,
+  type CurrentUser,
+} from '@/utils/supabase/getCurrentUser';
 import { searchQueryAtom } from '@/app/atoms';
 import { statusFilterAtom } from '@/features/map/atoms';
 import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
-import type { User } from '@supabase/supabase-js';
 import { ViewModeToggle } from '@/components/ViewModeToggle';
 
 const CARD_IMAGE_WIDTH = 360;
@@ -62,7 +64,7 @@ const getOptimizedCardImageProps = (
 };
 
 interface AuthenticatedPlaceListProps {
-  user: User;
+  user: CurrentUser;
 }
 
 const AuthenticatedPlaceList = ({ user }: AuthenticatedPlaceListProps) => {
@@ -73,7 +75,7 @@ const AuthenticatedPlaceList = ({ user }: AuthenticatedPlaceListProps) => {
 
   const { data: places } = useSuspenseQuery<PlaceWithStats[]>({
     queryKey: placeKeys.lists(user.id),
-    queryFn: () => getPlaces(user.id),
+    queryFn: getPlaces,
   });
 
   const searchFilteredPlaces = useMemo(() => {

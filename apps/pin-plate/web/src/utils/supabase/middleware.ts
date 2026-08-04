@@ -1,7 +1,14 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_PATH_PREFIXES = ['/sign-in', '/sign-up', '/auth', '/share'];
+const PUBLIC_PATH_PREFIXES = [
+  '/sign-in',
+  '/sign-up',
+  '/forgot-password',
+  '/reset-password',
+  '/auth',
+  '/share',
+];
 
 interface BetterAuthUser {
   id: string;

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { IcLogout, IcSetting } from '@pin-plate/ui/icons';
 import * as styles from './AccountPopover.css';
 import { useMyProfile } from '@/features/my-page';
-import { createClient } from '@/utils/supabase/client';
+import { logout } from '@/features/sign-in/api/auth';
 
 interface AccountPopoverProps {
   onClose: () => void;
@@ -28,8 +28,7 @@ export const AccountPopover = ({
 
   const handleLogoutClick = async () => {
     onClose();
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await logout();
     router.replace('/sign-in');
   };
 

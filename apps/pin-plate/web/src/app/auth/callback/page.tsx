@@ -77,6 +77,7 @@ const AuthCallbackContent = () => {
   const isBetterAuthCallback = searchParams.get('provider') === 'better-auth';
   const authCode = searchParams.get('code');
   const authError = searchParams.get('error_description');
+  const nextPath = searchParams.get('next');
 
   useEffect(() => {
     const supabase = createClient();
@@ -99,6 +100,11 @@ const AuthCallbackContent = () => {
     const handleLoginSuccess = (userId: string) => {
       if (hasCompletedAuth) return;
       hasCompletedAuth = true;
+
+      if (nextPath === '/reset-password') {
+        router.replace(nextPath);
+        return;
+      }
 
       redirectAfterLogin(userId, router);
     };
@@ -160,7 +166,10 @@ const AuthCallbackContent = () => {
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session) {
+        if (
+          (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') &&
+          session
+        ) {
           handleLoginSuccess(session.user.id);
         }
       });
@@ -177,7 +186,7 @@ const AuthCallbackContent = () => {
       unsubscribeAuthState?.();
       channel?.close();
     };
-  }, [authCode, authError, isBetterAuthCallback, isPopup, router]);
+  }, [authCode, authError, isBetterAuthCallback, isPopup, nextPath, router]);
 
   return <CallbackSpinner />;
 };

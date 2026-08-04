@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { login, loginWithGoogle } from '../api/auth';
+import {
+  login,
+  loginWithGoogle,
+  requestPasswordReset,
+  updatePassword,
+} from '../api/auth';
 import { createClient } from '@/utils/supabase/client';
 
 // 모듈 전체를 Mocking하되, createClient를 vi.fn()으로 정의하여
@@ -54,6 +59,52 @@ describe('auth.service', () => {
     await expect(
       login({ email: 'test@test.com', password: 'wrong' }),
     ).rejects.toThrow('Invalid credentials');
+  });
+
+  it('requests a password reset email with the reset callback URL', async () => {
+    const mockResetPasswordForEmail = vi.fn().mockResolvedValue({
+      data: {},
+      error: null,
+    });
+
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        href: 'http://localhost:3000/sign-in',
+        hostname: 'localhost',
+        origin: 'http://localhost:3000',
+      },
+    });
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      auth: {
+        resetPasswordForEmail: mockResetPasswordForEmail,
+      },
+    });
+
+    await requestPasswordReset({ email: 'user@example.com' });
+
+    expect(mockResetPasswordForEmail).toHaveBeenCalledWith('user@example.com', {
+      redirectTo: 'http://localhost:3000/auth/callback?next=%2Freset-password',
+    });
+  });
+
+  it('updates the authenticated recovery session password', async () => {
+    const mockUpdateUser = vi.fn().mockResolvedValue({
+      data: { user: { id: 'user-1' } },
+      error: null,
+    });
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      auth: {
+        updateUser: mockUpdateUser,
+      },
+    });
+
+    await updatePassword({ password: 'newPassword1' });
+
+    expect(mockUpdateUser).toHaveBeenCalledWith({
+      password: 'newPassword1',
+    });
   });
 });
 

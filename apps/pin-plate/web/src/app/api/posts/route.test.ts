@@ -1,12 +1,17 @@
 import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PATCH, POST } from './route';
+import { GET, PATCH, POST } from './route';
 
 vi.mock('@/utils/supabase/server', () => ({
   createClient: vi.fn(),
 }));
+vi.mock('@/utils/supabase/admin', () => ({
+  createAdminClient: vi.fn(),
+}));
 
 const mockCreateClient = vi.mocked(createClient);
+const mockCreateAdminClient = vi.mocked(createAdminClient);
 
 const {
   mockGetUser,
@@ -18,6 +23,9 @@ const {
   mockUpdateEqUserId,
   mockUpdateSelect,
   mockUpdateSingle,
+  mockSelect,
+  mockSelectEqUserId,
+  mockSelectOrder,
 } = vi.hoisted(() => ({
   mockGetUser: vi.fn(),
   mockFrom: vi.fn(),
@@ -28,6 +36,9 @@ const {
   mockUpdateEqUserId: vi.fn(),
   mockUpdateSelect: vi.fn(),
   mockUpdateSingle: vi.fn(),
+  mockSelect: vi.fn(),
+  mockSelectEqUserId: vi.fn(),
+  mockSelectOrder: vi.fn(),
 }));
 
 const TEST_IMAGE_ORIGIN = 'https://image.test';
@@ -79,6 +90,8 @@ beforeEach(() => {
   mockFrom.mockReturnValue({ insert: mockInsert, update: mockUpdate });
   mockCreateClient.mockResolvedValue({
     auth: { getUser: mockGetUser },
+  } as never);
+  mockCreateAdminClient.mockReturnValue({
     from: mockFrom,
   } as never);
 });
@@ -86,6 +99,38 @@ beforeEach(() => {
 afterEach(() => {
   vi.clearAllMocks();
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
+
+describe('GET /api/posts', () => {
+  it('reads posts with the Better Auth session user id', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ user: { id: 'better-user-1' } }),
+      }),
+    );
+    mockSelectOrder.mockResolvedValue({
+      data: [{ id: 1, user_id: 'better-user-1' }],
+      error: null,
+    });
+    mockSelectEqUserId.mockReturnValue({ order: mockSelectOrder });
+    mockSelect.mockReturnValue({ eq: mockSelectEqUserId });
+    mockFrom.mockReturnValue({ select: mockSelect });
+
+    const response = await GET(
+      new Request('http://localhost/api/posts', {
+        headers: { cookie: 'pin-plate.session_token=session-token' },
+      }) as never,
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(mockFrom).toHaveBeenCalledWith('posts');
+    expect(mockSelectEqUserId).toHaveBeenCalledWith('user_id', 'better-user-1');
+    expect(data).toEqual([{ id: 1, user_id: 'better-user-1' }]);
+  });
 });
 
 describe('POST /api/posts', () => {
