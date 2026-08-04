@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const DEFAULT_BASE_URL = 'http://localhost:8787';
+const DEFAULT_BASE_URL = 'http://127.0.0.1:8787';
 const DEFAULT_ORIGIN = 'http://localhost:3000';
 const DEFAULT_PASSWORD = 'PinPlateSmoke123!';
 
@@ -27,6 +27,10 @@ const parseArgs = (argv) =>
         return { ...options, shouldSignIn: true };
       }
 
+      if (arg === '--google') {
+        return { ...options, shouldTestGoogle: true };
+      }
+
       return options;
     },
     {
@@ -36,6 +40,7 @@ const parseArgs = (argv) =>
         `pinplate-smoke-${Date.now()}@example.com`,
       origin: process.env.AUTH_SMOKE_ORIGIN ?? DEFAULT_ORIGIN,
       password: process.env.AUTH_SMOKE_PASSWORD ?? DEFAULT_PASSWORD,
+      shouldTestGoogle: process.env.AUTH_SMOKE_GOOGLE === 'true',
       shouldSignIn: process.env.AUTH_SMOKE_SIGN_IN === 'true',
     },
   );
@@ -92,6 +97,85 @@ const assertStatus = ({ label, result, expectedStatuses }) => {
   console.log(`${label}: ${result.status}`);
 };
 
+const assertGoogleOAuthUrl = (url) => {
+  const parsedUrl = new URL(url);
+  const redirectUri = parsedUrl.searchParams.get('redirect_uri');
+
+  if (parsedUrl.host !== 'accounts.google.com') {
+    throw new Error(`Expected Google OAuth host, got ${parsedUrl.host}`);
+  }
+
+  if (redirectUri !== 'http://localhost:8787/auth/callback/google') {
+    throw new Error(`Unexpected Google redirect_uri: ${redirectUri}`);
+  }
+
+  if (!parsedUrl.searchParams.get('state')) {
+    throw new Error('Google OAuth URL is missing state.');
+  }
+
+  if (!parsedUrl.searchParams.get('code_challenge')) {
+    throw new Error('Google OAuth URL is missing PKCE code_challenge.');
+  }
+
+  if (parsedUrl.searchParams.get('prompt') !== 'select_account consent') {
+    throw new Error(
+      `Unexpected Google OAuth prompt: ${parsedUrl.searchParams.get('prompt')}`,
+    );
+  }
+
+  if (parsedUrl.searchParams.get('access_type') !== 'offline') {
+    throw new Error(
+      `Unexpected Google OAuth access_type: ${parsedUrl.searchParams.get(
+        'access_type',
+      )}`,
+    );
+  }
+};
+
+const assertGoogleOAuthStateCookie = (headers) => {
+  const stateCookie = getSetCookies(headers).find((cookie) =>
+    cookie.startsWith('pin-plate.state='),
+  );
+
+  if (!stateCookie) {
+    throw new Error('Google OAuth start did not return a state cookie.');
+  }
+
+  if (stateCookie.toLowerCase().includes('domain=pinonplate.com')) {
+    throw new Error(
+      'Local Google OAuth state cookie must not use Domain=pinonplate.com.',
+    );
+  }
+};
+
+const runGoogleOAuthSmoke = async ({ baseUrl, origin }) => {
+  const signInSocialResult = await requestJson(
+    `${baseUrl}/auth/sign-in/social`,
+    origin,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        callbackURL: `${origin}/auth/callback`,
+        provider: 'google',
+      }),
+    },
+  );
+
+  assertStatus({
+    label: 'POST /auth/sign-in/social',
+    result: signInSocialResult,
+    expectedStatuses: [200],
+  });
+
+  if (typeof signInSocialResult.body?.url !== 'string') {
+    throw new Error('Google sign-in did not return an OAuth URL.');
+  }
+
+  assertGoogleOAuthUrl(signInSocialResult.body.url);
+  assertGoogleOAuthStateCookie(signInSocialResult.headers);
+  console.log('Google OAuth start URL is valid.');
+};
+
 const main = async () => {
   const options = parseArgs(process.argv.slice(2));
   const baseUrl = options.baseUrl.replace(/\/+$/g, '');
@@ -113,13 +197,17 @@ const main = async () => {
     expectedStatuses: [200],
   });
 
+  if (options.shouldTestGoogle) {
+    await runGoogleOAuthSmoke({ baseUrl, origin: options.origin });
+  }
+
   const signUpResult = await requestJson(
     `${baseUrl}/auth/sign-up/email`,
     options.origin,
     {
       method: 'POST',
       body: JSON.stringify({
-        callbackURL: `${baseUrl}/auth/ok`,
+        callbackURL: `${options.origin}/auth/callback`,
         email: options.email,
         name: 'Pin Plate Smoke',
         password: options.password,

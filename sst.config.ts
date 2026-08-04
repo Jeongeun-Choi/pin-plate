@@ -47,6 +47,7 @@ export default $config({
       environment: {
         NODE_ENV: "production",
         NEXT_PUBLIC_SITE_URL: "https://pinonplate.com",
+        NEXT_PUBLIC_AUTH_API_URL: "https://api.pinonplate.com",
         // 서버 사이드
         KAKAO_SEARCH_CLIENT_ID: kakaoSearchClientId.value,
         S3_ACCESS_KEY_ID: awsAccessKeyId.value,

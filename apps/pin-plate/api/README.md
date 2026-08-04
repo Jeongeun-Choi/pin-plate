@@ -81,8 +81,21 @@ AUTH_SMOKE_EMAIL="you@example.com" AUTH_SMOKE_PASSWORD="password" pnpm --filter 
 Or pass arguments:
 
 ```bash
-pnpm --filter api smoke:auth -- --base-url=http://localhost:8787 --email=you@example.com --password=password --sign-in
+pnpm --filter api smoke:auth -- --base-url=http://127.0.0.1:8787 --email=you@example.com --password=password --sign-in
 ```
+
+To also verify that Google OAuth starts and returns a Google authorization URL:
+
+```bash
+pnpm --filter api smoke:auth -- --google
+```
+
+This checks that `/auth/sign-in/social` returns an OAuth URL with:
+
+- `accounts.google.com`
+- `redirect_uri=http://localhost:8787/auth/callback/google`
+- `state`
+- PKCE `code_challenge`
 
 `wrangler.jsonc` already defines local non-secret vars:
 

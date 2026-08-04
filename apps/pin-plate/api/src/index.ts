@@ -1,4 +1,4 @@
-import { createAuth } from './auth';
+import { createAuthRuntime } from './auth';
 import { parseRuntimeEnv } from './env';
 
 const AUTH_ROUTE_PREFIX = '/auth';
@@ -10,6 +10,20 @@ const JSON_HEADERS = {
 const getConfiguredFrontendOrigin = (env: Env): string =>
   env.FRONTEND_ORIGIN || 'https://pinonplate.com';
 
+const isLocalFrontendOrigin = (origin: string): boolean => {
+  try {
+    const url = new URL(origin);
+    const localHostnames = new Set(['localhost', '127.0.0.1', '0.0.0.0']);
+
+    return (
+      (url.protocol === 'http:' || url.protocol === 'https:') &&
+      localHostnames.has(url.hostname)
+    );
+  } catch {
+    return false;
+  }
+};
+
 const createCorsHeaders = (
   request: Request,
   frontendOrigin: string,
@@ -20,8 +34,11 @@ const createCorsHeaders = (
   );
   const headers = new Headers();
 
-  if (requestOrigin === frontendOrigin) {
-    headers.set('Access-Control-Allow-Origin', frontendOrigin);
+  if (
+    requestOrigin &&
+    (requestOrigin === frontendOrigin || isLocalFrontendOrigin(requestOrigin))
+  ) {
+    headers.set('Access-Control-Allow-Origin', requestOrigin);
     headers.set('Access-Control-Allow-Credentials', 'true');
     headers.set('Vary', 'Origin');
   }
@@ -97,10 +114,15 @@ export default {
         requestUrl.pathname.startsWith(`${AUTH_ROUTE_PREFIX}/`)
       ) {
         const runtimeEnv = parseRuntimeEnv(env);
-        const auth = createAuth({ ctx, env: runtimeEnv });
-        const authResponse = await auth.handler(request);
+        const authRuntime = createAuthRuntime({ ctx, env: runtimeEnv });
 
-        return withCorsHeaders(authResponse, corsHeaders);
+        try {
+          const authResponse = await authRuntime.auth.handler(request);
+
+          return withCorsHeaders(authResponse, corsHeaders);
+        } finally {
+          await authRuntime.closeDatabasePool();
+        }
       }
 
       return createJsonResponse(

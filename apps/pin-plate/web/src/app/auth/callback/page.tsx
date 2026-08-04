@@ -3,11 +3,13 @@
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { getBetterAuthSession } from '@/features/sign-in/api/auth';
 import { redirectAfterLogin } from '@/features/sign-in/lib/redirectAfterLogin';
 import {
   GOOGLE_LOGIN_CHANNEL,
   createGoogleLoginCallbackMessage,
   createGoogleLoginFailureMessage,
+  GOOGLE_LOGIN_SUCCESS_MESSAGE,
 } from '@/features/sign-in/lib/googleLoginMessage';
 
 const CallbackSpinner = () => (
@@ -72,6 +74,7 @@ const AuthCallbackContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isPopup = searchParams.get('popup') === 'true';
+  const isBetterAuthCallback = searchParams.get('provider') === 'better-auth';
   const authCode = searchParams.get('code');
   const authError = searchParams.get('error_description');
 
@@ -101,6 +104,22 @@ const AuthCallbackContent = () => {
     };
 
     const handleAuth = async () => {
+      if (isBetterAuthCallback) {
+        const betterAuthSession = await getBetterAuthSession();
+
+        if (!betterAuthSession) {
+          throw new Error('Better Auth session was not created.');
+        }
+
+        if (isPopup) {
+          notifyPopupOpener(GOOGLE_LOGIN_SUCCESS_MESSAGE);
+          return;
+        }
+
+        handleLoginSuccess(betterAuthSession.user.id);
+        return;
+      }
+
       if (isPopup) {
         if (authCode) {
           notifyPopupOpener(createGoogleLoginCallbackMessage(authCode));
@@ -158,7 +177,7 @@ const AuthCallbackContent = () => {
       unsubscribeAuthState?.();
       channel?.close();
     };
-  }, [authCode, authError, isPopup, router]);
+  }, [authCode, authError, isBetterAuthCallback, isPopup, router]);
 
   return <CallbackSpinner />;
 };

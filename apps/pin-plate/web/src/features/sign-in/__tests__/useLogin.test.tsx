@@ -11,7 +11,6 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('../api/auth', () => ({
   login: vi.fn(),
-  getUserNickname: vi.fn(),
   getSession: vi.fn(),
   loginWithGoogle: vi.fn(),
 }));
@@ -41,7 +40,6 @@ describe('useLogin', () => {
   });
 
   it('should redirect to home page and save token on success', async () => {
-    vi.mocked(authApi.getUserNickname).mockResolvedValue('Test User');
     vi.mocked(authApi.login).mockResolvedValue({
       session: {
         access_token: 'test-token',

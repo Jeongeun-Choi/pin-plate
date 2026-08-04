@@ -2,7 +2,6 @@ import { createClient } from '@/utils/supabase/client';
 import { AuthTokenResponsePassword } from '@supabase/supabase-js';
 import {
   GOOGLE_LOGIN_CHANNEL,
-  isGoogleLoginCallbackMessage,
   isGoogleLoginFailureMessage,
   isGoogleLoginSuccessMessage,
 } from '../lib/googleLoginMessage';
@@ -11,6 +10,94 @@ export interface LoginParams {
   email: string;
   password: string;
 }
+
+interface BetterAuthUser {
+  id: string;
+  email?: string;
+  name?: string | null;
+}
+
+interface BetterAuthSession {
+  user: BetterAuthUser;
+}
+
+interface BetterAuthSocialSignInResponse {
+  redirect?: boolean;
+  url?: string;
+}
+
+const GOOGLE_LOGIN_POPUP_TIMEOUT_MS = 5 * 60 * 1_000;
+
+const getAuthApiBaseUrl = () => {
+  const configuredAuthApiUrl = process.env.NEXT_PUBLIC_AUTH_API_URL?.replace(
+    /\/+$/g,
+    '',
+  );
+
+  if (configuredAuthApiUrl) return configuredAuthApiUrl;
+
+  if (typeof window !== 'undefined') {
+    const localAuthHostnames = new Set(['localhost', '127.0.0.1', '0.0.0.0']);
+
+    if (localAuthHostnames.has(window.location.hostname)) {
+      return `http://${window.location.hostname}:8787`;
+    }
+  }
+
+  return 'https://api.pinonplate.com';
+};
+
+const parseBetterAuthSocialSignInResponse = (
+  value: unknown,
+): BetterAuthSocialSignInResponse => {
+  if (typeof value !== 'object' || value === null) return {};
+
+  const response = value as { redirect?: unknown; url?: unknown };
+
+  return {
+    redirect:
+      typeof response.redirect === 'boolean' ? response.redirect : undefined,
+    url: typeof response.url === 'string' ? response.url : undefined,
+  };
+};
+
+const parseBetterAuthSession = (value: unknown): BetterAuthSession | null => {
+  if (typeof value !== 'object' || value === null) return null;
+
+  const response = value as { user?: unknown };
+
+  if (typeof response.user !== 'object' || response.user === null) return null;
+
+  const user = response.user as {
+    email?: unknown;
+    id?: unknown;
+    name?: unknown;
+  };
+
+  if (typeof user.id !== 'string') return null;
+
+  return {
+    user: {
+      id: user.id,
+      email: typeof user.email === 'string' ? user.email : undefined,
+      name: typeof user.name === 'string' ? user.name : null,
+    },
+  };
+};
+
+export const getBetterAuthSession =
+  async (): Promise<BetterAuthSession | null> => {
+    const response = await fetch(`${getAuthApiBaseUrl()}/auth/get-session`, {
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) return null;
+
+    return parseBetterAuthSession(await response.json());
+  };
 
 export const login = async (
   params: LoginParams,
@@ -26,7 +113,6 @@ export const login = async (
 };
 
 export const loginWithGoogle = async () => {
-  const supabase = createClient();
   const isMobileWebView = Boolean(window.ReactNativeWebView);
   const width = 500;
   const height = 600;
@@ -40,26 +126,38 @@ export const loginWithGoogle = async () => {
         `width=${width},height=${height},top=${top},left=${left}`,
       );
   const shouldUsePopup = Boolean(popupWindow);
+  const callbackUrl = `${window.location.origin}/auth/callback?provider=better-auth${
+    isMobileWebView || !shouldUsePopup ? '' : '&popup=true'
+  }`;
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo:
-        isMobileWebView || !shouldUsePopup
-          ? `${window.location.origin}/auth/callback`
-          : `${window.location.origin}/auth/callback?popup=true`,
-      skipBrowserRedirect: true,
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
+  let response: Response;
+
+  try {
+    response = await fetch(`${getAuthApiBaseUrl()}/auth/sign-in/social`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
-    },
-  });
-
-  if (error) {
+      body: JSON.stringify({
+        callbackURL: callbackUrl,
+        provider: 'google',
+      }),
+    });
+  } catch {
     popupWindow?.close();
-    throw new Error(error.message);
+    throw new Error(
+      '인증 서버에 연결하지 못했습니다. 로컬에서는 Worker dev 서버가 켜져 있는지 확인해주세요.',
+    );
   }
+
+  if (!response.ok) {
+    popupWindow?.close();
+    throw new Error('Google 로그인 URL을 생성하지 못했습니다.');
+  }
+
+  const data = parseBetterAuthSocialSignInResponse(await response.json());
 
   if (!data.url) {
     popupWindow?.close();
@@ -77,7 +175,7 @@ export const loginWithGoogle = async () => {
 
   return new Promise<void>((resolve, reject) => {
     let hasCompletedGoogleLogin = false;
-    let popupClosedTimerId: number | null = null;
+    let popupTimeoutTimerId: number | null = null;
     const channel =
       typeof BroadcastChannel === 'undefined'
         ? null
@@ -87,8 +185,8 @@ export const loginWithGoogle = async () => {
       channel?.close();
       window.removeEventListener('message', handleWindowMessage);
 
-      if (popupClosedTimerId !== null) {
-        window.clearInterval(popupClosedTimerId);
+      if (popupTimeoutTimerId !== null) {
+        window.clearTimeout(popupTimeoutTimerId);
       }
     };
 
@@ -98,27 +196,7 @@ export const loginWithGoogle = async () => {
 
       cleanupGoogleLoginListeners();
       popupWindow.close();
-      supabase.auth.getSession().then(() => resolve(), reject);
-    };
-
-    const completeGoogleLoginWithCode = (code: string) => {
-      if (hasCompletedGoogleLogin) return;
-      hasCompletedGoogleLogin = true;
-
-      supabase.auth
-        .exchangeCodeForSession(code)
-        .then(({ error }) => {
-          if (error) throw new Error(error.message);
-
-          cleanupGoogleLoginListeners();
-          popupWindow.close();
-          resolve();
-        })
-        .catch((error: unknown) => {
-          cleanupGoogleLoginListeners();
-          popupWindow.close();
-          reject(error);
-        });
+      getBetterAuthSession().then(() => resolve(), reject);
     };
 
     const failGoogleLogin = (message: string) => {
@@ -130,12 +208,15 @@ export const loginWithGoogle = async () => {
       reject(new Error(message));
     };
 
-    const handleChannelMessage = (event: MessageEvent<unknown>) => {
-      if (isGoogleLoginCallbackMessage(event.data)) {
-        completeGoogleLoginWithCode(event.data.code);
-        return;
-      }
+    const cancelGoogleLogin = () => {
+      if (hasCompletedGoogleLogin) return;
+      hasCompletedGoogleLogin = true;
 
+      cleanupGoogleLoginListeners();
+      resolve();
+    };
+
+    const handleChannelMessage = (event: MessageEvent<unknown>) => {
       if (isGoogleLoginFailureMessage(event.data)) {
         failGoogleLogin(event.data.message);
         return;
@@ -149,11 +230,6 @@ export const loginWithGoogle = async () => {
     const handleWindowMessage = (event: MessageEvent<unknown>) => {
       if (event.origin !== window.location.origin) return;
 
-      if (isGoogleLoginCallbackMessage(event.data)) {
-        completeGoogleLoginWithCode(event.data.code);
-        return;
-      }
-
       if (isGoogleLoginFailureMessage(event.data)) {
         failGoogleLogin(event.data.message);
         return;
@@ -166,29 +242,12 @@ export const loginWithGoogle = async () => {
 
     channel?.addEventListener('message', handleChannelMessage);
     window.addEventListener('message', handleWindowMessage);
-    popupClosedTimerId = window.setInterval(() => {
-      if (!popupWindow.closed) return;
-
-      cleanupGoogleLoginListeners();
-      reject(new Error('Google login popup was closed before completion.'));
-    }, 500);
+    popupTimeoutTimerId = window.setTimeout(() => {
+      cancelGoogleLogin();
+    }, GOOGLE_LOGIN_POPUP_TIMEOUT_MS);
   });
 };
 
-export const getUserNickname = async (
-  userId: string,
-): Promise<string | null> => {
-  const supabase = createClient();
-  const { data } = await supabase
-    .from('profiles')
-    .select('nickname')
-    .eq('id', userId)
-    .single();
-  return data?.nickname ?? null;
-};
-
 export const getSession = async () => {
-  const supabase = createClient();
-  const { data } = await supabase.auth.getSession();
-  return data.session;
+  return getBetterAuthSession();
 };
