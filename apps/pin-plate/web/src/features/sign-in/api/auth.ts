@@ -242,12 +242,20 @@ export const loginWithGoogle = async () => {
       }
     };
 
+    const closePopupWindow = () => {
+      try {
+        popupWindow.close();
+      } catch {
+        // COOP can block popup references after Google redirects.
+      }
+    };
+
     const completeGoogleLogin = () => {
       if (hasCompletedGoogleLogin) return;
       hasCompletedGoogleLogin = true;
 
       cleanupGoogleLoginListeners();
-      popupWindow.close();
+      closePopupWindow();
       getBetterAuthSession().then(() => resolve(), reject);
     };
 
@@ -256,7 +264,7 @@ export const loginWithGoogle = async () => {
       hasCompletedGoogleLogin = true;
 
       cleanupGoogleLoginListeners();
-      popupWindow.close();
+      closePopupWindow();
       reject(new Error(message));
     };
 

@@ -141,6 +141,21 @@ describe('loginWithGoogle', () => {
     }
   }
 
+  const createMockPopupWindow = (close = vi.fn()) => {
+    const mockPopupWindow = {
+      close,
+      location: { href: '' },
+    };
+
+    Object.defineProperty(mockPopupWindow, 'closed', {
+      get: () => {
+        throw new Error('window.closed should not be read during OAuth.');
+      },
+    });
+
+    return mockPopupWindow as unknown as Window;
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     MockBroadcastChannel.instances = [];
@@ -238,16 +253,8 @@ describe('loginWithGoogle', () => {
 
   it('does not inspect cross-origin popup closed state while waiting for Google', async () => {
     vi.useFakeTimers();
-    const mockPopupWindow = {
-      close: vi.fn(),
-      location: { href: '' },
-    } as unknown as Window;
+    const mockPopupWindow = createMockPopupWindow();
 
-    Object.defineProperty(mockPopupWindow, 'closed', {
-      get: () => {
-        throw new Error('popup.closed should not be inspected');
-      },
-    });
     vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
 
     const loginPromise = loginWithGoogle();
@@ -270,11 +277,7 @@ describe('loginWithGoogle', () => {
       .mockResolvedValueOnce(
         createJsonResponse({ user: { id: 'user-1', email: 'user@test.com' } }),
       );
-    const mockPopupWindow = {
-      close: vi.fn(),
-      closed: false,
-      location: { href: '' },
-    } as unknown as Window;
+    const mockPopupWindow = createMockPopupWindow();
     const mockOpen = vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
 
     const loginPromise = loginWithGoogle();
@@ -313,11 +316,10 @@ describe('loginWithGoogle', () => {
       .mockResolvedValueOnce(
         createJsonResponse({ user: { id: 'user-1', email: 'user@test.com' } }),
       );
-    const mockPopupWindow = {
-      close: vi.fn(),
-      closed: false,
-      location: { href: '' },
-    } as unknown as Window;
+    const mockPopupClose = vi.fn(() => {
+      throw new Error('COOP blocked close.');
+    });
+    const mockPopupWindow = createMockPopupWindow(mockPopupClose);
 
     vi.spyOn(window, 'open').mockReturnValue(mockPopupWindow);
 
@@ -339,7 +341,11 @@ describe('loginWithGoogle', () => {
     );
 
     await expect(loginPromise).resolves.toBeUndefined();
-    expect(mockPopupWindow.close).toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:8787/auth/get-session',
+      expect.objectContaining({ credentials: 'include' }),
+    );
+    expect(mockPopupClose).toHaveBeenCalled();
     expect(window.location.href).toBe('');
   });
 });
