@@ -32,6 +32,7 @@ web-build/
 # SST
 .sst/
 .open-next
+.wrangler/
 
 # Claude plans (tiki-taka design records)
 .claude/plans/
