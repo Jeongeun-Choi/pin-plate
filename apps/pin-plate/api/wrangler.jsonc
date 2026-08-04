@@ -8,8 +8,8 @@
   "vars": {
     "BETTER_AUTH_URL": "http://localhost:8787/auth",
     "FRONTEND_ORIGIN": "http://localhost:3000",
-    "AUTH_EMAIL_FROM": "Pin Plate <auth@pinonplate.com>"
-  }
+    "AUTH_EMAIL_FROM": "Pin Plate <auth@pinonplate.com>",
+  },
 
   // Production setup notes:
   // 1. Add api.pinonplate.com in Cloudflare Workers Domains & Routes.

@@ -8,7 +8,8 @@
     "deploy": "wrangler deploy",
     "lint": "eslint '**/*.ts'",
     "typecheck": "tsc --noEmit",
-    "prettier": "prettier '**/*.{ts,md,json,jsonc}'"
+    "prettier": "prettier '**/*.{ts,md,json,jsonc,mjs}'",
+    "smoke:auth": "node scripts/smoke-auth.mjs"
   },
   "dependencies": {
     "better-auth": "^1.4.0",

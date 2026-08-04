@@ -47,6 +47,43 @@ RESEND_API_KEY=replace-me
 DATABASE_URL=postgres://user:password@host:5432/database
 ```
 
+## Auth Smoke Test
+
+Start the Worker first:
+
+```bash
+pnpm --filter api dev
+```
+
+Then run the auth smoke script in another terminal:
+
+```bash
+pnpm --filter api smoke:auth
+```
+
+By default, the script creates a unique `example.com` smoke email and verifies:
+
+- `GET /health`
+- `GET /auth/ok`
+- `POST /auth/sign-up/email`
+
+Because local auth currently requires email verification, the default smoke run
+stops after sign-up. That proves the Worker, Better Auth handler, database, and
+sign-up route are connected without needing an inbox.
+
+To test an existing verified account through sign-in, session lookup, and
+sign-out:
+
+```bash
+AUTH_SMOKE_EMAIL="you@example.com" AUTH_SMOKE_PASSWORD="password" pnpm --filter api smoke:auth -- --sign-in
+```
+
+Or pass arguments:
+
+```bash
+pnpm --filter api smoke:auth -- --base-url=http://localhost:8787 --email=you@example.com --password=password --sign-in
+```
+
 `wrangler.jsonc` already defines local non-secret vars:
 
 ```txt
