@@ -1,25 +1,7 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
-import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 
-const readLocalEnvValue = (key: string): string | undefined => {
-  const envPath = resolve(process.cwd(), '.env.local');
-  if (!existsSync(envPath)) return undefined;
-
-  const line = readFileSync(envPath, 'utf8')
-    .split(/\r?\n/)
-    .find((entry) => entry.trim().startsWith(`${key}=`));
-  if (!line) return undefined;
-
-  const value = line.slice(line.indexOf('=') + 1).trim();
-  return value.replace(/^['"]|['"]$/g, '') || undefined;
-};
-
-const getE2eEnvValue = (key: string): string | undefined =>
-  process.env[key] ?? readLocalEnvValue(key);
-
-const TEST_LOGIN_EMAIL = getE2eEnvValue('PIN_PLATE_E2E_LOGIN_EMAIL');
-const TEST_LOGIN_PASSWORD = getE2eEnvValue('PIN_PLATE_E2E_LOGIN_PASSWORD');
+const TEST_LOGIN_EMAIL = process.env.PIN_PLATE_E2E_LOGIN_EMAIL;
+const TEST_LOGIN_PASSWORD = process.env.PIN_PLATE_E2E_LOGIN_PASSWORD;
 const FALLBACK_USER_ID = 'user-crud-1';
 const PLACE_ID = 'google-place-crud-1';
 const PLACE_NAME = '성수 CRUD 식당';

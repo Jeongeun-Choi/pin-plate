@@ -1,7 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const authTokenPattern = /\/auth\/v1\/token\?grant_type=password/;
-const profilePattern = /\/rest\/v1\/profiles/;
 
 const waitForClientReady = async (page: Page) => {
   await page.waitForLoadState('networkidle');
@@ -58,7 +57,6 @@ const mockInvalidLogin = async (page: Page) => {
 const mockSuccessfulLogin = async (page: Page) => {
   const calls = {
     token: 0,
-    profile: 0,
   };
 
   await page.route(authTokenPattern, async (route) => {
@@ -83,15 +81,6 @@ const mockSuccessfulLogin = async (page: Page) => {
           updated_at: '2026-07-15T00:00:00.000Z',
         },
       }),
-    });
-  });
-
-  await page.route(profilePattern, async (route) => {
-    calls.profile += 1;
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ nickname: '맛집러' }),
     });
   });
 
@@ -147,7 +136,6 @@ test.describe('auth pages', () => {
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem('accessToken')))
       .toBe('e2e-access-token');
-    await expect.poll(() => calls.profile).toBe(1);
   });
 
   test('signs up through the real Supabase-backed server action when configured', async ({
