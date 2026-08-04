@@ -171,6 +171,20 @@ export async function DELETE(request: NextRequest) {
   }
 
   const supabase = createAdminClient();
+  const { data: postToDelete, error: postLookupError } = await supabase
+    .from('posts')
+    .select('place_id')
+    .eq('id', postId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (postLookupError) {
+    return NextResponse.json(
+      { error: postLookupError.message },
+      { status: 500 },
+    );
+  }
+
   const { error } = await supabase
     .from('posts')
     .delete()
@@ -179,6 +193,37 @@ export async function DELETE(request: NextRequest) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const placeId =
+    typeof postToDelete?.place_id === 'string' ? postToDelete.place_id : null;
+
+  if (placeId) {
+    const { count, error: countError } = await supabase
+      .from('posts')
+      .select('id', { count: 'exact', head: true })
+      .eq('place_id', placeId)
+      .eq('user_id', userId);
+
+    if (countError) {
+      return NextResponse.json({ error: countError.message }, { status: 500 });
+    }
+
+    if (count === 0) {
+      const { error: placeDeleteError } = await supabase
+        .from('places')
+        .delete()
+        .eq('id', placeId)
+        .eq('user_id', userId)
+        .neq('status', 'wish');
+
+      if (placeDeleteError) {
+        return NextResponse.json(
+          { error: placeDeleteError.message },
+          { status: 500 },
+        );
+      }
+    }
   }
 
   return NextResponse.json({ ok: true });
