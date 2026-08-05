@@ -228,6 +228,11 @@ runs API lint, typecheck, a Wrangler dry run, deploys the Worker, then verifies
 the deployed health/auth/Google OAuth start endpoints without creating a smoke
 user.
 
+The workflow expects an auth-API-specific GitHub secret named
+`CLOUDFLARE_API_TOKEN_AUTH_API`. Keep the existing `CLOUDFLARE_ACCOUNT_ID` or
+`CLOUDFLARE_DEFAULT_ACCOUNT_ID` value if it already points at the Cloudflare
+account that owns the `pinonplate.com` zone.
+
 ## Notes
 
 The existing Next.js app still uses Supabase Auth until the migration is intentionally wired through this Worker. Do not remove Supabase Auth from the frontend until email, Google OAuth, session lookup, password reset, and user migration are verified.
