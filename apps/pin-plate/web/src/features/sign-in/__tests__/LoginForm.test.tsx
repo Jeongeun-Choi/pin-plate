@@ -28,13 +28,11 @@ describe('LoginForm', () => {
     vi.mocked(useLoginHook.useLogin).mockReturnValue({
       mutate: mockLoginWithEmail,
       isPending: false,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    } as unknown as ReturnType<typeof useLoginHook.useLogin>);
 
     vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
       mutate: mockLoginWithGoogle,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    } as unknown as ReturnType<typeof useLoginHook.useGoogleLogin>);
   });
 
   const renderComponent = () =>
@@ -56,20 +54,46 @@ describe('LoginForm', () => {
     expect(screen.getByText(/서비스 약관 및/)).toBeInTheDocument();
   });
 
-  it('비밀번호 찾기 링크를 로그인 폼 안에 표시한다', () => {
+  it('이메일 로그인은 기본 화면에서 보조 버튼으로 표시한다', () => {
     renderComponent();
 
-    expect(screen.getByRole('link', { name: '비밀번호 찾기' })).toHaveAttribute(
-      'href',
-      '/forgot-password',
+    expect(
+      screen.getByRole('button', { name: '이메일로 로그인' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByLabelText('이메일')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('비밀번호')).not.toBeInTheDocument();
+  });
+
+  it('이메일 로그인 선택 후 비밀번호 찾기 링크를 로그인 버튼 아래에 표시한다', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByRole('button', { name: '이메일로 로그인' }));
+
+    expect(screen.getByLabelText('이메일')).toBeInTheDocument();
+    expect(screen.getByLabelText('비밀번호')).toBeInTheDocument();
+
+    const loginButton = screen.getByRole('button', { name: '로그인' });
+    const forgotPasswordLink = screen.getByRole('link', {
+      name: '비밀번호 찾기',
+    });
+
+    expect(forgotPasswordLink).toHaveAttribute('href', '/forgot-password');
+    expect(forgotPasswordLink.closest('form')).toBe(
+      loginButton.closest('form'),
     );
+    expect(
+      loginButton.compareDocumentPosition(forgotPasswordLink) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      screen.queryByRole('button', { name: '소셜 로그인으로 돌아가기' }),
+    ).not.toBeInTheDocument();
   });
 
   it('Google 버튼 클릭 시 loginWithGoogle을 호출한다', () => {
     vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
       mutate: mockLoginWithGoogle,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    } as unknown as ReturnType<typeof useLoginHook.useGoogleLogin>);
 
     renderComponent();
     const googleButton = screen.getByRole('button', {
@@ -83,6 +107,8 @@ describe('LoginForm', () => {
 
   it('필수 입력 에러를 각 input 아래에 표시한다', () => {
     renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: '이메일로 로그인' }));
+
     const form = screen.getByRole('button', { name: '로그인' }).closest('form');
 
     expect(form).not.toBeNull();
@@ -96,6 +122,7 @@ describe('LoginForm', () => {
 
   it('이메일 형식 에러를 이메일 input 아래에 표시한다', () => {
     renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: '이메일로 로그인' }));
 
     fireEvent.change(screen.getByLabelText('이메일'), {
       target: { value: 'wrong-email' },
@@ -123,6 +150,7 @@ describe('LoginForm', () => {
       },
     );
     renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: '이메일로 로그인' }));
 
     fireEvent.change(screen.getByLabelText('이메일'), {
       target: { value: 'user@example.com' },

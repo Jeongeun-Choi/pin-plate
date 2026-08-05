@@ -12,6 +12,7 @@ const waitForClientReady = async (page: Page) => {
 };
 
 const fillLoginForm = async (page: Page, email: string, password: string) => {
+  await page.getByRole('button', { name: '이메일로 로그인' }).click();
   await page.getByLabel('이메일').fill(email);
   await page.getByLabel('비밀번호').fill(password);
 };
