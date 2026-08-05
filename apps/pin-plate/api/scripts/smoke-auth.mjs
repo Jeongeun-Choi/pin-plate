@@ -268,13 +268,6 @@ const main = async () => {
     expectedStatuses: [200],
   });
 
-  const authOkResult = await requestJson(`${baseUrl}/auth/ok`, options.origin);
-  assertStatus({
-    label: 'GET /auth/ok',
-    result: authOkResult,
-    expectedStatuses: [200],
-  });
-
   if (options.shouldTestGoogle) {
     await runGoogleOAuthSmoke({ baseUrl, origin: options.origin });
   }

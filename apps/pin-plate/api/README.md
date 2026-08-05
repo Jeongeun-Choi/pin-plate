@@ -64,7 +64,6 @@ pnpm --filter api smoke:auth
 By default, the script creates a unique `example.com` smoke email and verifies:
 
 - `GET /health`
-- `GET /auth/ok`
 - `POST /auth/sign-up/email`
 
 Because local auth currently requires email verification, the default smoke run
