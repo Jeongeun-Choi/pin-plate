@@ -1,8 +1,34 @@
 #!/usr/bin/env node
+/* global console, fetch, process, URL */
+
+import { setTimeout as sleep } from 'node:timers/promises';
 
 const DEFAULT_BASE_URL = 'http://127.0.0.1:8787';
 const DEFAULT_ORIGIN = 'http://localhost:3000';
 const DEFAULT_PASSWORD = 'PinPlateSmoke123!';
+const DEFAULT_NETWORK_RETRY_ATTEMPTS = 12;
+const DEFAULT_NETWORK_RETRY_DELAY_MS = 5_000;
+
+const getErrorMessage = (error) => {
+  if (!(error instanceof Error)) return String(error);
+
+  if (error.cause instanceof Error) {
+    return `${error.message}: ${error.cause.message}`;
+  }
+
+  if (
+    error.cause &&
+    typeof error.cause === 'object' &&
+    'message' in error.cause
+  ) {
+    return `${error.message}: ${String(error.cause.message)}`;
+  }
+
+  return error.message;
+};
+
+const getRetryAttemptCount = (value) =>
+  Number.isInteger(value) && value > 0 ? value : DEFAULT_NETWORK_RETRY_ATTEMPTS;
 
 const parseArgs = (argv) =>
   argv.reduce(
@@ -21,6 +47,13 @@ const parseArgs = (argv) =>
 
       if (arg.startsWith('--password=')) {
         return { ...options, password: arg.slice('--password='.length) };
+      }
+
+      if (arg.startsWith('--network-retries=')) {
+        return {
+          ...options,
+          networkRetryAttempts: Number(arg.slice('--network-retries='.length)),
+        };
       }
 
       if (arg === '--sign-in') {
@@ -44,6 +77,10 @@ const parseArgs = (argv) =>
         `pinplate-smoke-${Date.now()}@example.com`,
       origin: process.env.AUTH_SMOKE_ORIGIN ?? DEFAULT_ORIGIN,
       password: process.env.AUTH_SMOKE_PASSWORD ?? DEFAULT_PASSWORD,
+      networkRetryAttempts: Number(
+        process.env.AUTH_SMOKE_NETWORK_RETRIES ??
+          DEFAULT_NETWORK_RETRY_ATTEMPTS,
+      ),
       shouldSkipSignUp: process.env.AUTH_SMOKE_SKIP_SIGN_UP === 'true',
       shouldTestGoogle: process.env.AUTH_SMOKE_GOOGLE === 'true',
       shouldSignIn: process.env.AUTH_SMOKE_SIGN_IN === 'true',
@@ -51,15 +88,41 @@ const parseArgs = (argv) =>
   );
 
 const requestJson = async (url, origin, init = {}) => {
-  const response = await fetch(url, {
-    ...init,
-    headers: {
-      Accept: 'application/json',
-      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
-      Origin: origin,
-      ...init.headers,
-    },
-  });
+  const { networkRetryAttempts = 1, ...requestInit } = init;
+  const retryAttemptCount = getRetryAttemptCount(networkRetryAttempts);
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= retryAttemptCount; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        ...requestInit,
+        headers: {
+          Accept: 'application/json',
+          ...(requestInit.body ? { 'Content-Type': 'application/json' } : {}),
+          Origin: origin,
+          ...requestInit.headers,
+        },
+      });
+
+      return await parseJsonResponse(response);
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === retryAttemptCount) break;
+
+      console.log(
+        `Request failed (${attempt}/${retryAttemptCount}) for ${url}: ${getErrorMessage(
+          error,
+        )}. Retrying in ${DEFAULT_NETWORK_RETRY_DELAY_MS / 1_000}s...`,
+      );
+      await sleep(DEFAULT_NETWORK_RETRY_DELAY_MS);
+    }
+  }
+
+  throw new Error(`Request failed for ${url}: ${getErrorMessage(lastError)}`);
+};
+
+const parseJsonResponse = async (response) => {
   const responseText = await response.text();
   const responseBody = responseText ? parseResponseBody(responseText) : null;
 
@@ -196,7 +259,9 @@ const main = async () => {
   console.log(`Auth smoke base URL: ${baseUrl}`);
   console.log(`Smoke email: ${options.email}`);
 
-  const healthResult = await requestJson(`${baseUrl}/health`, options.origin);
+  const healthResult = await requestJson(`${baseUrl}/health`, options.origin, {
+    networkRetryAttempts: options.networkRetryAttempts,
+  });
   assertStatus({
     label: 'GET /health',
     result: healthResult,
