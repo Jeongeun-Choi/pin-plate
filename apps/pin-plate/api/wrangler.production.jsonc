@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "pin-plate-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "api.pinonplate.com",
+      "custom_domain": true,
+    },
+  ],
+  "vars": {
+    "BETTER_AUTH_URL": "https://api.pinonplate.com/auth",
+    "FRONTEND_ORIGIN": "https://pinonplate.com",
+    "AUTH_EMAIL_FROM": "Pin Plate <auth@pinonplate.com>",
+  },
+}

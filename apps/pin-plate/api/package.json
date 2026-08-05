@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
+    "deploy:production": "wrangler deploy --config wrangler.production.jsonc",
     "lint": "eslint '**/*.ts'",
     "migrate:supabase-auth": "node scripts/migrate-supabase-auth.mjs",
+    "secret:production": "wrangler secret put --config wrangler.production.jsonc",
     "typecheck": "tsc --noEmit",
     "prettier": "prettier '**/*.{ts,md,json,jsonc,mjs}'",
     "smoke:auth": "node scripts/smoke-auth.mjs"

@@ -27,6 +27,10 @@ const parseArgs = (argv) =>
         return { ...options, shouldSignIn: true };
       }
 
+      if (arg === '--skip-sign-up') {
+        return { ...options, shouldSkipSignUp: true };
+      }
+
       if (arg === '--google') {
         return { ...options, shouldTestGoogle: true };
       }
@@ -40,6 +44,7 @@ const parseArgs = (argv) =>
         `pinplate-smoke-${Date.now()}@example.com`,
       origin: process.env.AUTH_SMOKE_ORIGIN ?? DEFAULT_ORIGIN,
       password: process.env.AUTH_SMOKE_PASSWORD ?? DEFAULT_PASSWORD,
+      shouldSkipSignUp: process.env.AUTH_SMOKE_SKIP_SIGN_UP === 'true',
       shouldTestGoogle: process.env.AUTH_SMOKE_GOOGLE === 'true',
       shouldSignIn: process.env.AUTH_SMOKE_SIGN_IN === 'true',
     },
@@ -97,7 +102,7 @@ const assertStatus = ({ label, result, expectedStatuses }) => {
   console.log(`${label}: ${result.status}`);
 };
 
-const assertGoogleOAuthUrl = (url) => {
+const assertGoogleOAuthUrl = (url, expectedRedirectUri) => {
   const parsedUrl = new URL(url);
   const redirectUri = parsedUrl.searchParams.get('redirect_uri');
 
@@ -105,7 +110,7 @@ const assertGoogleOAuthUrl = (url) => {
     throw new Error(`Expected Google OAuth host, got ${parsedUrl.host}`);
   }
 
-  if (redirectUri !== 'http://localhost:8787/auth/callback/google') {
+  if (redirectUri !== expectedRedirectUri) {
     throw new Error(`Unexpected Google redirect_uri: ${redirectUri}`);
   }
 
@@ -132,7 +137,7 @@ const assertGoogleOAuthUrl = (url) => {
   }
 };
 
-const assertGoogleOAuthStateCookie = (headers) => {
+const assertGoogleOAuthStateCookie = (headers, baseUrl) => {
   const stateCookie = getSetCookies(headers).find((cookie) =>
     cookie.startsWith('pin-plate.state='),
   );
@@ -141,7 +146,12 @@ const assertGoogleOAuthStateCookie = (headers) => {
     throw new Error('Google OAuth start did not return a state cookie.');
   }
 
-  if (stateCookie.toLowerCase().includes('domain=pinonplate.com')) {
+  const isLocalSmoke = new URL(baseUrl).hostname === 'localhost';
+
+  if (
+    isLocalSmoke &&
+    stateCookie.toLowerCase().includes('domain=pinonplate.com')
+  ) {
     throw new Error(
       'Local Google OAuth state cookie must not use Domain=pinonplate.com.',
     );
@@ -171,8 +181,11 @@ const runGoogleOAuthSmoke = async ({ baseUrl, origin }) => {
     throw new Error('Google sign-in did not return an OAuth URL.');
   }
 
-  assertGoogleOAuthUrl(signInSocialResult.body.url);
-  assertGoogleOAuthStateCookie(signInSocialResult.headers);
+  assertGoogleOAuthUrl(
+    signInSocialResult.body.url,
+    `${baseUrl}/auth/callback/google`,
+  );
+  assertGoogleOAuthStateCookie(signInSocialResult.headers, baseUrl);
   console.log('Google OAuth start URL is valid.');
 };
 
@@ -199,6 +212,12 @@ const main = async () => {
 
   if (options.shouldTestGoogle) {
     await runGoogleOAuthSmoke({ baseUrl, origin: options.origin });
+  }
+
+  if (options.shouldSkipSignUp) {
+    console.log('Sign-up smoke skipped.');
+    console.log('Auth smoke test passed.');
+    return;
   }
 
   const signUpResult = await requestJson(

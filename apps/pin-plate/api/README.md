@@ -203,11 +203,11 @@ AUTH_EMAIL_FROM=Pin Plate <auth@pinonplate.com>
 3. Add Worker secrets:
 
 ```bash
-pnpm --filter api wrangler secret put BETTER_AUTH_SECRET
-pnpm --filter api wrangler secret put GOOGLE_CLIENT_ID
-pnpm --filter api wrangler secret put GOOGLE_CLIENT_SECRET
-pnpm --filter api wrangler secret put RESEND_API_KEY
-pnpm --filter api wrangler secret put DATABASE_URL
+pnpm --filter api secret:production BETTER_AUTH_SECRET
+pnpm --filter api secret:production GOOGLE_CLIENT_ID
+pnpm --filter api secret:production GOOGLE_CLIENT_SECRET
+pnpm --filter api secret:production RESEND_API_KEY
+pnpm --filter api secret:production DATABASE_URL
 ```
 
 4. Prefer Hyperdrive for production Supabase Postgres access, then bind it as `HYPERDRIVE`.
@@ -216,6 +216,17 @@ pnpm --filter api wrangler secret put DATABASE_URL
    connection strategy is finalized. The current Worker config is request-env
    based, so keep schema generation as a follow-up migration task rather than a
    default scaffold script.
+
+6. Deploy with the production Wrangler config:
+
+```bash
+pnpm --filter api deploy:production
+```
+
+Or run the `Deploy Auth API` GitHub Actions workflow manually. The workflow
+runs API lint, typecheck, a Wrangler dry run, deploys the Worker, then verifies
+the deployed health/auth/Google OAuth start endpoints without creating a smoke
+user.
 
 ## Notes
 
