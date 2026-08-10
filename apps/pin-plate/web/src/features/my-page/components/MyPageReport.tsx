@@ -438,10 +438,10 @@ export const MyPageReportPreview = ({
   );
 };
 
-export const MyPageReportSection = () => {
+export default function MyPageReportSection() {
   const { data: posts = [], isLoading: isPostsLoading } = usePosts();
 
   const reportStats = useMemo(() => buildMyPageReportStats(posts), [posts]);
 
   return <MyPageReportPreview stats={reportStats} isLoading={isPostsLoading} />;
-};
+}

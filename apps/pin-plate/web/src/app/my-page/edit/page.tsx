@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMyProfile } from '@/features/my-page';
+import { useMyProfile } from '@/features/my-page/hooks/useMyProfile';
 import type { ProfileWithEmail } from '@/features/my-page/api/getMyProfile';
 import { createClient } from '@/utils/supabase/client';
 import * as styles from './page.css';

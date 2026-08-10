@@ -1,9 +1,19 @@
 'use client';
 
 import { useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useAtom } from 'jotai';
-import { PostModal } from '@/features/post/components/PostModal';
 import { isPostModalOpenAtom, prefillPlaceAtom } from '@/features/post/atoms';
+
+const PostModal = dynamic(
+  () =>
+    import('@/features/post/components/PostModal').then(
+      (module) => module.PostModal,
+    ),
+  {
+    ssr: false,
+  },
+);
 
 export const GlobalPostModal = () => {
   const [isOpen, setIsOpen] = useAtom(isPostModalOpenAtom);
