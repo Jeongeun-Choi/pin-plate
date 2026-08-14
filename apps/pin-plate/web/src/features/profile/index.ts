@@ -1,3 +1,3 @@
 export * from './api/getMyProfile';
 export * from './hooks/useMyProfile';
-export * from './myPageKeys';
+export * from './profileKeys';

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { IcLogout, IcSetting } from '@pin-plate/ui/icons';
 import * as styles from './AccountPopover.css';
-import { useMyProfile } from '@/features/my-page/hooks/useMyProfile';
+import { useMyProfile } from '@/features/profile/hooks/useMyProfile';
 import { logout } from '@/features/sign-in/api/auth';
 
 interface AccountPopoverProps {

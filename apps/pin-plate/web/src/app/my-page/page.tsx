@@ -3,7 +3,7 @@
 // export const dynamic = 'force-dynamic';
 
 import dynamic from 'next/dynamic';
-import { useMyProfile } from '@/features/my-page';
+import { useMyProfile } from '@/features/profile/hooks/useMyProfile';
 import { MyPageHeader, MyPageMenu } from '@/features/my-page/components';
 import * as styles from './page.css';
 import { Spinner } from '@pin-plate/ui';

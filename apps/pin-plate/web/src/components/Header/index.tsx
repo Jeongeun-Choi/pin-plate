@@ -32,8 +32,8 @@ import {
 } from './Header.css';
 import { isPostModalOpenAtom } from '@/features/post/atoms';
 import { AccountPopover } from './AccountPopover';
-import { getMyProfile } from '@/features/my-page/api/getMyProfile';
-import { myPageKeys } from '@/features/my-page/myPageKeys';
+import { getMyProfile } from '@/features/profile/api/getMyProfile';
+import { profileKeys } from '@/features/profile/profileKeys';
 import { useSearchPlaces } from '@/features/map/hooks/useSearchPlaces';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
@@ -88,7 +88,7 @@ export const Header = () => {
 
   const handleProfileHover = () => {
     queryClient.prefetchQuery({
-      queryKey: myPageKeys.profile(),
+      queryKey: profileKeys.me(),
       queryFn: getMyProfile,
     });
   };

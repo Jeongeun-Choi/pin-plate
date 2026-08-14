@@ -1,6 +1,6 @@
 'use client';
 
-import { useMyProfile } from '@/features/my-page/hooks/useMyProfile';
+import { useMyProfile } from '@/features/profile/hooks/useMyProfile';
 import * as styles from './MyPageHeader.css';
 
 export const MyPageHeader = () => {

@@ -10,7 +10,7 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-vi.mock('@/features/my-page/hooks/useMyProfile', () => ({
+vi.mock('@/features/profile/hooks/useMyProfile', () => ({
   useMyProfile: vi.fn(),
 }));
 
@@ -18,7 +18,7 @@ vi.mock('@/features/post/hooks/usePosts', () => ({
   usePosts: vi.fn(),
 }));
 
-const { useMyProfile } = await import('@/features/my-page/hooks/useMyProfile');
+const { useMyProfile } = await import('@/features/profile/hooks/useMyProfile');
 const { usePosts } = await import('@/features/post/hooks/usePosts');
 
 const mockedUseMyProfile = vi.mocked(useMyProfile);
