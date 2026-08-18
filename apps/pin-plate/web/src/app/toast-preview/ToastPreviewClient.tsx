@@ -1,6 +1,7 @@
 'use client';
 
-import { Toast, ToastPosition, ToastViewport } from '@pin-plate/ui';
+import { Toast, ToastViewport } from '@pin-plate/ui/toast';
+import type { ToastPosition } from '@pin-plate/ui/toast';
 import { useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
 import * as s from './page.css';
