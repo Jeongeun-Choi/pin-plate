@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import * as styles from './not-found.styles.css';
+import { boundaryClassNames as styles } from './boundaryClassNames';
 
 export default function NotFound() {
   const router = useRouter();

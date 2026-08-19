@@ -3,6 +3,7 @@ import QueryProvider from '@/providers/QueryProvider';
 import MapProvider from '@/providers/MapProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import '@pin-plate/ui/reset'; // UI 패키지의 Reset CSS 적용
+import './boundary.styles.css';
 
 export const dynamic = 'force-dynamic';
 
