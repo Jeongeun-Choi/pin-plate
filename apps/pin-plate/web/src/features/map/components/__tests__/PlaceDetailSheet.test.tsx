@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { Provider as JotaiProvider, createStore } from 'jotai';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { clickedMapInfoAtom, selectedSearchPlaceAtom } from '../../atoms';
-import { PlaceDetailSheet } from '../PlaceDetailSheet';
+import PlaceDetailSheet from '../PlaceDetailSheet';
 import type { Place } from '@/features/post/types/search';
 import { ToastProvider } from '@/providers/ToastProvider';
 

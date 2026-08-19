@@ -13,7 +13,12 @@ interface Props {
   onClose: () => void;
 }
 
-export const ShareMapDialog = ({ isOpen, places, ownerId, onClose }: Props) => {
+export default function ShareMapDialog({
+  isOpen,
+  places,
+  ownerId,
+  onClose,
+}: Props) {
   const dialogRef = useRef<HTMLElement>(null);
 
   useDialogFocusTrap({
@@ -40,4 +45,4 @@ export const ShareMapDialog = ({ isOpen, places, ownerId, onClose }: Props) => {
       </section>
     </div>
   );
-};
+}

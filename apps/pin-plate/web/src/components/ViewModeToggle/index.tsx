@@ -3,7 +3,18 @@
 import { useAtom } from 'jotai';
 import { IcList, IcMap } from '@pin-plate/ui/icons';
 import { viewModeAtom } from '@/app/atoms';
-import * as s from './ViewModeToggle.css';
+import {
+  container,
+  headerContainer,
+  surfaceContainer,
+  compactContainer,
+  button,
+  compactButton,
+  compactIconOnlyButton,
+  iconOnlyButton,
+  buttonTone,
+  activeButtonTone,
+} from './ViewModeToggle.css'; // TODO: 추후에 ~Style로 네이밍 변경하기
 
 interface Props {
   className?: string;
@@ -20,9 +31,9 @@ export const ViewModeToggle = ({
 }: Props) => {
   const [viewMode, setViewMode] = useAtom(viewModeAtom);
   const containerClassName = [
-    s.container,
-    tone === 'header' ? s.headerContainer : s.surfaceContainer,
-    size === 'compact' ? s.compactContainer : '',
+    container,
+    tone === 'header' ? headerContainer : surfaceContainer,
+    size === 'compact' ? compactContainer : '',
     className,
   ]
     .filter(Boolean)
@@ -30,15 +41,15 @@ export const ViewModeToggle = ({
 
   const getButtonClassName = (mode: typeof viewMode) =>
     [
-      s.button,
-      size === 'compact' ? s.compactButton : '',
+      button,
+      size === 'compact' ? compactButton : '',
       showLabels
         ? ''
         : size === 'compact'
-          ? s.compactIconOnlyButton
-          : s.iconOnlyButton,
-      s.buttonTone[tone],
-      viewMode === mode ? s.activeButtonTone[tone] : '',
+          ? compactIconOnlyButton
+          : iconOnlyButton,
+      buttonTone[tone],
+      viewMode === mode ? activeButtonTone[tone] : '',
     ]
       .filter(Boolean)
       .join(' ');

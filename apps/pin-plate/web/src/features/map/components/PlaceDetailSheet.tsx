@@ -16,7 +16,7 @@ import { NearbyPlaceList } from './NearbyPlaceList';
 import * as s from './PlaceDetailSheet.css';
 import { useToast } from '@/providers/ToastProvider';
 
-export const PlaceDetailSheet = () => {
+export default function PlaceDetailSheet() {
   const openedAtRef = useRef(0);
   const [clickedInfo, setClickedInfo] = useAtom(clickedMapInfoAtom);
   const [selectedSearchPlace, setSelectedSearchPlace] = useAtom(
@@ -179,4 +179,4 @@ export const PlaceDetailSheet = () => {
       </div>
     </>
   );
-};
+}

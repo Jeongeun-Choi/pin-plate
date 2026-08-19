@@ -1,4 +1,8 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import {
+  useQuery,
+  useSuspenseQuery,
+  UseQueryResult,
+} from '@tanstack/react-query';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { getPlaces } from '../api/getPlaces';
 import { placeKeys } from '../placeKeys';
@@ -15,5 +19,17 @@ export const usePlaces = (): UseQueryResult<PlaceWithStats[], Error> => {
     queryKey: placeKeys.lists(userId),
     queryFn: getPlaces,
     enabled: !!userId,
+  });
+};
+
+export const useSuspensePlaces = () => {
+  const { data: user } = useSuspenseQuery({
+    queryKey: ['auth', 'user'],
+    queryFn: getCurrentUser,
+  });
+
+  return useSuspenseQuery<PlaceWithStats[]>({
+    queryKey: placeKeys.lists(user?.id ?? 'guest'),
+    queryFn: getPlaces,
   });
 };
