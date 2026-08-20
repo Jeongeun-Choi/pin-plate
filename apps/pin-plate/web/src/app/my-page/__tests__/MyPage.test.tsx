@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Post } from '@/features/post/types/post';
@@ -95,7 +95,7 @@ describe('MyPage', () => {
     );
   });
 
-  it('shows one report chart at a time to signed-in users', () => {
+  it('shows one report chart at a time to signed-in users', async () => {
     mockedUseMyProfile.mockReturnValue({
       data: {
         id: 'user-id',
@@ -120,6 +120,9 @@ describe('MyPage', () => {
     } as unknown as ReturnType<typeof usePosts>);
 
     renderMyPage();
+    await act(async () => {
+      await vi.dynamicImportSettled();
+    });
 
     expect(screen.getByText('취향 리포트')).toBeInTheDocument();
     expect(screen.getByText('이번 주 자주 간 음식점')).toBeInTheDocument();

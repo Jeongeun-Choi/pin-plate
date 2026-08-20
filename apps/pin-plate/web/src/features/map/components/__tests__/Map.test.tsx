@@ -49,6 +49,7 @@ vi.mock('@vis.gl/react-google-maps', () => ({
 
 vi.mock('@/features/place/hooks/usePlaces', () => ({
   usePlaces: () => ({ data: [] }),
+  useSuspensePlaces: () => ({ data: [] }),
 }));
 
 vi.mock('../CustomMarker', () => ({

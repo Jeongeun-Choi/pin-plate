@@ -105,7 +105,9 @@ describe('useLocationSearch', () => {
 
     expect(result.current.searchResults).toEqual([]);
     expect(result.current.isLoading).toBe(false);
-    expect(screen.getByText('검색 중 오류가 발생했어요')).toBeInTheDocument();
+    expect(
+      await screen.findByText('검색 중 오류가 발생했어요'),
+    ).toBeInTheDocument();
   });
 
   it('resetSearch는 상태를 초기화한다', async () => {
