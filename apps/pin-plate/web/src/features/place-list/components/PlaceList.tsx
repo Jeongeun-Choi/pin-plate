@@ -6,14 +6,7 @@ import { getImageProps } from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAtom, useAtomValue } from 'jotai';
 import { Card, Dropdown } from '@pin-plate/ui';
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { getPlaces } from '../../place/api/getPlaces';
-import { placeKeys } from '../../place/placeKeys';
-import type { PlaceWithStats } from '../../place/types/place';
-import {
-  getCurrentUser,
-  type CurrentUser,
-} from '@/utils/supabase/getCurrentUser';
+import { useSuspensePlaces } from '../../place/hooks/usePlaces';
 import { searchQueryAtom } from '@/app/atoms';
 import { statusFilterAtom } from '@/features/map/atoms';
 import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
@@ -63,20 +56,13 @@ const getOptimizedCardImageProps = (
   };
 };
 
-interface AuthenticatedPlaceListProps {
-  user: CurrentUser;
-}
-
-const AuthenticatedPlaceList = ({ user }: AuthenticatedPlaceListProps) => {
+export default function PlaceList() {
   const [sortBy, setSortBy] = useState<SortType>('latest');
   const [statusFilter, setStatusFilter] = useAtom(statusFilterAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
   const router = useRouter();
 
-  const { data: places } = useSuspenseQuery<PlaceWithStats[]>({
-    queryKey: placeKeys.lists(user.id),
-    queryFn: getPlaces,
-  });
+  const { data: places } = useSuspensePlaces();
 
   const searchFilteredPlaces = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -99,7 +85,6 @@ const AuthenticatedPlaceList = ({ user }: AuthenticatedPlaceListProps) => {
           new Date(a.last_visited_at ?? a.created_at).getTime()
         );
       }
-
       return (b.avg_rating ?? 0) - (a.avg_rating ?? 0);
     });
   }, [statusFilteredPlaces, sortBy]);
@@ -221,15 +206,4 @@ const AuthenticatedPlaceList = ({ user }: AuthenticatedPlaceListProps) => {
       </div>
     </div>
   );
-};
-
-export const PlaceList = () => {
-  const { data: user, isLoading } = useQuery({
-    queryKey: ['auth', 'user'],
-    queryFn: getCurrentUser,
-  });
-
-  if (isLoading || !user) return null;
-
-  return <AuthenticatedPlaceList user={user} />;
-};
+}

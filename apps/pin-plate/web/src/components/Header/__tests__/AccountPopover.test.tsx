@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-vi.mock('@/features/my-page', () => ({
+vi.mock('@/features/profile/hooks/useMyProfile', () => ({
   useMyProfile: vi.fn(),
 }));
 
@@ -24,7 +24,7 @@ vi.mock('@/utils/supabase/client', () => ({
   }),
 }));
 
-const { useMyProfile } = await import('@/features/my-page');
+const { useMyProfile } = await import('@/features/profile/hooks/useMyProfile');
 
 const mockedUseMyProfile = vi.mocked(useMyProfile);
 

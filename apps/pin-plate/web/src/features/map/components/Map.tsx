@@ -9,8 +9,7 @@ import {
 import type { MapMouseEvent } from '@vis.gl/react-google-maps';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useRouter } from 'next/navigation';
-import * as styles from './Map.styles.css';
-import { usePlaces } from '@/features/place/hooks/usePlaces';
+import { useSuspensePlaces } from '@/features/place/hooks/usePlaces';
 import type { PlaceWithStats } from '@/features/place/types/place';
 import type { Place } from '@/features/post/types/search';
 import {
@@ -29,8 +28,14 @@ import {
 } from '../atoms';
 import { getClientPosition } from '../utils/event';
 import CustomMarker from './CustomMarker';
-import { Spinner, vars } from '@pin-plate/ui';
+import { vars } from '@pin-plate/ui';
 import { ViewModeToggle } from '@/components/ViewModeToggle';
+import {
+  mapContainer,
+  mapWrapper,
+  viewModeOverlay,
+  viewModeToggle,
+} from './Map.styles.css';
 
 const SEOUL_DEFAULT: google.maps.LatLngLiteral = {
   lat: 37.3595704,
@@ -104,7 +109,7 @@ export const Map = () => {
   const nearbyPlaces = useAtomValue(nearbyResultsAtom);
   const statusFilter = useAtomValue(statusFilterAtom);
 
-  const { data: places } = usePlaces();
+  const { data: places } = useSuspensePlaces();
 
   const searchFilteredPlaces = useMemo(() => {
     const savedPlaces = places ?? [];
@@ -199,9 +204,9 @@ export const Map = () => {
   };
 
   return (
-    <div className={styles.mapWrapper}>
-      <div className={styles.viewModeOverlay}>
-        <ViewModeToggle className={styles.viewModeToggle} size="compact" />
+    <div className={mapWrapper}>
+      <div className={viewModeOverlay}>
+        <ViewModeToggle className={viewModeToggle} size="compact" />
       </div>
       {initialCenter ? (
         <GoogleMap
@@ -210,7 +215,7 @@ export const Map = () => {
           defaultZoom={15}
           disableDefaultUI
           clickableIcons={false}
-          className={styles.mapContainer}
+          className={mapContainer}
           onClick={handleMapClick}
         >
           <MapEffects
@@ -364,9 +369,7 @@ export const Map = () => {
           )}
         </GoogleMap>
       ) : (
-        <div className={styles.mapContainer}>
-          <Spinner />
-        </div>
+        <></>
       )}
     </div>
   );

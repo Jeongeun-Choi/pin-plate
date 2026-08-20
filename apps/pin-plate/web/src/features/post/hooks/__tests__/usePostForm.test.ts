@@ -257,7 +257,7 @@ describe('usePostForm', () => {
     });
 
     expect(
-      screen.getByText('사진은 최대 0장 더 추가할 수 있어요'),
+      await screen.findByText('사진은 최대 0장 더 추가할 수 있어요'),
     ).toBeInTheDocument();
   });
 
@@ -270,7 +270,9 @@ describe('usePostForm', () => {
       await result.current.submit();
     });
 
-    expect(screen.getByText('방문한 장소를 선택해 주세요')).toBeInTheDocument();
+    expect(
+      await screen.findByText('방문한 장소를 선택해 주세요'),
+    ).toBeInTheDocument();
     expect(mockCreatePost).not.toHaveBeenCalled();
   });
 
@@ -287,7 +289,7 @@ describe('usePostForm', () => {
       await result.current.submit();
     });
 
-    expect(screen.getByText('별점을 입력해 주세요')).toBeInTheDocument();
+    expect(await screen.findByText('별점을 입력해 주세요')).toBeInTheDocument();
     expect(mockCreatePost).not.toHaveBeenCalled();
   });
 
@@ -356,7 +358,7 @@ describe('usePostForm', () => {
         place_id: expect.anything(),
       }),
     );
-    expect(screen.getByText('게시글이 등록됐어요')).toBeInTheDocument();
+    expect(await screen.findByText('게시글이 등록됐어요')).toBeInTheDocument();
     expect(mockOnSuccess).toHaveBeenCalled();
     expect(result.current.formState.content).toBe('');
     expect(result.current.formState.rating).toBe(0);

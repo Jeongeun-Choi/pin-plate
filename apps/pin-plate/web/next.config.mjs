@@ -1,9 +1,14 @@
 import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
+import bundle from '@next/bundle-analyzer';
 
 const withVanillaExtract = createVanillaExtractPlugin();
 
+const withBundleAnalyzer = bundle({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = withBundleAnalyzer({
   // 모노레포 패키지 트랜스파일 설정
   transpilePackages: ['@pin-plate/ui'],
 
@@ -124,6 +129,6 @@ const nextConfig = {
 
     return config;
   },
-};
+});
 
 export default withVanillaExtract(nextConfig);

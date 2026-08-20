@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ShareMapDialog } from '../components/ShareMapDialog';
+import ShareMapDialog from '../components/ShareMapDialog';
 import { useCreateSharedMap } from '../hooks/useCreateSharedMap';
 import type { PlaceStatus, PlaceWithStats } from '@/features/place/types/place';
 import type { SharedMap } from '../types/sharedMap';

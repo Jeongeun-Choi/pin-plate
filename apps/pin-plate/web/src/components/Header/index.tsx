@@ -13,15 +13,39 @@ import {
 } from '@pin-plate/ui/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { searchQueryAtom } from '@/app/atoms';
-import * as styles from './Header.css';
+import {
+  clearButton,
+  container,
+  leftSection,
+  logoContainer,
+  logoText,
+  profileIcon,
+  profileWrapper,
+  rightSection,
+  searchButton,
+  searchContainer,
+  searchInput,
+  shareButton,
+  shareButtonText,
+  writeButton,
+  writeButtonText,
+} from './Header.css';
 import { isPostModalOpenAtom } from '@/features/post/atoms';
 import { AccountPopover } from './AccountPopover';
-import { myPageKeys, getMyProfile } from '@/features/my-page';
+import { getMyProfile } from '@/features/profile/api/getMyProfile';
+import { profileKeys } from '@/features/profile/profileKeys';
 import { useSearchPlaces } from '@/features/map/hooks/useSearchPlaces';
 import { usePlaces } from '@/features/place/hooks/usePlaces';
-import { ShareMapDialog } from '@/features/shared-map/components/ShareMapDialog';
 import { getCurrentUser } from '@/utils/supabase/getCurrentUser';
 import { ViewModeToggle } from '@/components/ViewModeToggle';
+import dynamic from 'next/dynamic';
+
+const ShareMapDialog = dynamic(
+  () => import('@/features/shared-map/components/ShareMapDialog'),
+  {
+    ssr: false,
+  },
+);
 
 export const Header = () => {
   const [searchInputValue, setSearchInputValue] = useState('');
@@ -64,7 +88,7 @@ export const Header = () => {
 
   const handleProfileHover = () => {
     queryClient.prefetchQuery({
-      queryKey: myPageKeys.profile(),
+      queryKey: profileKeys.me(),
       queryFn: getMyProfile,
     });
   };
@@ -98,20 +122,17 @@ export const Header = () => {
 
   return (
     <>
-      <header className={styles.container}>
+      <header className={container}>
         {/* Left: Logo & Search */}
-        <div className={styles.leftSection}>
-          <div
-            className={styles.logoContainer}
-            onClick={() => router.push('/')}
-          >
-            <span className={styles.logoText}>Pin-plate</span>
+        <div className={leftSection}>
+          <div className={logoContainer} onClick={() => router.push('/')}>
+            <span className={logoText}>Pin-plate</span>
           </div>
 
-          <div className={styles.searchContainer}>
+          <div className={searchContainer}>
             <button
               type="button"
-              className={styles.searchButton}
+              className={searchButton}
               onClick={handleSearch}
               aria-label="검색"
             >
@@ -120,7 +141,7 @@ export const Header = () => {
             <Input
               type="search"
               enterKeyHint="search"
-              className={styles.searchInput}
+              className={searchInput}
               placeholder="음식점 이름으로 검색"
               value={searchInputValue}
               onChange={(e) => setSearchInputValue(e.target.value)}
@@ -129,7 +150,7 @@ export const Header = () => {
             {searchInputValue && (
               <button
                 type="button"
-                className={styles.clearButton}
+                className={clearButton}
                 onClick={handleClearSearch}
                 aria-label="검색어 초기화"
               >
@@ -139,35 +160,35 @@ export const Header = () => {
           </div>
         </div>
 
-        <div className={styles.rightSection}>
+        <div className={rightSection}>
           {/* Toggle */}
           <ViewModeToggle tone="header" />
 
           {/* Write Button */}
           <button
-            className={styles.writeButton}
+            className={writeButton}
             onClick={() => setIsPostModalOpen(true)}
           >
             <IcPlus width={16} height={16} color="currentColor" />
-            <span className={styles.writeButtonText}>작성하기</span>
+            <span className={writeButtonText}>작성하기</span>
           </button>
 
           {/* Share Button */}
           <button
             type="button"
-            className={styles.shareButton}
+            className={shareButton}
             onClick={handleShareMapOpen}
             disabled={isShareButtonDisabled}
             title={shareButtonTitle}
           >
             <IcShare width={16} height={16} color="currentColor" />
-            <span className={styles.shareButtonText}>공유하기</span>
+            <span className={shareButtonText}>공유하기</span>
           </button>
 
           {/* Profile Icon */}
-          <div className={styles.profileWrapper}>
+          <div className={profileWrapper}>
             <div
-              className={styles.profileIcon}
+              className={profileIcon}
               onClick={togglePopover}
               onMouseEnter={handleProfileHover}
             >

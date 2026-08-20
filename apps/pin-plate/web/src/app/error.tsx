@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, startTransition } from 'react';
-import * as styles from './error.styles.css';
+import { boundaryClassNames as styles } from './boundaryClassNames';
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -12,11 +12,6 @@ interface ErrorProps {
 export default function Error({ error, reset }: ErrorProps) {
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    // 실무에서는 이곳에 Sentry 등의 에러 트래킹 서비스를 연결합니다.
-    console.error('Unhandled Error:', error);
-  }, [error]);
-
   const handleRetry = () => {
     // 모든 쿼리 무효화 후 Next.js 에러 상태 초기화
     queryClient.invalidateQueries();
@@ -25,11 +20,16 @@ export default function Error({ error, reset }: ErrorProps) {
     });
   };
 
+  useEffect(() => {
+    // 실무에서는 이곳에 Sentry 등의 에러 트래킹 서비스를 연결합니다.
+    console.error('Unhandled Error:', error);
+  }, [error]);
+
   return (
     <main className={styles.container}>
       <section className={styles.card}>
         <div className={styles.iconContainer}>
-          <span>⚠️</span>
+          <span aria-hidden="true">!</span>
         </div>
         <h1 className={styles.title}>문제가 발생했습니다</h1>
         <p className={styles.description}>

@@ -1,5 +1,5 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 import { ToastProvider, useToast } from '../ToastProvider';
 
 const ToastHarness = () => {
@@ -37,8 +37,25 @@ const DismissibleToastHarness = () => {
   );
 };
 
+const ShortDurationToastHarness = () => {
+  const { showSuccessToast } = useToast();
+
+  const handleShowToast = () => {
+    showSuccessToast({
+      title: '곧 사라지는 토스트',
+      duration: 40,
+    });
+  };
+
+  return (
+    <button type="button" onClick={handleShowToast}>
+      짧은 토스트 열기
+    </button>
+  );
+};
+
 describe('ToastProvider', () => {
-  it('shows a toast message without a dismiss button by default', () => {
+  it('shows a toast message without a dismiss button by default', async () => {
     render(
       <ToastProvider>
         <ToastHarness />
@@ -47,7 +64,7 @@ describe('ToastProvider', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '토스트 열기' }));
 
-    expect(screen.getByText('게시글이 저장됐어요')).toBeInTheDocument();
+    expect(await screen.findByText('게시글이 저장됐어요')).toBeInTheDocument();
     expect(
       screen.getByText('내 지도에서 바로 확인할 수 있어요.'),
     ).toBeInTheDocument();
@@ -56,7 +73,7 @@ describe('ToastProvider', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows and dismisses a dismissible toast message', () => {
+  it('shows and dismisses a dismissible toast message', async () => {
     render(
       <ToastProvider>
         <DismissibleToastHarness />
@@ -65,12 +82,12 @@ describe('ToastProvider', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '닫기 토스트 열기' }));
 
-    fireEvent.click(screen.getByRole('button', { name: '알림 닫기' }));
+    fireEvent.click(await screen.findByRole('button', { name: '알림 닫기' }));
 
     expect(screen.queryByText('게시글이 저장됐어요')).not.toBeInTheDocument();
   });
 
-  it('does not stack duplicate toast messages', () => {
+  it('does not stack duplicate toast messages', async () => {
     render(
       <ToastProvider>
         <ToastHarness />
@@ -82,32 +99,26 @@ describe('ToastProvider', () => {
     fireEvent.click(triggerButton);
     fireEvent.click(triggerButton);
 
-    expect(screen.getAllByText('게시글이 저장됐어요')).toHaveLength(1);
+    expect(await screen.findAllByText('게시글이 저장됐어요')).toHaveLength(1);
   });
 
-  it('removes a toast after its duration', () => {
-    vi.useFakeTimers();
-
+  it('removes a toast after its duration', async () => {
     render(
       <ToastProvider>
-        <ToastHarness />
+        <ShortDurationToastHarness />
       </ToastProvider>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '토스트 열기' }));
+    fireEvent.click(screen.getByRole('button', { name: '짧은 토스트 열기' }));
 
-    expect(screen.getByText('게시글이 저장됐어요')).toBeInTheDocument();
+    expect(await screen.findByText('곧 사라지는 토스트')).toBeInTheDocument();
 
-    act(() => {
-      vi.advanceTimersByTime(3200);
+    await waitFor(() => {
+      expect(screen.queryByText('곧 사라지는 토스트')).not.toBeInTheDocument();
     });
-
-    expect(screen.queryByText('게시글이 저장됐어요')).not.toBeInTheDocument();
-
-    vi.useRealTimers();
   });
 
-  it('accepts an explicit toast position', () => {
+  it('accepts an explicit toast position', async () => {
     render(
       <ToastProvider position="top-center">
         <ToastHarness />
@@ -116,6 +127,6 @@ describe('ToastProvider', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '토스트 열기' }));
 
-    expect(screen.getByText('게시글이 저장됐어요')).toBeInTheDocument();
+    expect(await screen.findByText('게시글이 저장됐어요')).toBeInTheDocument();
   });
 });

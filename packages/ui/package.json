@@ -9,6 +9,7 @@
     "./styles": "./src/styles/vars.css.ts",
     "./vars": "./src/styles/vars.css.ts",
     "./reset": "./src/styles/reset.css.ts",
+    "./toast": "./src/components/Toast/index.tsx",
     "./icons": "./src/icons/index.ts"
   },
   "scripts": {

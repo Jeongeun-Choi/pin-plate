@@ -1,14 +1,24 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 
-import {
-  MyPageReportSection,
-  MyPageHeader,
-  MyPageMenu,
-  useMyProfile,
-} from '@/features/my-page';
+import dynamic from 'next/dynamic';
+import { useMyProfile } from '@/features/profile/hooks/useMyProfile';
+import { MyPageHeader, MyPageMenu } from '@/features/my-page/components';
 import * as styles from './page.css';
+import { Spinner } from '@pin-plate/ui';
+
+const MyPageReportSection = dynamic(
+  () => import('@/features/my-page/components/MyPageReport'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className={styles.loadingState} role="status" aria-live="polite">
+        <Spinner />
+      </div>
+    ),
+  },
+);
 
 export default function MyPage() {
   const { data: profile, isLoading } = useMyProfile();
