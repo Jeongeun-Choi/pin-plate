@@ -24,7 +24,9 @@ const {
   mockUpdateSelect,
   mockUpdateSingle,
   mockSelect,
+  mockSelectEqId,
   mockSelectEqUserId,
+  mockSelectMaybeSingle,
   mockSelectOrder,
 } = vi.hoisted(() => ({
   mockGetUser: vi.fn(),
@@ -37,7 +39,9 @@ const {
   mockUpdateSelect: vi.fn(),
   mockUpdateSingle: vi.fn(),
   mockSelect: vi.fn(),
+  mockSelectEqId: vi.fn(),
   mockSelectEqUserId: vi.fn(),
+  mockSelectMaybeSingle: vi.fn(),
   mockSelectOrder: vi.fn(),
 }));
 
@@ -103,6 +107,46 @@ afterEach(() => {
 });
 
 describe('GET /api/posts', () => {
+  it('returns one owned post by id', async () => {
+    mockAuthenticatedUser({ id: 'user-1' });
+    mockSelectMaybeSingle.mockResolvedValue({
+      data: { id: 23, user_id: 'user-1' },
+      error: null,
+    });
+    mockSelectEqUserId.mockReturnValue({ maybeSingle: mockSelectMaybeSingle });
+    mockSelectEqId.mockReturnValue({ eq: mockSelectEqUserId });
+    mockSelect.mockReturnValue({ eq: mockSelectEqId });
+    mockFrom.mockReturnValue({ select: mockSelect });
+
+    const response = await GET(
+      new Request('http://localhost/api/posts?id=23') as never,
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(mockSelectEqId).toHaveBeenCalledWith('id', 23);
+    expect(mockSelectEqUserId).toHaveBeenCalledWith('user_id', 'user-1');
+    expect(mockSelectMaybeSingle).toHaveBeenCalled();
+    expect(data).toEqual({ id: 23, user_id: 'user-1' });
+  });
+
+  it('returns 404 when the requested post is missing or not owned by the user', async () => {
+    mockAuthenticatedUser({ id: 'user-1' });
+    mockSelectMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockSelectEqUserId.mockReturnValue({ maybeSingle: mockSelectMaybeSingle });
+    mockSelectEqId.mockReturnValue({ eq: mockSelectEqUserId });
+    mockSelect.mockReturnValue({ eq: mockSelectEqId });
+    mockFrom.mockReturnValue({ select: mockSelect });
+
+    const response = await GET(
+      new Request('http://localhost/api/posts?id=23') as never,
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(data).toEqual({ error: 'Post not found' });
+  });
+
   it('reads posts with the Better Auth session user id', async () => {
     vi.stubGlobal(
       'fetch',

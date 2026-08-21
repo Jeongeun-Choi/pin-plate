@@ -39,10 +39,14 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('id', postId)
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
     return NextResponse.json(data);
