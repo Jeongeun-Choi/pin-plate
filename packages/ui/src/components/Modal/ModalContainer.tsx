@@ -28,7 +28,7 @@ function ModalContainerInner({ children }: PropsWithChildren) {
 export default function ModalContainer({ children }: PropsWithChildren) {
   const { isOpen } = useModalContext();
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   return <ModalContainerInner>{children}</ModalContainerInner>;
 }

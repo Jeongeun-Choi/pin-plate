@@ -30,7 +30,7 @@ export default function FullScreenModalContainer({
 }: PropsWithChildren) {
   const { isOpen } = useModalContext();
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   return <FullScreenModalContainerInner>{children}</FullScreenModalContainerInner>;
 }
