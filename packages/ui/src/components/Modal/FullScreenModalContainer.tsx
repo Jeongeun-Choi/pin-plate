@@ -1,10 +1,21 @@
 'use client';
 
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalContext } from './context';
 import { useModalA11y } from './useModalA11y';
 import * as s from './styles.css';
+
+const subscribeToHydration = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+const useIsHydrated = () =>
+  useSyncExternalStore(
+    subscribeToHydration,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
 
 function FullScreenModalContainerInner({ children }: PropsWithChildren) {
   const { close } = useModalContext();
@@ -29,8 +40,11 @@ export default function FullScreenModalContainer({
   children,
 }: PropsWithChildren) {
   const { isOpen } = useModalContext();
+  const isHydrated = useIsHydrated();
 
-  if (!isOpen || typeof document === 'undefined') return null;
+  if (!isOpen || !isHydrated) return null;
 
-  return <FullScreenModalContainerInner>{children}</FullScreenModalContainerInner>;
+  return (
+    <FullScreenModalContainerInner>{children}</FullScreenModalContainerInner>
+  );
 }
