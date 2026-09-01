@@ -136,6 +136,116 @@ export const postImage = style({
   objectFit: 'cover',
 });
 
+export const carouselViewport = style({
+  width: '100%',
+  height: '100%',
+  overflow: 'hidden',
+});
+
+export const carouselContainer = style({
+  height: '100%',
+  display: 'flex',
+});
+
+export const carouselSlide = style({
+  position: 'relative',
+  height: '100%',
+  minWidth: 0,
+  flex: '0 0 100%',
+});
+
+const carouselButton = style({
+  position: 'absolute',
+  top: '50%',
+  zIndex: 1,
+  width: '44px',
+  height: '44px',
+  border: `1px solid ${vars.colors.background.border}`,
+  borderRadius: vars.borderRadius.full,
+  backgroundColor: vars.colors.background.surface,
+  color: vars.colors.text.primary,
+  fontSize: vars.fontSize['2xl'],
+  fontWeight: vars.fontWeight.bold,
+  lineHeight: 1,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  boxShadow: vars.boxShadow.card,
+  transform: 'translateY(-50%)',
+  transition: 'opacity 0.2s ease, background-color 0.2s ease',
+
+  ':hover': {
+    backgroundColor: vars.colors.primary.light,
+  },
+
+  ':disabled': {
+    cursor: 'default',
+    opacity: 0.35,
+  },
+});
+
+export const carouselPrevButton = style([
+  carouselButton,
+  {
+    left: vars.spacing[3],
+  },
+]);
+
+export const carouselNextButton = style([
+  carouselButton,
+  {
+    right: vars.spacing[3],
+  },
+]);
+
+export const carouselStatus = style({
+  position: 'absolute',
+  right: vars.spacing[3],
+  bottom: vars.spacing[3],
+  zIndex: 1,
+  minWidth: '52px',
+  padding: `${vars.spacing[1]} ${vars.spacing[2]}`,
+  borderRadius: vars.borderRadius.full,
+  backgroundColor: vars.colors.background.surface,
+  border: `1px solid ${vars.colors.background.border}`,
+  color: vars.colors.text.body,
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.bold,
+  textAlign: 'center',
+  boxShadow: vars.boxShadow.card,
+});
+
+export const carouselDots = style({
+  position: 'absolute',
+  left: '50%',
+  bottom: vars.spacing[3],
+  zIndex: 1,
+  display: 'flex',
+  gap: vars.spacing[1],
+  transform: 'translateX(-50%)',
+});
+
+export const carouselDot = style({
+  width: '8px',
+  height: '8px',
+  padding: 0,
+  border: 'none',
+  borderRadius: vars.borderRadius.full,
+  backgroundColor: vars.colors.background.surface,
+  opacity: 0.72,
+  cursor: 'pointer',
+});
+
+export const carouselDotSelected = style([
+  carouselDot,
+  {
+    width: '20px',
+    backgroundColor: vars.colors.primary.default,
+    opacity: 1,
+  },
+]);
+
 export const imagePlaceholder = style({
   width: '100%',
   height: '100%',
@@ -143,6 +253,10 @@ export const imagePlaceholder = style({
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: vars.colors.primary.light,
+});
+
+export const imagePlaceholderIcon = style({
+  color: vars.colors.primary.default,
 });
 
 export const content = style({
