@@ -1,10 +1,9 @@
-import Image from 'next/image';
 import type { ReactNode } from 'react';
 import * as styles from './styles/PostDetailModal.styles.css';
 import { Post } from '../types/post';
-import { IcFork, TagChip } from '@pin-plate/ui';
+import { TagChip } from '@pin-plate/ui';
 import { getTagLabel } from '../constants/tags';
-import { getTrustedImageUrl } from '@/features/image/utils/imageReference';
+import { PostImageCarousel } from './PostImageCarousel';
 
 interface IPostDetailContentProps {
   post: Post;
@@ -15,11 +14,6 @@ export default function PostDetailContent({
   post,
   metaSlot,
 }: IPostDetailContentProps) {
-  const firstImageUrl = post.image_urls[0] ?? '';
-  const detailImageUrl = firstImageUrl
-    ? (getTrustedImageUrl(firstImageUrl) ?? firstImageUrl)
-    : '';
-
   // Format date
   const formattedDate = new Date(post.created_at).toLocaleString('ko-KR', {
     year: 'numeric',
@@ -31,23 +25,10 @@ export default function PostDetailContent({
 
   return (
     <div className={styles.detailLayout}>
-      {/* Image */}
-      <div className={styles.imageContainer}>
-        {detailImageUrl ? (
-          <Image
-            src={detailImageUrl}
-            alt={post.place_name}
-            fill
-            sizes="(min-width: 768px) 450px, 100vw"
-            className={styles.postImage}
-            priority
-          />
-        ) : (
-          <div className={styles.imagePlaceholder}>
-            <IcFork size={72} color="#ffa07a" />
-          </div>
-        )}
-      </div>
+      <PostImageCarousel
+        imageUrls={post.image_urls}
+        placeName={post.place_name}
+      />
 
       {/* Content */}
       <div className={styles.content}>
