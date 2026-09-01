@@ -334,9 +334,11 @@ export const reviewCardEmpty = style({
 });
 
 export const loadingRow = style({
-  padding: '20px',
+  width: '100%',
   display: 'flex',
   justifyContent: 'center',
+  alignItems: 'center',
+  height: '100%',
 });
 
 export const errorMessage = style({
