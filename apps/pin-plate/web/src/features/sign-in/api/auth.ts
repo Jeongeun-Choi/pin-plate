@@ -34,6 +34,10 @@ interface BetterAuthSocialSignInResponse {
   url?: string;
 }
 
+interface GoogleLoginResult {
+  shouldVerifySession: boolean;
+}
+
 const GOOGLE_LOGIN_POPUP_TIMEOUT_MS = 5 * 60 * 1_000;
 
 const getPasswordResetRedirectUrl = () => {
@@ -164,7 +168,7 @@ export const updatePassword = async ({ password }: PasswordUpdateParams) => {
   return data;
 };
 
-export const loginWithGoogle = async () => {
+export const loginWithGoogle = async (): Promise<GoogleLoginResult> => {
   const isMobileWebView = Boolean(window.ReactNativeWebView);
   const width = 500;
   const height = 600;
@@ -213,19 +217,19 @@ export const loginWithGoogle = async () => {
 
   if (!data.url) {
     popupWindow?.close();
-    return;
+    return { shouldVerifySession: true };
   }
 
   // 모바일 WebView는 팝업(window.open)과 BroadcastChannel을 지원하지 않으므로
   // 같은 화면에서 그대로 이동시키고, 완료 처리는 콜백 페이지가 전담한다.
   if (isMobileWebView || !popupWindow) {
     window.location.href = data.url;
-    return;
+    return { shouldVerifySession: false };
   }
 
   popupWindow.location.href = data.url;
 
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<GoogleLoginResult>((resolve, reject) => {
     let hasCompletedGoogleLogin = false;
     let popupTimeoutTimerId: number | null = null;
     const channel =
@@ -256,7 +260,10 @@ export const loginWithGoogle = async () => {
 
       cleanupGoogleLoginListeners();
       closePopupWindow();
-      getBetterAuthSession().then(() => resolve(), reject);
+      getBetterAuthSession().then(
+        () => resolve({ shouldVerifySession: true }),
+        reject,
+      );
     };
 
     const failGoogleLogin = (message: string) => {
@@ -273,7 +280,7 @@ export const loginWithGoogle = async () => {
       hasCompletedGoogleLogin = true;
 
       cleanupGoogleLoginListeners();
-      resolve();
+      resolve({ shouldVerifySession: false });
     };
 
     const handleChannelMessage = (event: MessageEvent<unknown>) => {

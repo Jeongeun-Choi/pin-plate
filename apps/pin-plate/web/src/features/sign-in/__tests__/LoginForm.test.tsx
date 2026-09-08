@@ -31,6 +31,11 @@ describe('LoginForm', () => {
     } as unknown as ReturnType<typeof useLoginHook.useLogin>);
 
     vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
+      data: null,
+      error: null,
+      isError: false,
+      isPending: false,
+      isSuccess: false,
       mutate: mockLoginWithGoogle,
     } as unknown as ReturnType<typeof useLoginHook.useGoogleLogin>);
   });
@@ -92,6 +97,11 @@ describe('LoginForm', () => {
 
   it('Google 버튼 클릭 시 loginWithGoogle을 호출한다', () => {
     vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
+      data: null,
+      error: null,
+      isError: false,
+      isPending: false,
+      isSuccess: false,
       mutate: mockLoginWithGoogle,
     } as unknown as ReturnType<typeof useLoginHook.useGoogleLogin>);
 
@@ -103,6 +113,81 @@ describe('LoginForm', () => {
     fireEvent.click(googleButton);
 
     expect(mockLoginWithGoogle).toHaveBeenCalled();
+  });
+
+  it('Google 로그인 진행 중 상태를 버튼과 안내 문구로 표시한다', () => {
+    vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
+      data: null,
+      error: null,
+      isError: false,
+      isPending: true,
+      isSuccess: false,
+      mutate: mockLoginWithGoogle,
+    } as unknown as ReturnType<typeof useLoginHook.useGoogleLogin>);
+
+    renderComponent();
+
+    const googleButton = screen.getByRole('button', {
+      name: /Google 로그인 중/,
+    });
+
+    expect(googleButton).toBeDisabled();
+    expect(googleButton).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Google 인증 창에서 로그인을 완료해 주세요.',
+    );
+  });
+
+  it('Google 로그인 성공 후 이동 안내 문구를 표시한다', () => {
+    vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
+      data: { user: { id: 'google-user-123' } },
+      error: null,
+      isError: false,
+      isPending: false,
+      isSuccess: true,
+      mutate: mockLoginWithGoogle,
+    } as unknown as ReturnType<typeof useLoginHook.useGoogleLogin>);
+
+    renderComponent();
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '로그인됐어요. 지도로 이동할게요.',
+    );
+  });
+
+  it('Google 로그인 세션이 없으면 성공 안내 문구를 표시하지 않는다', () => {
+    vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
+      data: null,
+      error: null,
+      isError: false,
+      isPending: false,
+      isSuccess: true,
+      mutate: mockLoginWithGoogle,
+    } as unknown as ReturnType<typeof useLoginHook.useGoogleLogin>);
+
+    renderComponent();
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('로그인됐어요. 지도로 이동할게요.'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('Google 로그인 실패 메시지를 인라인으로 표시한다', () => {
+    vi.mocked(useLoginHook.useGoogleLogin).mockReturnValue({
+      data: null,
+      error: new Error('Google 로그인 URL을 생성하지 못했습니다.'),
+      isError: true,
+      isPending: false,
+      isSuccess: false,
+      mutate: mockLoginWithGoogle,
+    } as unknown as ReturnType<typeof useLoginHook.useGoogleLogin>);
+
+    renderComponent();
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Google 로그인 URL을 생성하지 못했습니다.',
+    );
   });
 
   it('필수 입력 에러를 각 input 아래에 표시한다', () => {

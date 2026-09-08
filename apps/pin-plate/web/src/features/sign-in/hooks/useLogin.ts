@@ -25,16 +25,27 @@ export const useGoogleLogin = () => {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: () => loginWithGoogle(),
-    onSuccess: async () => {
+    mutationFn: async () => {
+      const googleLoginResult = await loginWithGoogle();
+
+      if (!googleLoginResult.shouldVerifySession) {
+        return null;
+      }
+
       const session = await getSession();
 
+      if (!session) {
+        throw new Error(
+          '로그인은 완료됐지만 세션을 확인하지 못했어요. 다시 시도해 주세요.',
+        );
+      }
+
+      return session;
+    },
+    onSuccess: async (session) => {
       if (!session) return;
 
       await redirectAfterLogin(session.user.id, router);
-    },
-    onError: (error) => {
-      console.error('Google login failed:', error);
     },
   });
 };
