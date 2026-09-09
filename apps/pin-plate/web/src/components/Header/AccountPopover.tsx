@@ -19,7 +19,10 @@ export const AccountPopover = ({
   const popoverRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const { data: profile } = useMyProfile();
+  const { data: profile, isLoading: isProfileLoading } = useMyProfile();
+
+  const profileDisplayName = profile?.nickname || profile?.name || '사용자';
+  const profileDisplayEmail = profile?.email || '이메일 없음';
 
   const handleMyPageClick = () => {
     onClose();
@@ -72,7 +75,17 @@ export const AccountPopover = ({
     };
   }, [onClose]);
 
-  const content = profile ? (
+  const content = isProfileLoading ? (
+    <div
+      className={styles.popoverContainer}
+      ref={popoverRef}
+      style={positionStyle}
+    >
+      <div className={styles.bottomSection} role="status" aria-live="polite">
+        <p className={styles.userEmail}>내 정보를 불러오는 중이에요.</p>
+      </div>
+    </div>
+  ) : profile ? (
     <div
       className={styles.popoverContainer}
       ref={popoverRef}
@@ -80,8 +93,8 @@ export const AccountPopover = ({
     >
       <div className={styles.topSection}>
         <div className={styles.userInfo}>
-          <p className={styles.userName}>{profile.nickname || profile.name}</p>
-          <p className={styles.userEmail}>{profile.email}</p>
+          <p className={styles.userName}>{profileDisplayName}</p>
+          <p className={styles.userEmail}>{profileDisplayEmail}</p>
         </div>
       </div>
       <div className={styles.bottomSection}>

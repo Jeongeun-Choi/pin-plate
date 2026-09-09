@@ -265,7 +265,7 @@ describe('loginWithGoogle', () => {
 
     await vi.advanceTimersByTimeAsync(5 * 60 * 1_000);
 
-    await expect(loginPromise).resolves.toBeUndefined();
+    await expect(loginPromise).resolves.toEqual({ shouldVerifySession: false });
     expect(mockPopupWindow.close).not.toHaveBeenCalled();
 
     vi.useRealTimers();
@@ -300,7 +300,7 @@ describe('loginWithGoogle', () => {
       type: 'GOOGLE_LOGIN_SUCCESS',
     });
 
-    await expect(loginPromise).resolves.toBeUndefined();
+    await expect(loginPromise).resolves.toEqual({ shouldVerifySession: true });
     expect(fetch).toHaveBeenCalledWith(
       'http://localhost:8787/auth/get-session',
       expect.objectContaining({ credentials: 'include' }),
@@ -340,7 +340,7 @@ describe('loginWithGoogle', () => {
       }),
     );
 
-    await expect(loginPromise).resolves.toBeUndefined();
+    await expect(loginPromise).resolves.toEqual({ shouldVerifySession: true });
     expect(fetch).toHaveBeenCalledWith(
       'http://localhost:8787/auth/get-session',
       expect.objectContaining({ credentials: 'include' }),

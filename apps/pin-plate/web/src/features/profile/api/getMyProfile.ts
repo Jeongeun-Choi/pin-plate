@@ -2,10 +2,22 @@ import { z } from 'zod';
 
 const profileWithEmailSchema = z.object({
   id: z.string(),
-  nickname: z.string().nullable(),
-  name: z.string().nullable(),
-  image_url: z.string().nullable(),
-  email: z.string().nullable().optional(),
+  nickname: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? null),
+  name: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? null),
+  image_url: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? null),
+  email: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? null),
 });
 
 export type ProfileWithEmail = z.infer<typeof profileWithEmailSchema>;

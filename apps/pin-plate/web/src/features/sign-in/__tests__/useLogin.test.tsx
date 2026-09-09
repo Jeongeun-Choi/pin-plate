@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useLogin } from '../hooks/useLogin';
+import { useGoogleLogin, useLogin } from '../hooks/useLogin';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -84,6 +84,82 @@ describe('useLogin', () => {
     });
 
     expect(result.current.error?.message).toBe('Login failed');
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('redirects after Google login creates a session', async () => {
+    vi.mocked(authApi.loginWithGoogle).mockResolvedValue({
+      shouldVerifySession: true,
+    });
+    vi.mocked(authApi.getSession).mockResolvedValue({
+      user: { id: 'google-user-123' },
+    });
+
+    const { result } = renderHook(() => useGoogleLogin(), {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      ),
+    });
+
+    result.current.mutate();
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(authApi.loginWithGoogle).toHaveBeenCalled();
+    expect(authApi.getSession).toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith('/');
+  });
+
+  it('surfaces a Google login error when the session cannot be confirmed', async () => {
+    vi.mocked(authApi.loginWithGoogle).mockResolvedValue({
+      shouldVerifySession: true,
+    });
+    vi.mocked(authApi.getSession).mockResolvedValue(null);
+
+    const { result } = renderHook(() => useGoogleLogin(), {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      ),
+    });
+
+    result.current.mutate();
+
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
+
+    expect(result.current.error?.message).toBe(
+      '로그인은 완료됐지만 세션을 확인하지 못했어요. 다시 시도해 주세요.',
+    );
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('does not verify the session while Google login is redirecting the current page', async () => {
+    vi.mocked(authApi.loginWithGoogle).mockResolvedValue({
+      shouldVerifySession: false,
+    });
+
+    const { result } = renderHook(() => useGoogleLogin(), {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      ),
+    });
+
+    result.current.mutate();
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(authApi.getSession).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
   });
 });

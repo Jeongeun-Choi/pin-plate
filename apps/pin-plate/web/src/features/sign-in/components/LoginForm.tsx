@@ -63,7 +63,22 @@ export function LoginForm() {
   const [isEmailLoginExpanded, setIsEmailLoginExpanded] = useState(false);
 
   const { mutate: loginWithEmail, isPending: isEmailLoginPending } = useLogin();
-  const { mutate: loginWithGoogle } = useGoogleLogin();
+  const {
+    data: googleLoginSession,
+    error: googleLoginError,
+    isError: isGoogleLoginError,
+    isPending: isGoogleLoginPending,
+    isSuccess: isGoogleLoginSuccess,
+    mutate: loginWithGoogle,
+  } = useGoogleLogin();
+
+  const googleLoginErrorMessage =
+    googleLoginError instanceof Error
+      ? googleLoginError.message
+      : 'Google 로그인이 완료되지 않았어요. 다시 시도해 주세요.';
+  const googleLoginButtonText = isGoogleLoginPending
+    ? 'Google 로그인 중...'
+    : 'Google로 계속하기';
 
   const handleShowEmailLogin = () => {
     setFieldErrors({});
@@ -115,6 +130,8 @@ export function LoginForm() {
         type="button"
         className={styles.googleButton}
         onClick={handleGoogleLogin}
+        disabled={isGoogleLoginPending}
+        aria-busy={isGoogleLoginPending}
       >
         <Image
           src="/assets/ic-google.svg"
@@ -123,8 +140,28 @@ export function LoginForm() {
           height={24}
           className={styles.buttonIcon}
         />
-        <span className={styles.buttonText}>Google로 계속하기</span>
+        <span className={styles.buttonText}>{googleLoginButtonText}</span>
       </button>
+
+      {isGoogleLoginPending && (
+        <div className={styles.statusMessage} role="status">
+          <p className={styles.statusBody}>
+            Google 인증 창에서 로그인을 완료해 주세요.
+          </p>
+        </div>
+      )}
+
+      {isGoogleLoginSuccess && googleLoginSession && (
+        <div className={styles.statusMessage} role="status">
+          <p className={styles.statusBody}>로그인됐어요. 지도로 이동할게요.</p>
+        </div>
+      )}
+
+      {isGoogleLoginError && (
+        <p className={styles.errorText} role="alert">
+          {googleLoginErrorMessage}
+        </p>
+      )}
 
       <div className={styles.dividerWrap}>
         <div className={styles.dividerLine} />

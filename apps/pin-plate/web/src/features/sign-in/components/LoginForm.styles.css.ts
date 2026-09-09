@@ -96,6 +96,10 @@ export const googleButton = style([
     ':hover': {
       backgroundColor: '#f8f9fa',
     },
+    ':disabled': {
+      cursor: 'not-allowed',
+      opacity: 0.65,
+    },
   },
 ]);
 
