@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --webpack -H 0.0.0.0",
     "build": "next build --webpack",
+    "build:open-next": "node scripts/build-open-next.mjs",
     "start": "next start",
     "lint": "eslint '**/*.{ts,tsx}'",
     "prettier": "prettier '**/*.{ts,tsx}'",

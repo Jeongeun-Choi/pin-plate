@@ -160,6 +160,7 @@ export default withSentryConfig(configWithVanillaExtract, {
   webpack: {
     treeshake: {
       removeDebugLogging: true,
+      removeTracing: true,
     },
   },
 });

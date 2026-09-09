@@ -43,7 +43,7 @@ export default $config({
       path: "apps/pin-plate/web",
       // open-next.config.ts에서 내부 빌드 커맨드를 "pnpm build"로 오버라이드
       // → next build --webpack 실행 (Vanilla Extract 호환 필수)
-      buildCommand: "pnpm exec open-next build",
+      buildCommand: "pnpm run build:open-next",
       regions: ["ap-northeast-2"],
 
       environment: {
