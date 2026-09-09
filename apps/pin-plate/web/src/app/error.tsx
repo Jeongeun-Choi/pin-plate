@@ -1,6 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
+import * as Sentry from '@sentry/nextjs';
 import { useEffect, startTransition } from 'react';
 import { boundaryClassNames as styles } from './boundaryClassNames';
 
@@ -21,8 +22,7 @@ export default function Error({ error, reset }: ErrorProps) {
   };
 
   useEffect(() => {
-    // 실무에서는 이곳에 Sentry 등의 에러 트래킹 서비스를 연결합니다.
-    console.error('Unhandled Error:', error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (

@@ -1,5 +1,6 @@
 import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
 import bundle from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs/config';
 
 const withVanillaExtract = createVanillaExtractPlugin();
 
@@ -131,4 +132,34 @@ const nextConfig = withBundleAnalyzer({
   },
 });
 
-export default withVanillaExtract(nextConfig);
+const configWithVanillaExtract = withVanillaExtract(nextConfig);
+
+export default withSentryConfig(configWithVanillaExtract, {
+  org: process.env.SENTRY_ORG ?? 'pin-plate',
+  project: process.env.SENTRY_PROJECT ?? 'javascript-nextjs',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  telemetry: false,
+  silent: !process.env.SENTRY_DEBUG,
+  tunnelRoute: '/monitoring',
+  widenClientFileUpload: true,
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+    deleteSourcemapsAfterUpload: true,
+  },
+  release: {
+    create: Boolean(process.env.SENTRY_AUTH_TOKEN),
+    name: process.env.SENTRY_RELEASE,
+    setCommits: process.env.SENTRY_AUTH_TOKEN
+      ? { auto: true, ignoreMissing: true, ignoreEmpty: true }
+      : undefined,
+    deploy: {
+      env: process.env.SENTRY_ENVIRONMENT ?? 'production',
+      url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pinonplate.com',
+    },
+  },
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
+});
