@@ -1,8 +1,11 @@
 import { spawnSync } from 'node:child_process';
 import {
+  copyFileSync,
   existsSync,
   lstatSync,
+  mkdirSync,
   readdirSync,
+  readFileSync,
   readlinkSync,
   rmSync,
   statSync,
@@ -108,6 +111,52 @@ const pruneServerFunction = () => {
   );
 };
 
+const copyInstrumentationChunks = () => {
+  const serverPath = join(appRoot, '.next', 'server');
+  const tracePath = join(serverPath, 'instrumentation.js.nft.json');
+  const outputServerPath = join(
+    appRoot,
+    '.open-next',
+    'server-functions',
+    'default',
+    'apps',
+    'pin-plate',
+    'web',
+    '.next',
+    'server',
+  );
+
+  if (!existsSync(tracePath) || !existsSync(outputServerPath)) {
+    return;
+  }
+
+  const trace = JSON.parse(readFileSync(tracePath, 'utf8'));
+  const copiedFiles = [];
+
+  for (const filePath of trace.files ?? []) {
+    if (!filePath.startsWith('chunks/')) {
+      continue;
+    }
+
+    const sourcePath = join(serverPath, filePath);
+    const targetPath = join(outputServerPath, filePath);
+
+    if (!existsSync(sourcePath) || existsSync(targetPath)) {
+      continue;
+    }
+
+    mkdirSync(dirname(targetPath), { recursive: true });
+    copyFileSync(sourcePath, targetPath);
+    copiedFiles.push(filePath);
+  }
+
+  if (copiedFiles.length > 0) {
+    console.log(
+      `[open-next-prune] copied ${copiedFiles.length} instrumentation chunk files.`,
+    );
+  }
+};
+
 const pruneBrokenSymlinks = (directoryPath) => {
   if (!existsSync(directoryPath)) {
     return 0;
@@ -138,6 +187,7 @@ const pruneBrokenSymlinks = (directoryPath) => {
 };
 
 runOpenNextBuild();
+copyInstrumentationChunks();
 pruneServerFunction();
 
 const removedSymlinkCount = pruneBrokenSymlinks(
