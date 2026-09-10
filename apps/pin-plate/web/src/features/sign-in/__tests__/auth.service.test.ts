@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   login,
   loginWithGoogle,
+  logout,
   requestPasswordReset,
   updatePassword,
 } from '../api/auth';
@@ -105,6 +106,46 @@ describe('auth.service', () => {
     expect(mockUpdateUser).toHaveBeenCalledWith({
       password: 'newPassword1',
     });
+  });
+
+  it('requests Better Auth sign-out with a JSON body while clearing Supabase auth', async () => {
+    const mockSignOut = vi.fn().mockResolvedValue({ error: null });
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), {
+          headers: { 'Content-Type': 'application/json' },
+          status: 200,
+        }),
+      ),
+    );
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        hostname: 'localhost',
+      },
+    });
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      auth: {
+        signOut: mockSignOut,
+      },
+    });
+
+    await logout();
+
+    expect(fetch).toHaveBeenCalledWith('http://localhost:8787/auth/sign-out', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+    expect(mockSignOut).toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
   });
 });
 
