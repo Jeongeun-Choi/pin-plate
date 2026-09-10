@@ -152,7 +152,11 @@ const isDetectingMonorepo = useIsFetching(...) > 0;
 
 ## Git Workflow
 
-- 새 작업 브랜치를 만들 때 기본 prefix는 `feature/`를 사용한다.
+- 새 작업 브랜치를 만들 때 작업 유형에 맞는 prefix를 사용한다.
+- 기능 추가: `feature/`
+- 버그 수정: `bugfix/`
+- 리팩터링: `refactor/`
+- 문서, 설정, 빌드, 의존성 등 기타 작업: `chore/`
 
 ---
 
