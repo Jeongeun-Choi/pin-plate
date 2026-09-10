@@ -94,6 +94,7 @@ jobs:
           GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
         run: |
           : "${CLOUDFLARE_ZONE_ID:?Missing CLOUDFLARE_ZONE_ID GitHub secret}"
           if [ -z "${SUPABASE_URL:-}" ]; then
@@ -110,6 +111,7 @@ jobs:
           : "${GOOGLE_MAPS_MAP_ID:?Missing GOOGLE_MAPS_MAP_ID GitHub secret}"
           : "${SENTRY_DSN:?Missing SENTRY_DSN GitHub secret}"
           : "${SENTRY_AUTH_TOKEN:?Missing SENTRY_AUTH_TOKEN GitHub secret}"
+          : "${NEXT_PUBLIC_GA_MEASUREMENT_ID:?Missing NEXT_PUBLIC_GA_MEASUREMENT_ID GitHub secret}"
 
           pnpm sst secret set CloudflareZoneId "$CLOUDFLARE_ZONE_ID" --stage production
           pnpm sst secret set SupabaseUrl "$SUPABASE_URL" --stage production
@@ -120,6 +122,7 @@ jobs:
           pnpm sst secret set GoogleMapsMapId "$GOOGLE_MAPS_MAP_ID" --stage production
           pnpm sst secret set SentryDsn "$SENTRY_DSN" --stage production
           pnpm sst secret set SentryAuthToken "$SENTRY_AUTH_TOKEN" --stage production
+          pnpm sst secret set GoogleAnalyticsMeasurementId "$NEXT_PUBLIC_GA_MEASUREMENT_ID" --stage production
 
       - name: Unlock SST (clear stale lock)
         env:

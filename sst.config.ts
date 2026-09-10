@@ -31,6 +31,9 @@ export default $config({
     const googleMapsApiKey = new sst.Secret("GoogleMapsApiKey");
     const sentryAuthToken = new sst.Secret("SentryAuthToken");
     const sentryDsn = new sst.Secret("SentryDsn");
+    const googleAnalyticsMeasurementId = new sst.Secret(
+      "GoogleAnalyticsMeasurementId",
+    );
 
     // 클라이언트 사이드 Secrets (빌드 시 JS 번들에 포함)
     const kakaoAppKey = new sst.Secret("KakaoAppKey");
@@ -52,6 +55,7 @@ export default $config({
         NEXT_PUBLIC_AUTH_API_URL: "https://api.pinonplate.com",
         NEXT_PUBLIC_SENTRY_DSN: sentryDsn.value,
         NEXT_PUBLIC_SENTRY_ENVIRONMENT: "production",
+        NEXT_PUBLIC_GA_MEASUREMENT_ID: googleAnalyticsMeasurementId.value,
         SENTRY_ENVIRONMENT: "production",
         SENTRY_ORG: "pin-plate",
         SENTRY_PROJECT: "javascript-nextjs",
