@@ -364,6 +364,7 @@ const main = async () => {
     options.origin,
     {
       method: 'POST',
+      body: JSON.stringify({}),
       headers: {
         Cookie: cookieHeader,
       },
