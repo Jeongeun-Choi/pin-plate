@@ -1,7 +1,16 @@
 export {};
 
 declare global {
+  type GtagCommand = 'config' | 'event' | 'js';
+
   interface Window {
+    dataLayer?: unknown[];
+    gtag?: (
+      command: GtagCommand,
+      targetId: string | Date,
+      config?: Record<string, unknown>,
+    ) => void;
+
     /**
      * Native App (Webview)에서 주입해주는 위치 정보
      */
